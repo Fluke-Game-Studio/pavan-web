@@ -45,9 +45,9 @@ jobs:
 
       # ----------------------------
       # Target folder mapping
-      # prod: arcade.flukegamestudio.com
-      # dev : arcade.flukegamestudio.com/dev
-      # qa  : arcade.flukegamestudio.com/qa
+      # prod: pavan.flukegamestudio.com
+      # dev : pavan.flukegamestudio.com/dev
+      # qa  : pavan.flukegamestudio.com/qa
       # ----------------------------
       - name: Choose remote folder
         id: target
