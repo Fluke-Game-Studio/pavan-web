@@ -1,1 +1,2 @@
-*.glb filter=lfs diff=lfs merge=lfs -text
+my-app/public/goathumaun.glb filter=lfs diff=lfs merge=lfs -text
+my-app/public/hanuman.glb filter=lfs diff=lfs merge=lfs -text
