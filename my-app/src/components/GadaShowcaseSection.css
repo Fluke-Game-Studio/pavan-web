@@ -1,0 +1,147 @@
+/* ─── Gada Showcase Section — dual-gada crossing scroll animation ─────────── */
+
+/* Tall wrapper gives the sticky inner room to animate through scroll */
+.gss-wrapper {
+    position: relative;
+    height: 280vh;
+    background: var(--pavan-bg, #0e0e16);
+}
+
+/* Sticky viewport — holds canvas + text at 100vh while wrapper scrolls */
+.gss-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ─── Canvas layer ──────────────────────────────────────────────────────── */
+
+.gss-canvas-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.gss-canvas-bg canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ─── Ambient glow blob behind the text card ────────────────────────────── */
+
+.gss-ambient {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse 80% 70% at 50% 50%,
+            rgba(255, 215, 0, 0.12) 0%,
+            transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(24px);
+}
+
+/* ─── Glassmorphism text card ────────────────────────────────────────────── */
+
+.gss-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: clamp(300px, 38vw, 520px);
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+
+    padding: 2.5rem 3rem;
+    border-radius: 18px;
+    background: rgba(14, 14, 22, 0.62);
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    border: 1px solid rgba(255, 215, 0, 0.14);
+    box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.gss-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: #FFD700;
+}
+
+.gss-title {
+    font-family: 'FlukeGame', sans-serif;
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    font-weight: normal;
+    color: var(--text-primary, #fff);
+    line-height: 1.05;
+    margin: 0.1rem 0 0;
+}
+
+.gss-subtitle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+    margin: 0;
+}
+
+.gss-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+    margin: 0.3rem 0 0;
+    max-width: 420px;
+}
+
+.gss-tag {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.28rem 0.9rem;
+    border: 1px solid rgba(255, 215, 0, 0.28);
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #FFD700;
+    background: rgba(255, 215, 0, 0.07);
+}
+
+.gss-scroll-hint {
+    margin-top: 0.6rem;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .gss-card {
+        width: calc(100vw - 3rem);
+        padding: 1.8rem 1.6rem;
+    }
+
+    .gss-title {
+        font-size: 1.8rem;
+    }
+
+    .gss-body {
+        font-size: 0.88rem;
+    }
+}

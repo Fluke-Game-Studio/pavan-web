@@ -1,0 +1,87 @@
+﻿/* Studio Stats */
+.studio-stats {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 2rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-color);
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  border-color: var(--volt-primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.15);
+}
+
+.stat-card__number {
+  font-family: 'FlukeGame', sans-serif;
+  font-size: 2.5rem;
+  color: var(--volt-primary);
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.stat-card__suffix {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+.stat-card__label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Section Header Center */
+.section-header-center {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Project Status Badge */
+.project-status {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--volt-primary);
+  color: var(--black-pure);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: 'FlukeGame', sans-serif;
+  z-index: 2;
+  line-height: 1.6;
+}
