@@ -1,0 +1,20 @@
+.pavan-stat {
+  padding: 1rem;
+}
+
+.pavan-stat__num {
+  display: block;
+  font-size: 3rem;
+  font-family: 'Archivo Black', sans-serif;
+  color: var(--pavan-gold);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.pavan-stat__label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+}

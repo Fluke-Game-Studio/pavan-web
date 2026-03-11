@@ -1,0 +1,31 @@
+.pavan-lore {
+  border-left: 3px solid var(--pavan-gold);
+  padding: 2rem 2rem;
+  background: var(--pavan-surface);
+  border-radius: 0 6px 6px 0;
+  transition: box-shadow 0.35s, transform 0.3s;
+}
+
+.pavan-lore:hover {
+  box-shadow: -4px 0 24px rgba(255, 215, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+
+.pavan-lore__title {
+  font-size: 0.8rem;
+  font-family: 'Mahaputra', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--pavan-accent);
+  margin-bottom: 1.2rem;
+}
+
+.pavan-lore__quote {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+  border: none;
+  margin: 0;
+  padding: 0;
+}

@@ -1,0 +1,42 @@
+.pavan-feat {
+  border: 1px solid rgba(155, 28, 28, 0.25);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  padding: 2.5rem;
+  background: var(--pavan-surface);
+  transition: border-color 0.35s, box-shadow 0.35s, transform 0.3s;
+}
+
+.pavan-feat:hover {
+  border-color: rgba(255, 215, 0, 0.35);
+  border-left-color: var(--pavan-gold);
+  box-shadow: 0 0 28px rgba(255, 215, 0, 0.08), inset 0 0 20px rgba(255, 215, 0, 0.03);
+  transform: translateY(-4px);
+}
+
+.pavan-feat__icon {
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+  display: block;
+  color: #E83838;
+  transition: color 0.3s;
+}
+
+.pavan-feat:hover .pavan-feat__icon {
+  color: #FFD700;
+}
+
+.pavan-feat__title {
+  font-size: 1rem;
+  font-family: 'Mahaputra', serif;
+  color: var(--pavan-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.pavan-feat__body {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.75;
+}

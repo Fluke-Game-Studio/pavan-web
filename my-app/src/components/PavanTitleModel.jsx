@@ -89,6 +89,10 @@ const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
 
     return (
         <div className="pavan-title-3d" onMouseMove={handleMouseMove}>
+            <div className={`pavan-hero__backdrop ${isScrolled ? 'pavan-hero__backdrop--scrolled' : ''}`}>
+                <img src="/hanuman.png" alt="Hanuman Backdrop" className="pavan-hero__backdrop-img" />
+                <div className="pavan-hero__backdrop-glow" />
+            </div>
             <Canvas
                 shadows={false}
                 dpr={[1, 1.5]}

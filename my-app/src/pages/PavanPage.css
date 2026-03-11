@@ -52,16 +52,23 @@
 }
 
 .pavan-eyebrow {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 700;
+  position: fixed;
+  top: 1.5rem;
+  /* Moved up above navbar content area */
+  right: 2rem;
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   color: var(--pavan-accent);
-  margin-bottom: 1.5rem;
   border: 1px solid rgba(232, 56, 58, 0.4);
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 99px;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 0, 5, 0.4);
+  z-index: 1100;
+  /* Higher than navbar to ensure visibility */
+  pointer-events: none;
 }
 
 .pavan-hero__title {
@@ -129,6 +136,61 @@
   50% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* ─── Hanuman Title Backdrop ────── */
+.pavan-hero__backdrop {
+  position: absolute;
+  top: 40%;
+  left: 49%;
+  /* Shifted right to align with the 'V' in PAVAN */
+  transform: translate(-50%, -50%);
+  width: clamp(400px, 85vw, 1400px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.1;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pavan-hero__backdrop--scrolled {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.pavan-hero__backdrop-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 40px var(--pavan-gold));
+}
+
+.pavan-hero__backdrop-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at center,
+      rgba(255, 215, 0, 0.6) 0%,
+      rgba(155, 28, 28, 0.3) 35%,
+      transparent 70%);
+  filter: blur(60px);
+  z-index: -1;
+  animation: pulseglow 4s ease-in-out infinite;
+}
+
+@keyframes hanumanFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1.05);
+  }
+
+  50% {
+    transform: translateY(-15px) scale(1);
   }
 }
 

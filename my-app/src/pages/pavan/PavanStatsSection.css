@@ -1,0 +1,21 @@
+@import '../../components/pavan/PavanStat.css';
+
+.pavan-stats {
+  border-top: 1px solid rgba(155, 28, 28, 0.3);
+  border-bottom: 1px solid rgba(155, 28, 28, 0.3);
+  padding: 3rem 0;
+  background: var(--pavan-surface);
+}
+
+.pavan-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .pavan-stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
