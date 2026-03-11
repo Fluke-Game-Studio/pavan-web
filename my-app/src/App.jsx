@@ -40,7 +40,7 @@ function AppShell() {
   const isPavan = pathname === '/pavan';
 
   // Animate favicon when tab is inactive
-  useFavicon('/logo.png', 1000);
+  useFavicon('/pavan_icon.png', 1000);
 
   return (
     <div className="app">
