@@ -3,7 +3,7 @@
 
 import { tryJsonParse, safeStr, humanizeId, inferTypeFromId } from '../shared/utils';
 
-const API_BASE = 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com';
+const API_BASE = '/api';
 
 /**
  * Normalizes a question object from the API
