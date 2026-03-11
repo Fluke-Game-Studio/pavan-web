@@ -1,0 +1,99 @@
+﻿/* Philosophy Styles */
+.philosophy {
+  text-align: center;
+  background: transparent;
+}
+
+.philo.section-title {
+  font-size: 2.5rem;
+  margin-bottom: 5rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.phi-label {
+  display: block;
+  font-size: 0.8rem;
+  font-family: 'FlukeGame', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--volt-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.phi-text {
+  font-size: 3rem;
+  line-height: 1.5;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: var(--text-primary);
+  font-family: 'FlukeGame', sans-serif;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  .phi-text {
+    font-size: 2rem;
+  }
+}
+
+.phi-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-top: 1.5rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Mission Pillars */
+.mission-pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  margin-top: 5rem;
+}
+
+.mission-pillar {
+  text-align: left;
+  padding: 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-color);
+  transition: all 0.3s;
+}
+
+.mission-pillar:hover {
+  border-color: rgba(255, 215, 0, 0.3);
+  transform: translateY(-4px);
+}
+
+.mission-pillar__number {
+  font-family: 'FlukeGame', sans-serif;
+  font-size: 2.5rem;
+  color: var(--volt-primary);
+  opacity: 0.3;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.mission-pillar__title {
+  font-size: 1.1rem;
+  color: var(--volt-primary);
+  margin-bottom: 1rem;
+  font-family: 'FlukeGame', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+}
+
+.mission-pillar__text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}

@@ -1,0 +1,65 @@
+﻿.project-info {
+  padding: 2.5rem;
+}
+
+.project-title {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+  color: var(--volt-primary);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.project-desc {
+  font-size: 0.95rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+/* Pavan Feature Styles */
+.pavan-feature {
+  background: rgba(8, 8, 10, 0.0);
+}
+
+.pavan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 6rem;
+}
+
+@media (max-width: 900px) {
+  .pavan-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.pavan-desc {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 3.5rem;
+  max-width: 600px;
+}
+
+.cinematic-frame {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.frame-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8), 0 0 30px rgba(198, 167, 94, 0.05);
+}

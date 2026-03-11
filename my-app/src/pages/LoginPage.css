@@ -1,0 +1,173 @@
+﻿/* ─── LOGIN PAGE ─── */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%),
+    var(--bg-color);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 1.2rem;
+  font-family: 'Archivo Black', sans-serif;
+  color: var(--volt-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.login-title {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.login-sub {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 320px;
+  margin-bottom: 1rem;
+}
+
+.login-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #fff;
+  color: #3c4043;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  font-family: 'Lato', sans-serif;
+  margin-top: 0.5rem;
+}
+
+.login-google-btn:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.login-google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.login-fine {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+.login-fine a {
+  color: rgba(255, 215, 0, 0.5);
+}
+
+.login-fine a:hover {
+  color: var(--volt-primary);
+}
+
+/* ─── SHOWCASE PAGE ─── */
+.showcase-page {
+  padding-top: 80px;
+  min-height: 100vh;
+}
+
+.showcase-videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 3rem;
+  margin-bottom: 6rem;
+}
+
+@media (max-width: 768px) {
+  .showcase-videos {
+    grid-template-columns: 1fr;
+  }
+}
+
+.showcase-video-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.showcase-video-card:hover {
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.showcase-video-frame {
+  width: 100%;
+  aspect-ratio: 16/9;
+  position: relative;
+  background: #000;
+}
+
+.showcase-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.showcase-video-info {
+  padding: 1.5rem;
+}
+
+.showcase-video-info h3 {
+  font-size: 1.1rem;
+  color: var(--volt-primary);
+  margin-bottom: 0.5rem;
+  font-family: 'Archivo Black', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.showcase-video-info p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.showcase-cta {
+  text-align: center;
+  padding: 5rem 0 3rem;
+}
+
+.showcase-cta h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.showcase-cta p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
