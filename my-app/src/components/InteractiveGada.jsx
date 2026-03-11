@@ -4,6 +4,7 @@ import { useGLTF, PerspectiveCamera, Stars, useProgress, Html } from '@react-thr
 import { motion, useScroll, useTransform } from 'framer-motion';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
+import './InteractiveGada.css';
 
 // ─── Sound Effect Manager ────────────────────────────────────────────────────
 const useSoundEffects = () => {

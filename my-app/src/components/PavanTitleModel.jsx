@@ -2,6 +2,7 @@ import React, { Suspense, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, PerspectiveCamera, Center } from '@react-three/drei';
 import * as THREE from 'three';
+import './PavanTitleModel.css';
 
 function TitleModel({ url, mousePositionRef }) {
     const { scene } = useGLTF(url);
