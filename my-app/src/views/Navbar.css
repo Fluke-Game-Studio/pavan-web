@@ -26,13 +26,20 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.nav-content {
+.nav-container--full {
+  width: 100%;
+  padding: 0 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
   height: 64px;
   overflow: visible;
+}
+
+@media (max-width: 1024px) {
+  .nav-container--full {
+    padding: 0 2rem;
+  }
 }
 
 
@@ -133,8 +140,27 @@
 }
 
 .nav-login-btn {
-  padding: 0.6rem 1.4rem;
-  font-size: 0.8rem;
+  padding: 0.8rem 2.2rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  font-family: var(--font-title);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-width: 2.5px;
+  background: transparent;
+  color: var(--volt-primary);
+  border-color: var(--volt-primary);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  /* Using font-weight 900. If still thin, text-shadow provides auxiliary weight */
+  text-shadow: 0 0 1px var(--volt-primary), 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.nav-login-btn:hover {
+  background: var(--volt-primary);
+  color: var(--black-pure);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  text-shadow: none;
 }
 
 .nav-hamburger {

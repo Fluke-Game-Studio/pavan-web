@@ -26,7 +26,7 @@ const Navbar = () => {
 
     return (
         <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-            <div className="container nav-content">
+            <div className="nav-container--full nav-content">
                 <NavLink to="/" className={`logo logo--with-text${isScrolled ? ' logo--shrink' : ''}`} onClick={handleLinkClick}>
                     <div className="logo-img-wrapper">
                         <img
@@ -51,7 +51,7 @@ const Navbar = () => {
                             <div className="nav-underline" />
                         </NavLink>
                     ))}
-                    <NavLink to="/login" className="btn btn-outline nav-login-btn">
+                    <NavLink to="/login" className="btn btn-outline font-w nav-login-btn">
                         Sign In
                     </NavLink>
                     <ThemeToggle />
