@@ -1,0 +1,151 @@
+.not-found {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--bg-color);
+}
+
+.not-found__content {
+  text-align: center;
+  max-width: 600px;
+}
+
+.not-found__glitch {
+  margin-bottom: 1rem;
+}
+
+.not-found__code {
+  font-family: 'FlukeGame', monospace;
+  font-size: clamp(6rem, 15vw, 10rem);
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--volt-primary);
+  margin: 0;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.not-found__title {
+  font-family: 'FlukeGame', monospace;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin: 1rem 0;
+  text-transform: uppercase;
+}
+
+.not-found__message {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.not-found__pixel-art {
+  margin: 2rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.not-found__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+}
+
+.not-found__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  font-family: 'FlukeGame', monospace;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+}
+
+.not-found__button--primary {
+  background: var(--volt-primary);
+  color: var(--black-pure);
+}
+
+.not-found__button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.not-found__button--secondary {
+  background: transparent;
+  color: var(--volt-primary);
+  border: 2px solid var(--volt-primary);
+}
+
+.not-found__button--secondary:hover {
+  background: var(--volt-primary);
+  color: var(--black-pure);
+}
+
+.not-found__hint {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.not-found__hint p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.not-found__links {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.not-found__links a {
+  font-family: 'FlukeGame', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color var(--transition-smooth);
+}
+
+.not-found__links a:hover {
+  color: var(--volt-primary);
+}
+
+@media (max-width: 768px) {
+  .not-found {
+    padding: 1rem;
+  }
+  
+  .not-found__code {
+    font-size: 5rem;
+  }
+  
+  .not-found__title {
+    font-size: 1.5rem;
+  }
+  
+  .not-found__actions {
+    flex-direction: column;
+  }
+  
+  .not-found__button {
+    width: 100%;
+    justify-content: center;
+  }
+}

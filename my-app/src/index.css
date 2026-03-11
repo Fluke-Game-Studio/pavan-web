@@ -1,0 +1,274 @@
+﻿@import './views/Navbar.css';
+@import './views/Hero.css';
+@import './views/ProjectsGrid.css';
+@import './views/PavanFeature.css';
+@import './views/Philosophy.css';
+@import './views/StudioStats.css';
+@import './views/Footer.css';
+@import './views/GadaSmash.css';
+
+@import './pages/CareersPage.css';
+@import './pages/ApplyPage.css';
+@import './pages/PavanPage.css';
+@import './pages/AboutPage.css';
+@import './pages/ContactPage.css';
+@import './pages/LoginPage.css';
+@import './pages/ShowcasePage.css';
+@import './pages/QueenBeeGame.css';
+@import './pages/NotFoundPage.css';
+
+
+
+@font-face {
+  font-family: 'FlukeGame';
+  src: url('/fonts/Minercraftory.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mahaputra';
+  src: url('/fonts/Mahaputra.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg-color: #0F0F11;
+  --surface-color: #1A1A1D;
+  --volt-primary: #FFD700;
+  /* Sampled from Logo */
+  --volt-highlight: #FFF000;
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --border-color: rgba(255, 215, 0, 0.15);
+  --transition-smooth: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --black-pure: #000000;
+  --navbar-bg: rgba(11, 11, 13, 0.85);
+  --navbar-bg-scrolled: rgba(8, 8, 10, 0.97);
+  --footer-bg: rgba(0, 0, 0, 0.55);
+  --footer-text-muted: rgba(255, 255, 255, 0.2);
+  --star-color: rgba(255, 255, 255, 1);
+  --star-glow: rgba(255, 255, 255, 0.4);
+}
+
+/* Light Mode Theme */
+:root[data-theme='light'] {
+  --bg-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --volt-primary: #C49A00;
+  --volt-highlight: #D4A800;
+  --text-primary: #1A1A1D;
+  --text-secondary: #505050;
+  --border-color: rgba(196, 154, 0, 0.25);
+  --black-pure: #000000;
+  --navbar-bg: rgba(250, 250, 250, 0.85);
+  --navbar-bg-scrolled: rgba(255, 255, 255, 0.97);
+  --footer-bg: rgba(245, 245, 245, 0.95);
+  --footer-text-muted: rgba(0, 0, 0, 0.4);
+  --star-color: rgba(196, 154, 0, 0.06);
+  --star-glow: rgba(196, 154, 0, 0.02);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  cursor: none !important;
+  font-family: inherit;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  cursor: none;
+}
+
+
+body {
+  overflow-x: hidden;
+  position: relative;
+  cursor: none;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+#root {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Hide all default cursors */
+a,
+button,
+input,
+textarea,
+select,
+[role="button"],
+.interactive,
+*:hover {
+  cursor: none !important;
+}
+
+
+
+/* Grain Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Cfilter id='noiseFilter'%3%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3%3C/filter%3%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3C/svg%3E");
+}
+
+/* Ambient Background */
+.ambient-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--volt-primary);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-smooth);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  transition: var(--transition-smooth);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'FlukeGame', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: normal;
+  color: var(--volt-primary);
+  background: none;
+  -webkit-text-fill-color: initial;
+  line-height: 1.4;
+}
+
+.volt-line {
+  height: 4px;
+  width: 60px;
+  background: var(--volt-primary);
+  margin: 1.5rem 0;
+}
+
+.the-banana-curve {
+  height: 100px;
+  width: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3%3Cpath d='M0,0 Q600,120 1200,0' fill='none' stroke='%23FFD700' stroke-width='2' stroke-dasharray='10,10' opacity='0.3'/%3%3C/svg%3E");
+  background-size: 100% 100%;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.the-banana-curve::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: var(--volt-primary);
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3%3Cpath d='M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C14.5,4 16.7,5.1 18.2,7L15,7L15,5C15,4.4 14.6,4 14,4C13.4,4 13,4.4 13,5L13,7L11,7L11,5C11,4.4 10.6,4 10,4C9.4,4 9,4.4 9,5L9,7L7.8,7C6.2,5.1 4,12 4,12C4,12 6.2,18.9 7.8,17L9,17L9,19C9,19.6 9.4,20 10,20C10.6,20 11,19.6 11,19L11,17L13,17L13,19C13,19.6 13.4,20 14,20C14.6,20 15,19.6 15,19L15,17L18.2,17C16.7,18.9 14.5,20 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12Z'/%3%3C/svg%3E");
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3%3Cpath d='M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C14.5,4 16.7,5.1 18.2,7L15,7L15,5C15,4.4 14.6,4 14,4C13.4,4 13,4.4 13,5L13,7L11,7L11,5C11,4.4 10.6,4 10,4C9.4,4 9,4.4 9,5L9,7L7.8,7C6.2,5.1 4,12 4,12C4,12 6.2,18.9 7.8,17L9,17L9,19C9,19.6 9.4,20 10,20C10.6,20 11,19.6 11,19L11,17L13,17L13,19C13,19.6 13.4,20 14,20C14.6,20 15,19.6 15,19L15,17L18.2,17C16.7,18.9 14.5,20 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12Z'/%3%3C/svg%3E");
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.volt-glow {
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.section-padding {
+  padding: 4rem 0;
+}
+
+
+.page-hero {
+  padding: 6rem 0 3rem;
+  max-width: 800px;
+}
+
+.page-hero__title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.page-hero__sub {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  max-width: 640px;
+}
+
+/* ─── HEX PULSE LOADER ─── */
+.hex-pulse {
+  width: 48px;
+  height: 48px;
+  background: var(--volt-primary);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  animation: hexPulse 1.2s ease-in-out infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes hexPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}

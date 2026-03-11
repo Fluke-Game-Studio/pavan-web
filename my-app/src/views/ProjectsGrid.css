@@ -1,0 +1,181 @@
+﻿/* Projects Grid Styles */
+.section-title {
+  font-size: 1.8rem;
+  /* margin-bottom: 4rem; */
+  color: var(--text-primary);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+}
+
+.project-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.project-card.featured {
+  grid-column: span 2;
+}
+
+@media (max-width: 1000px) {
+  .project-card.featured {
+    grid-column: span 1;
+  }
+}
+
+.project-image-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #1a1a1c;
+  position: relative;
+}
+
+.project-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 40px rgba(198, 167, 94, 0.05);
+  transition: var(--transition-smooth);
+}
+
+.project-card:hover .project-glow {
+  box-shadow: inset 0 0 60px rgba(198, 167, 94, 0.15), 0 0 20px rgba(198, 167, 94, 0.1);
+}
+
+.project-card:hover {
+  border-color: var(--volt-primary);
+  transform: translateY(-10px);
+}
+
+
+/* ─── PROJECT CARD ENHANCEMENTS ─── */
+.project-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.project-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid var(--volt-primary);
+  border-radius: 99px;
+  padding: 0.4rem 1rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--volt-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.project-bee-icon {
+  font-size: 1rem;
+  line-height: 1;
+  color: #FFD700;
+  transition: color 0.3s;
+}
+
+.project-badge:hover .project-bee-icon {
+  color: #FFA500;
+}
+
+/* ─── QUEEN BEE GAME PAGE ─── */
+.queenbee-page {
+  width: 100%;
+  height: 100vh;
+  background-color: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.queenbee-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #121212;
+  z-index: 0;
+}
+
+.queenbee-wip {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  color: white;
+  max-width: 600px;
+  padding: 3rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.wip-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--volt-primary);
+  margin-bottom: 1rem;
+  border: 1px solid var(--volt-primary);
+  padding: 0.3rem 0.8rem;
+  border-radius: 99px;
+}
+
+.queenbee-wip h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-family: 'Archivo Black', sans-serif;
+  color: var(--volt-primary);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+.queenbee-wip p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.queenbee-status {
+  margin-bottom: 2rem;
+}
+
+.status-badge {
+  display: inline-block;
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: #ff6b6b;
+  padding: 0.5rem 1.2rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.queenbee-back {
+  display: inline-block;
+  margin-top: 1rem;
+}
