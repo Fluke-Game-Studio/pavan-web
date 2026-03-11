@@ -1,4 +1,4 @@
-﻿/* ─── SHOWCASE PAGE ─── */
+/* ─── SHOWCASE PAGE ─── */
 .showcase-page {
   padding-top: 80px;
   min-height: 100vh;
@@ -51,7 +51,7 @@
   font-size: 1.1rem;
   color: var(--volt-primary);
   margin-bottom: 0.5rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }

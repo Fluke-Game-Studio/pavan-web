@@ -1,4 +1,4 @@
-﻿/* ─── ABOUT PAGE ─── */
+/* ─── ABOUT PAGE ─── */
 .about-page {
   padding-top: 80px;
   min-height: 100vh;
@@ -60,7 +60,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.75rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-value__body {
@@ -106,7 +106,7 @@
 }
 
 .timeline-item__year {
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-title);
   font-size: 1.5rem;
   color: var(--volt-primary);
   margin-bottom: 0.5rem;

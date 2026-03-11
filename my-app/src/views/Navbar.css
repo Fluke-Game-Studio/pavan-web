@@ -1,4 +1,4 @@
-﻿/* Navbar Styles */
+/* Navbar Styles */
 
 .navbar {
   position: fixed;
@@ -43,7 +43,7 @@
   align-items: center;
   gap: 1rem;
   text-decoration: none;
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-brand);
   color: var(--text-primary);
   font-size: 1.2rem;
   flex-shrink: 0;
@@ -75,7 +75,7 @@
 }
 
 .logo-text--navbar {
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-brand);
   font-size: 1.3rem;
   letter-spacing: 0.08em;
   color: var(--text-primary);

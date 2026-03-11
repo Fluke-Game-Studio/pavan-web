@@ -27,7 +27,7 @@
 }
 
 .game-loader__message {
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   font-size: 1.2rem;
   color: var(--text-primary);
   letter-spacing: 0.1em;

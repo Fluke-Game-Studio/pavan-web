@@ -33,4 +33,13 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

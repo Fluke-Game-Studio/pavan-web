@@ -1,4 +1,4 @@
-﻿/* Footer Styles */
+/* Footer Styles */
 .footer {
   background: var(--footer-bg);
   border-top: 1px solid var(--border-color);
@@ -47,8 +47,8 @@
 }
 
 .footer-logo {
+  font-family: var(--font-brand);
   font-size: 1.1rem;
-  font-weight: 700;
   color: var(--volt-primary);
 }
 

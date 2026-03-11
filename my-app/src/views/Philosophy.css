@@ -1,4 +1,4 @@
-﻿/* Philosophy Styles */
+/* Philosophy Styles */
 .philosophy {
   text-align: center;
   background: transparent;
@@ -15,7 +15,7 @@
 .phi-label {
   display: block;
   font-size: 0.8rem;
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--volt-primary);
@@ -31,7 +31,7 @@
   text-transform: uppercase;
   font-weight: normal;
   color: var(--text-primary);
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-title);
   letter-spacing: 0.08em;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .mission-pillar__number {
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   font-size: 2.5rem;
   color: var(--volt-primary);
   opacity: 0.3;
@@ -86,7 +86,7 @@
   font-size: 1.1rem;
   color: var(--volt-primary);
   margin-bottom: 1rem;
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   line-height: 1.5;

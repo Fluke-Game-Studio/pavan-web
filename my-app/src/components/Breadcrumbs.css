@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'FlukeGame', monospace;
+  font-family: var(--font-body), monospace;
   font-size: 0.75rem;
   line-height: 1.6;
   letter-spacing: 0.08em;

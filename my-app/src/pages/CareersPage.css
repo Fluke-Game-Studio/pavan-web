@@ -1,4 +1,4 @@
-﻿/* ─── CAREERS PAGE ─── */
+/* ─── CAREERS PAGE ─── */
 .careers-page {
   padding-top: 80px;
   min-height: 100vh;
@@ -90,7 +90,7 @@
   color: var(--text-primary);
   text-transform: none;
   letter-spacing: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
 }
 
@@ -143,7 +143,7 @@
   font-size: 1.6rem;
   color: var(--volt-primary);
   text-transform: none;
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-title);
   line-height: 1.5;
   letter-spacing: 0.05em;
 }

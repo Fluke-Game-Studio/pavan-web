@@ -1,4 +1,4 @@
-﻿/* Projects Grid Styles */
+/* Projects Grid Styles */
 .section-title {
   font-size: 1.8rem;
   /* margin-bottom: 4rem; */
@@ -145,10 +145,10 @@
 
 .queenbee-wip h1 {
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-family: 'Archivo Black', sans-serif;
-  color: var(--volt-primary);
-  margin-bottom: 1rem;
-  line-height: 1.1;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .queenbee-wip p {

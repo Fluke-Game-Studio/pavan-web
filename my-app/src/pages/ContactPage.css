@@ -1,4 +1,4 @@
-﻿/* ─── CONTACT PAGE ─── */
+/* ─── CONTACT PAGE ─── */
 .contact-page {
   padding-top: 80px;
   min-height: 100vh;
@@ -38,7 +38,7 @@
   letter-spacing: 0.12em;
   color: var(--volt-primary);
   margin-bottom: 1.5rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-body);
 }
 
 .contact-aside__links {
@@ -106,7 +106,7 @@
   font-size: 1.1rem;
   color: var(--volt-primary);
   margin-bottom: 0.75rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

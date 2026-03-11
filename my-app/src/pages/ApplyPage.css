@@ -1,4 +1,4 @@
-﻿/* ─── APPLY PAGE ─── */
+/* ─── APPLY PAGE ─── */
 .apply-page {
   padding-top: 100px;
   min-height: 100vh;
@@ -39,6 +39,7 @@
 }
 
 .apply-title {
+  font-family: var(--font-title);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   color: var(--text-primary);
   margin: 0.5rem 0 1rem;
@@ -89,6 +90,7 @@
 }
 
 .apply-chapter__title {
+  font-family: var(--font-title);
   font-size: 1.8rem;
   color: var(--volt-primary);
   margin-bottom: 0.8rem;
@@ -143,7 +145,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   padding: 0.85rem 1rem;
   transition: border-color 0.2s;

@@ -1,4 +1,4 @@
-﻿/* ─── LOGIN PAGE ─── */
+/* ─── LOGIN PAGE ─── */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -26,7 +26,7 @@
 
 .login-logo {
   font-size: 1.2rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-brand);
   color: var(--volt-primary);
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
@@ -61,7 +61,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: box-shadow 0.2s;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-body);
   margin-top: 0.5rem;
 }
 
@@ -143,7 +143,7 @@
   font-size: 1.1rem;
   color: var(--volt-primary);
   margin-bottom: 0.5rem;
-  font-family: 'Archivo Black', sans-serif;
+  font-family: var(--font-title);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
