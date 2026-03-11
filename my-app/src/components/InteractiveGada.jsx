@@ -727,18 +727,12 @@ const InteractiveGada = ({ modelPath = '/gada.glb', initialXOffset = 0, scrollSh
             </Canvas>
 
             {/* Cinematic Top Message */}
-            <GadaTopMessage opacity={uiOpacity} />
+            <GadaTopMessage opacity={1} />
 
             {/* Bottom Hint */}
-            <motion.div
-                className="gada-hint"
-                style={{
-                    opacity: uiOpacity,
-                    scale: useTransform(scrollYProgress, [0, 0.1], [1, 0.9])
-                }}
-            >
+            <div className="gada-hint">
                 Hover to Control • Click to Throw
-            </motion.div>
+            </div>
 
         </div>
     );

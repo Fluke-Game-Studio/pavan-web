@@ -638,7 +638,7 @@
 
 .gada-hint {
   position: absolute;
-  bottom: 2rem;
+  bottom: 3rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
@@ -652,14 +652,27 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
   pointer-events: none;
-  z-index: 20;
+  animation: pulseHint 2s ease-in-out infinite;
 }
 
+@keyframes pulseHint {
+
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
 
 /* Cinematic Top Message */
 .gada-top-message {
   position: absolute;
-  top: 2rem;
+  top: 4rem;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;

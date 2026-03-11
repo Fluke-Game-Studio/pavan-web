@@ -4,6 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import * as THREE from 'three';
+import SciChartMap from './scichart/SciChartMap';
 import './PavanScrollShowcase.css';
 
 // ─── Section Data ─────────────────────────────────────────────────────────────
@@ -49,12 +50,12 @@ const SECTIONS = [
     {
         id: 'world',
         tabLabel: '03 World',
-        eyebrow: 'The World',
-        title: 'World Showcase',
-        subtitle: '',
-        description: '',
+        eyebrow: 'Exploration',
+        title: 'New York City',
+        subtitle: '3D LiDAR Topology Map',
+        description: 'Explore the high-precision 3D topology of New York City. This interactive LiDAR map demonstrates the primal scale of the urban jungle that Hanuman will traverse.',
         glow: '#A855F7',
-        tag: 'Coming Soon',
+        tag: 'Prototype Build',
         modelUrl: null,
         scale: 1.8,
         position: [0, -0.2, 0], 
@@ -370,32 +371,36 @@ const PavanScrollShowcase = () => {
                             });
                         }}
                     >
-                        <Canvas
-                            camera={{ position: [0, 0, 7], fov: 40 }}
-                            gl={{ alpha: true, antialias: true }}
-                            style={{ width: '100%', height: '100%', background: 'transparent' }}
-                        >
-                            <ambientLight intensity={0.6} />
-                            <directionalLight position={[5, 10, 5]} intensity={1.5} color="#fff" />
+                        {activeItem.id === 'world' ? (
+                            <SciChartMap />
+                        ) : (
+                            <Canvas
+                                camera={{ position: [0, 0, 7], fov: 40 }}
+                                gl={{ alpha: true, antialias: true }}
+                                style={{ width: '100%', height: '100%', background: 'transparent' }}
+                            >
+                                <ambientLight intensity={0.6} />
+                                <directionalLight position={[5, 10, 5]} intensity={1.5} color="#fff" />
 
-                            {/* Red Spark Explosion */}
-                            <ParticleBurst triggerKey={activeIndex} />
+                                {/* Red Spark Explosion */}
+                                <ParticleBurst triggerKey={activeIndex} />
 
-                            <Suspense fallback={null}>
-                                <Pedestal color={activeItem.glow} />
-                                <AnimatePresence mode="wait">
-                                    <motion.group
-                                        key={activeItem.id}
-                                        initial={{ scale: 0.6, opacity: 0, y: 1 }}
-                                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                                        exit={{ scale: 0.6, opacity: 0, y: 1 }}
-                                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                                    >
-                                        <ModelViewer item={activeItem} mousePos={mousePos} />
-                                    </motion.group>
-                                </AnimatePresence>
-                            </Suspense>
-                        </Canvas>
+                                <Suspense fallback={null}>
+                                    <Pedestal color={activeItem.glow} />
+                                    <AnimatePresence mode="wait">
+                                        <motion.group
+                                            key={activeItem.id}
+                                            initial={{ scale: 0.6, opacity: 0, y: 1 }}
+                                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                                            exit={{ scale: 0.6, opacity: 0, y: 1 }}
+                                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                                        >
+                                            <ModelViewer item={activeItem} mousePos={mousePos} />
+                                        </motion.group>
+                                    </AnimatePresence>
+                                </Suspense>
+                            </Canvas>
+                        )}
                     </div>
                 </div>
             </div>
