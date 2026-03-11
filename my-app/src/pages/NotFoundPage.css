@@ -17,7 +17,7 @@
 }
 
 .not-found__code {
-  font-family: 'FlukeGame', monospace;
+  font-family: var(--font-title), monospace;
   font-size: clamp(6rem, 15vw, 10rem);
   line-height: 1;
   letter-spacing: 0.1em;
@@ -27,7 +27,7 @@
 }
 
 .not-found__title {
-  font-family: 'FlukeGame', monospace;
+  font-family: var(--font-title), monospace;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   line-height: 1.4;
   letter-spacing: 0.08em;
@@ -62,7 +62,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.75rem;
-  font-family: 'FlukeGame', monospace;
+  font-family: var(--font-body), monospace;
   font-size: 0.875rem;
   letter-spacing: 0.08em;
   text-decoration: none;
@@ -114,7 +114,7 @@
 }
 
 .not-found__links a {
-  font-family: 'FlukeGame', monospace;
+  font-family: var(--font-body), monospace;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   color: var(--text-secondary);

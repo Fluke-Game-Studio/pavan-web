@@ -50,39 +50,34 @@ const SECTIONS = [
         id: 'world',
         tabLabel: '03 World',
         eyebrow: 'The World',
-        title: 'World of Pavan',
-        subtitle: 'Myth Meets the Future',
-        description:
-            "In a world plagued by corruption, a powerful force stirs from ancient myth. The timeless values of faith, courage, and truth become the cornerstone of the journey. Lord Hanuman's legend was uploaded to escape death — and summoned something older.",
+        title: 'World Showcase',
+        subtitle: '',
+        description: '',
         glow: '#A855F7',
-        tag: 'Narrative — Lore Fragment',
-        modelUrl: '/gada.glb',
+        tag: 'Coming Soon',
+        modelUrl: null,
         scale: 1.8,
-        position: [0, -0.2, 0], // Adjusted to sit on pedestal
-        specs: [
-            { label: 'Lore Depth', value: 85 },
-            { label: 'Mythology', value: 100 },
-            { label: 'Atmosphere', value: 92 },
-        ],
+        position: [0, -0.2, 0], 
+        specs: [],
     },
 ];
 
 // ─── Spinning 3D model inside the archive ─────────────────────────────────────
 function ModelViewer({ item, mousePos }) {
-    const { scene: rawScene } = useGLTF(item.modelUrl);
-    const scene = useMemo(() => SkeletonUtils.clone(rawScene), [rawScene]);
-    const groupRef = useRef();
-
-    useEffect(() => {
-        const color = new THREE.Color(item.glow);
-        scene.traverse((child) => {
+    const { scene: rawScene } = useGLTF(item.modelUrl || '/gada.glb'); // Fallback or handle null below
+    const scene = useMemo(() => {
+        if (!item.modelUrl) return null;
+        const cloned = SkeletonUtils.clone(rawScene);
+        cloned.traverse((child) => {
             if (child.isMesh && child.material) {
-                child.material.emissive = color;
-                child.material.emissiveIntensity = 0.3;
-                child.material.needsUpdate = true;
+                child.material = child.material.clone();
             }
         });
-    }, [scene, item.glow]);
+        return cloned;
+    }, [rawScene, item.modelUrl]);
+    const groupRef = useRef();
+
+    // Emissive overrides removed to respect original material
 
     useFrame((state, delta) => {
         if (groupRef.current) {
@@ -102,6 +97,8 @@ function ModelViewer({ item, mousePos }) {
             }
         }
     });
+
+    if (!scene) return null;
 
     return (
         <group ref={groupRef} position={item.position}>

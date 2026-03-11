@@ -81,8 +81,16 @@
     color: #FFD700;
 }
 
+.gada-showcase__title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--volt-primary);
+  margin-bottom: 0.5rem;
+}
 .gss-title {
-    font-family: 'FlukeGame', sans-serif;
+    font-family: var(--font-title);
     font-size: clamp(2rem, 3.6vw, 3.2rem);
     font-weight: normal;
     color: var(--text-primary, #fff);

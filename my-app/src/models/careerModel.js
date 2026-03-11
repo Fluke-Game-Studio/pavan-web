@@ -3,7 +3,9 @@
 
 import { tryJsonParse, unwrapPayload, safeStr } from '../shared/utils';
 
-const API_BASE = 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com';
+const API_BASE = import.meta.env.DEV 
+    ? '/api' 
+    : 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com';
 
 /**
  * Normalizes raw job data from API

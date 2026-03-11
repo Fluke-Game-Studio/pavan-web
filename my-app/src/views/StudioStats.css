@@ -1,4 +1,4 @@
-﻿/* Studio Stats */
+/* Studio Stats */
 .studio-stats {
   background: rgba(0, 0, 0, 0.3);
 }
@@ -30,7 +30,7 @@
 }
 
 .stat-card__number {
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   font-size: 2.5rem;
   color: var(--volt-primary);
   line-height: 1.4;
@@ -81,7 +81,7 @@
   font-weight: normal;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-body);
   z-index: 2;
   line-height: 1.6;
 }

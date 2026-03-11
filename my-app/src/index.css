@@ -1,4 +1,4 @@
-﻿@import './views/Navbar.css';
+@import './views/Navbar.css';
 @import './views/Hero.css';
 @import './views/ProjectsGrid.css';
 @import './views/PavanFeature.css';
@@ -20,11 +20,13 @@
 
 
 @font-face {
-  font-family: 'FlukeGame';
+  font-family: 'Minecraftry';
   src: url('/fonts/Minercraftory.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+  /* Exclude numbers and dots for Minecraftry as well to ensure "simple font" fallback */
+  unicode-range: U+00-2D, U+2F, U+3A-10FFFF;
 }
 
 @font-face {
@@ -33,9 +35,14 @@
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+  /* Exclude numbers (U+30-39) and dots (U+2E) to force fallback to a simple font */
+  unicode-range: U+00-2D, U+2F, U+3A-10FFFF;
 }
 
 :root {
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-title: 'Mahaputra', serif;
+  --font-brand: 'Minecraftry', sans-serif;
   --bg-color: #0F0F11;
   --surface-color: #1A1A1D;
   --volt-primary: #FFD700;
@@ -85,7 +92,7 @@ html {
   scroll-behavior: smooth;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   cursor: none;
 }
 
@@ -94,11 +101,11 @@ body {
   overflow-x: hidden;
   position: relative;
   cursor: none;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
 }
 
 #root {
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
 }
 
 /* Hide all default cursors */
@@ -175,7 +182,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: 'FlukeGame', sans-serif;
+  font-family: var(--font-title);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: normal;

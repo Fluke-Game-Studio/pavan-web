@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, PerspectiveCamera, Stars } from '@react-three/drei';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import * as THREE from 'three';
+import { SkeletonUtils } from 'three-stdlib';
 
 // ─── Sound Effect Manager ────────────────────────────────────────────────────
 const useSoundEffects = () => {
@@ -314,7 +315,16 @@ function GadaTrail({ gadaPosition, throwState, isMoving }) {
 // ─── Gada Model Component ────────────────────────────────────────────────────
 
 function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, throwProgress, manualRotation, throwStartPosition, showGrid, gadaWorldPosition, initialXOffset = 0, scrollShift = 0, scrollYProgress }) {
-    const { scene } = useGLTF(url);
+    const { scene: rawScene } = useGLTF(url);
+    const scene = useMemo(() => {
+        const cloned = SkeletonUtils.clone(rawScene);
+        cloned.traverse((child) => {
+            if (child.isMesh && child.material) {
+                child.material = child.material.clone();
+            }
+        });
+        return cloned;
+    }, [rawScene]);
     const modelRef = useRef();
     const xRotAccum = useRef(0); // accumulated local X spin angle
     const prevThrowState = useRef(throwState);
@@ -336,11 +346,6 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
                 if (child.isMesh) {
                     child.castShadow = false;
                     child.receiveShadow = false;
-                    if (child.material) {
-                        child.material.emissive = new THREE.Color(0x000000);
-                        child.material.emissiveIntensity = 0;
-                        child.material.needsUpdate = true;
-                    }
                 }
             });
         }
@@ -354,17 +359,7 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
         }
     }, [scene, showGrid]);
 
-    useEffect(() => {
-        if (scene) {
-            scene.traverse((child) => {
-                if (child.isMesh && child.material) {
-                    child.material.emissiveIntensity = glowIntensity;
-                    // Always keep emissive black to avoid gold tint when thrown
-                    child.material.emissive = new THREE.Color(0x000000);
-                }
-            });
-        }
-    }, [scene, glowIntensity]);
+    // Emissive intensity override removed to respect original material
 
     useFrame((state) => {
         // scrollShift can be a raw number or a Framer Motion MotionValue
@@ -473,18 +468,12 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
 
 
 // ─── Cinematic Top Message Overlay ──────────────────────────────────────────
-function GadaTopMessage({ throwState, opacity }) {
-    const getMessage = () => {
-        if (throwState === 'throwing') return "UNLEASHING DIVINE WRATH";
-        if (throwState === 'returning') return "RECALLING THE SACRED WEAPON";
-        return "MACE OF THE PRIMAL WARRIOR";
-    };
-
+function GadaTopMessage({ opacity }) {
     return (
         <motion.div className="gada-top-message" style={{ opacity }}>
             <div className="gada-top-message__glow" />
             <span className="gada-top-message__label">Interactive Archive</span>
-            <h3 className="gada-top-message__title">{getMessage()}</h3>
+            <h3 className="gada-top-message__title">MACE OF THE PRIMAL WARRIOR</h3>
         </motion.div>
     );
 }
@@ -738,7 +727,7 @@ const InteractiveGada = ({ modelPath = '/gada.glb', initialXOffset = 0, scrollSh
             </Canvas>
 
             {/* Cinematic Top Message */}
-            <GadaTopMessage throwState={throwState} opacity={uiOpacity} />
+            <GadaTopMessage opacity={uiOpacity} />
 
             {/* Bottom Hint */}
             <motion.div
