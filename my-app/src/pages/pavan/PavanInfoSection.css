@@ -1,0 +1,110 @@
+/* Info Section Layout Styles extracted from PavanPage.css */
+
+.pavan-info-section {
+  padding: 7rem 0;
+  background: var(--pavan-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pavan-info-section__inner {
+  display: flex;
+  align-items: center;
+  gap: 6rem;
+}
+
+.pavan-info-section--flip .pavan-info-section__inner {
+  flex-direction: row-reverse;
+}
+
+.pavan-info-section__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.pavan-info-section__title {
+  font-family: var(--font-title);
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: normal;
+  color: var(--text-primary);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.pavan-info-section__subtitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.pavan-info-section__body {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0.4rem 0 0;
+}
+
+.pavan-info-section__tag {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.3rem 1rem;
+  border: 1px solid;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.pavan-info-section__deco {
+  flex: 0 0 260px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+}
+
+.pavan-info-section__glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse 70% 70% at 50% 50%,
+      color-mix(in srgb, var(--accent, #FFD700) 22%, transparent) 0%,
+      transparent 70%);
+  pointer-events: none;
+}
+
+.pavan-info-section__icon {
+  font-size: 6rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 24px var(--accent, #FFD700));
+  position: relative;
+  z-index: 1;
+  user-select: none;
+}
+
+@media (max-width: 900px) {
+  .pavan-info-section__inner,
+  .pavan-info-section--flip .pavan-info-section__inner {
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+  }
+  .pavan-info-section__body {
+    max-width: 100%;
+  }
+  .pavan-info-section__deco {
+    flex: 0 0 160px;
+    height: 160px;
+  }
+  .pavan-info-section__icon {
+    font-size: 4rem;
+  }
+}

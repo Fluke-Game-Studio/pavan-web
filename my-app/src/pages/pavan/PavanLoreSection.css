@@ -1,0 +1,17 @@
+@import '../../components/pavan/PavanLore.css';
+
+.pavan-lore-cards {
+  background: rgba(10, 0, 5, 0.8);
+}
+
+.pavan-lore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .pavan-lore-grid {
+    grid-template-columns: 1fr;
+  }
+}

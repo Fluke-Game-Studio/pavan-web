@@ -1,7 +1,7 @@
 /* ─── Pavan Scroll Showcase — High-Tech Archive Redesign ─────────────── */
 
 .pss-section {
-    padding: 10rem 0;
+    padding: 2rem 0 8rem;
     background: var(--pavan-bg, #0e0e16);
     position: relative;
     overflow: hidden;
@@ -16,7 +16,7 @@
 }
 
 .pss-section__title {
-    font-family: var(--font-display);
+    font-family: var(--font-title);
     font-size: clamp(2.4rem, 5vw, 4rem);
     color: var(--text-primary);
     margin-top: 0.8rem;
@@ -152,7 +152,7 @@
 }
 
 .pss-title {
-    font-family: var(--font-main);
+    font-family: var(--font-title);
     font-size: clamp(2rem, 3.5vw, 3.2rem);
     /* Reduced from 2.4-4.2 for smaller appearance */
     font-weight: normal;

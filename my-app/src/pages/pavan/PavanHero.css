@@ -1,0 +1,247 @@
+.pavan-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 80%, rgba(155, 28, 28, 0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(232, 56, 58, 0.12) 0%, transparent 60%),
+    var(--pavan-deep);
+  overflow: hidden;
+}
+
+.pavan-hero__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, var(--pavan-deep) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pavan-hero__grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(155, 28, 28, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155, 28, 28, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pavan-hero__content {
+  position: relative;
+  z-index: 2;
+  padding: 6rem 0 4rem;
+}
+
+.pavan-eyebrow {
+  position: fixed;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--pavan-accent);
+  border: 1px solid rgba(232, 56, 58, 0.4);
+  padding: 0.5rem 1.2rem;
+  border-radius: 99px;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 0, 5, 0.4);
+  z-index: 1100;
+  pointer-events: none;
+}
+
+.pavan-hero__title {
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-family: var(--font-title);
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  color: var(--pavan-gold);
+  text-shadow: 0 0 60px rgba(255, 215, 0, 0.25);
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.pavan-hero__title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 1rem;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.pavan-title-3d {
+  width: 100%;
+  height: clamp(160px, 20vw, 300px);
+  margin: 0 auto;
+  position: relative;
+  overflow: visible;
+}
+
+.pavan-title-3d::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 70%;
+  background: radial-gradient(ellipse at center,
+      rgba(255, 215, 0, 0.25) 0%,
+      rgba(255, 165, 0, 0.15) 30%,
+      rgba(232, 56, 58, 0.1) 60%,
+      transparent 100%);
+  filter: blur(40px);
+  z-index: -1;
+  pointer-events: none;
+  animation: pulseglow 3s ease-in-out infinite;
+}
+
+@keyframes pulseglow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* ─── Hanuman Title Backdrop ────── */
+.pavan-hero__backdrop {
+  position: absolute;
+  top: 40%;
+  left: 49%;
+  transform: translate(-50%, -50%);
+  width: clamp(400px, 85vw, 1400px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.1;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pavan-hero__backdrop--scrolled {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.pavan-hero__backdrop-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 40px var(--pavan-gold));
+}
+
+.pavan-hero__backdrop-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at center,
+      rgba(255, 215, 0, 0.6) 0%,
+      rgba(155, 28, 28, 0.3) 35%,
+      transparent 70%);
+  filter: blur(60px);
+  z-index: -1;
+  animation: pulseglow 4s ease-in-out infinite;
+}
+
+@keyframes hanumanFloat {
+  0%, 100% { transform: translateY(0) scale(1.05); }
+  50% { transform: translateY(-15px) scale(1); }
+}
+
+.pavan-hero__title-sub {
+  display: block;
+  font-size: clamp(1.2rem, 3vw, 2.5rem);
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.15em;
+  font-weight: 400;
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  margin-top: 0;
+}
+
+.pavan-hero__tagline {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.55);
+  margin: 1rem 0 2rem;
+  font-style: italic;
+}
+
+.pavan-hero__actions {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pavan-btn-primary {
+  background: var(--pavan-accent);
+  color: #fff;
+  font-family: var(--font-body);
+  padding: 1rem 2.5rem;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+}
+
+.pavan-btn-primary:hover {
+  background: #c82020;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(232, 56, 58, 0.4);
+}
+
+.pavan-btn-ghost {
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  color: var(--pavan-gold);
+  font-family: var(--font-body);
+  padding: 1rem 2.5rem;
+  font-size: 0.85rem;
+}
+
+.pavan-btn-ghost:hover {
+  border-color: var(--pavan-gold);
+  background: rgba(255, 215, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.pavan-hero__scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.pavan-scroll-line {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, rgba(255, 215, 0, 0.5), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

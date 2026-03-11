@@ -1,96 +1,24 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FaBolt, FaGlobe, FaTheaterMasks, FaMusic, FaCog, FaFire } from 'react-icons/fa';
+
+// Components
 import PavanTitleModel from '../components/PavanTitleModel';
 import InteractiveGada from '../components/InteractiveGada';
 import PavanScrollShowcase from '../components/PavanScrollShowcase';
+import PavanStat from '../components/pavan/PavanStat';
+import PavanFeature from '../components/pavan/PavanFeature';
+import PavanLore from '../components/pavan/PavanLore';
 
-// ─── Parallax Section Component ─────────────────────────────────────────────
-const ParallaxBlock = ({ children, offset = 60 }) => {
-    const ref = useRef(null);
-    const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-    const y = useTransform(scrollYProgress, [0, 1], [-offset, offset]);
-    return (
-        <motion.div ref={ref} style={{ y }}>
-            {children}
-        </motion.div>
-    );
-};
-
-// ─── Count-up Stat ───────────────────────────────────────────────────────────
-const StatItem = ({ number, label }) => {
-    const ref = useRef();
-    const [displayed, setDisplayed] = useState('0');
-    const isNumeric = !isNaN(parseFloat(number)) && number !== '∞';
-
-    useEffect(() => {
-        if (!isNumeric) { setDisplayed(number); return; }
-        const target = parseFloat(number);
-        const suffix = typeof number === 'string' ? number.replace(/[\d.]/g, '') : '';
-        let start = null;
-        const duration = 1400;
-        const observer = new IntersectionObserver(([e]) => {
-            if (!e.isIntersecting) return;
-            observer.disconnect();
-            const step = (ts) => {
-                if (!start) start = ts;
-                const progress = Math.min((ts - start) / duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3);
-                setDisplayed(Math.round(ease * target) + suffix);
-                if (progress < 1) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
-        }, { threshold: 0.5 });
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, [number]);
-
-    return (
-        <motion.div
-            ref={ref}
-            className="pavan-stat"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-        >
-            <span className="pavan-stat__num">{displayed}</span>
-            <span className="pavan-stat__label">{label}</span>
-        </motion.div>
-    );
-};
-
-// ─── Feature Block ───────────────────────────────────────────────────────────
-const FeatureBlock = ({ icon, title, body, delay = 0 }) => (
-    <motion.div
-        className="pavan-feat"
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, delay }}
-    >
-        <div className="pavan-feat__icon">{icon}</div>
-        <h3 className="pavan-feat__title">{title}</h3>
-        <p className="pavan-feat__body">{body}</p>
-    </motion.div>
-);
-
-// ─── World Lore Card ─────────────────────────────────────────────────────────
-const LoreCard = ({ title, quote, delay = 0 }) => (
-    <motion.div
-        className="pavan-lore"
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay }}
-    >
-        <h4 className="pavan-lore__title">{title}</h4>
-        <blockquote className="pavan-lore__quote">{quote}</blockquote>
-    </motion.div>
-);
-
-// ─── Lore Section with Gada ────────────────────────────────────────────────
+// Section Styles
+import './pavan/PavanTheme.css';
+import './pavan/PavanHero.css';
+import './pavan/PavanStatsSection.css';
+import './pavan/PavanFeaturesSection.css';
+import './pavan/PavanLoreSection.css';
+import './pavan/PavanCTA.css';
+import './pavan/PavanInfoSection.css';
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 const PavanPage = () => {
@@ -148,10 +76,10 @@ const PavanPage = () => {
             {/* ── STATS BAR ─────────────────────────────────────────────────── */}
             <section className="pavan-stats">
                 <div className="container pavan-stats__grid">
-                    <StatItem number="∞" label="Branching Choices" />
-                    <StatItem number="7" label="Ancient Pantheons" />
-                    <StatItem number="2050+" label="Lines of Lore" />
-                    <StatItem number="1" label="Unbreakable Will" />
+                    <PavanStat number="∞" label="Branching Choices" />
+                    <PavanStat number="7" label="Ancient Pantheons" />
+                    <PavanStat number="2050+" label="Lines of Lore" />
+                    <PavanStat number="1" label="Unbreakable Will" />
                 </div>
             </section>
 
@@ -170,37 +98,36 @@ const PavanPage = () => {
                     </motion.div>
 
                     <div className="pavan-feats-grid">
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaBolt />}
                             title="God-Tier Combat"
                             body="Fluid, kinetic combat rooted in ancient martial traditions. Every strike carries the weight of mythology."
-                            delay={0}
                         />
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaGlobe />}
                             title="Open World Mythology"
                             body="Explore a fractured realm where ancient temples and neon megacities coexist. Every corner holds a story."
                             delay={0.15}
                         />
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaTheaterMasks />}
                             title="Narrative Depth"
                             body="Your decisions carve the fate of gods and men alike. No two playthroughs are the same."
                             delay={0.3}
                         />
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaMusic />}
                             title="Mythic Soundtrack"
                             body="An original score blending classical Indian instruments with cinematic electronic compositions."
                             delay={0.45}
                         />
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaCog />}
                             title="No Pay-to-Win"
                             body="Every mechanic earned through skill and story. No microtransactions, no shortcut stores."
                             delay={0.6}
                         />
-                        <FeatureBlock
+                        <PavanFeature
                             icon={<FaFire />}
                             title="Volunteer-Built"
                             body="Crafted by passionate volunteers who believe great stories shouldn't need a AAA budget to exist."
@@ -224,17 +151,16 @@ const PavanPage = () => {
                     </motion.div>
 
                     <div className="pavan-lore-grid">
-                        <LoreCard
+                        <PavanLore
                             title="The Vaayu Prophecy"
                             quote={`"He who commands the wind shall never be bound — not by iron, not by fate, not by the silence of forgotten gods."`}
-                            delay={0}
                         />
-                        <LoreCard
+                        <PavanLore
                             title="The Neon Oath"
                             quote={`"The old world ended in prayer. The new world began in circuitry. Pavan is the bridge between the last prayer and the first signal."`}
                             delay={0.2}
                         />
-                        <LoreCard
+                        <PavanLore
                             title="The Fractured Realm"
                             quote={`"They uploaded the legends to escape death. Instead, they summoned something older than death itself."`}
                             delay={0.4}

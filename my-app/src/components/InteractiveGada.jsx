@@ -1,9 +1,10 @@
 import React, { Suspense, useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, PerspectiveCamera, Stars } from '@react-three/drei';
+import { useGLTF, PerspectiveCamera, Stars, useProgress, Html } from '@react-three/drei';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
+import './InteractiveGada.css';
 
 // ─── Sound Effect Manager ────────────────────────────────────────────────────
 const useSoundEffects = () => {
@@ -467,6 +468,32 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
 }
 
 
+// ─── Premium Loader Overlay ──────────────────────────────────────────────────
+function PremiumLoader() {
+    const { progress } = useProgress();
+    return (
+        <Html center>
+            <motion.div 
+                className="gada-loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+            >
+                <div className="gada-loader__bar">
+                    <motion.div 
+                        className="gada-loader__fill" 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                    />
+                </div>
+                <div className="gada-loader__text">
+                    SACRED WEAPON INITIALIZING... {Math.round(progress)}%
+                </div>
+            </motion.div>
+        </Html>
+    );
+}
+
 // ─── Cinematic Top Message Overlay ──────────────────────────────────────────
 function GadaTopMessage({ opacity }) {
     return (
@@ -707,7 +734,7 @@ const InteractiveGada = ({ modelPath = '/gada.glb', initialXOffset = 0, scrollSh
                 />
 
                 {/* Gada Model */}
-                <Suspense fallback={null}>
+                <Suspense fallback={<PremiumLoader />}>
                     <GadaModel
                         url={modelPath}
                         currentPosition={currentPosition}

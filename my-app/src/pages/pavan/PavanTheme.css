@@ -1,0 +1,55 @@
+:root {
+  --pavan-crimson: #9B1C1C;
+  --pavan-deep: #0A0005;
+  --pavan-accent: #E8383A;
+  --pavan-gold: #FFD700;
+  --pavan-surface: rgba(26, 5, 5, 0.85);
+}
+
+.pavan-page {
+  background: var(--pavan-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Common Typography & Utilities */
+.pavan-section-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--pavan-accent);
+  margin-bottom: 1rem;
+}
+
+.pavan-section-title {
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-family: var(--font-title);
+  color: var(--pavan-gold);
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  margin-bottom: 2rem;
+}
+
+.pavan-accent {
+  color: var(--pavan-accent);
+}
+
+.pavan-section-header {
+  margin-bottom: 4rem;
+}
+
+.pavan-body-text {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1.2rem;
+  max-width: 560px;
+}
+
+.section-padding {
+  padding: 4rem 0;
+}

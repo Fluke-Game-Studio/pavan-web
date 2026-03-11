@@ -35,10 +35,6 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api/lidardata': {
-        target: 'https://www.scichart.com/demo',
-        changeOrigin: true,
-      },
       '/api': {
         target: 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com',
         changeOrigin: true,

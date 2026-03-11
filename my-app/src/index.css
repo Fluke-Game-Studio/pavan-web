@@ -41,7 +41,7 @@
 
 :root {
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-title: 'Mahaputra', serif;
+  --font-title: 'Mahaputra', var(--font-body);
   --font-brand: 'Minecraftry', sans-serif;
   --bg-color: #0F0F11;
   --surface-color: #1A1A1D;
