@@ -39,9 +39,9 @@ export default defineConfig({
         target: 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        // Added to prevent HTML fallback for API routes
+        secure: true,
         headers: {
-          Connection: 'keep-alive'
+          'Origin': 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com'
         }
       },
     },

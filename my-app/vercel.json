@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://xtipeal88c.execute-api.us-east-1.amazonaws.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
