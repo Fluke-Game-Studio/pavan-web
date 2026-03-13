@@ -3,7 +3,7 @@
 
 import { tryJsonParse, safeStr, humanizeId, inferTypeFromId } from '../shared/utils';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 /**
  * Normalizes a question object from the API

@@ -3,7 +3,7 @@
 
 import { tryJsonParse, unwrapPayload, safeStr } from '../shared/utils';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 /**
  * Normalizes raw job data from API
@@ -41,9 +41,24 @@ export async function fetchJobs() {
         headers: { Accept: 'application/json' },
     });
 
-    if (!res.ok) throw new Error(`Failed to fetch jobs (${res.status})`);
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    const text = await res.text();
+    const data = tryJsonParse(text);
 
-    const data = await res.json();
+    if (!res.ok) {
+        const msg =
+            data?.message ||
+            data?.error ||
+            `Failed to fetch jobs (${res.status})`;
+        throw new Error(msg);
+    }
+
+    if (!data || (!contentType.includes('application/json') && text.trim().startsWith('<'))) {
+        throw new Error(
+            'Jobs API did not return JSON. Check API URL/proxy configuration for /api/jobs.'
+        );
+    }
+
     const payload = unwrapPayload(data);
 
     const items =
