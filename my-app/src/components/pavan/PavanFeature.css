@@ -1,5 +1,5 @@
 .pavan-feat {
-  border: 1px solid rgba(155, 28, 28, 0.25);
+  border: 1px solid var(--pavan-border);
   border-left: 3px solid transparent;
   border-radius: 6px;
   padding: 2.5rem;
@@ -37,6 +37,6 @@
 
 .pavan-feat__body {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--pavan-text-dim);
   line-height: 1.75;
 }

@@ -4,7 +4,13 @@
     radial-gradient(ellipse 80% 60% at 50% 50%, rgba(155, 28, 28, 0.3) 0%, transparent 70%),
     var(--pavan-deep);
   text-align: center;
-  border-top: 1px solid rgba(155, 28, 28, 0.3);
+  border-top: 1px solid var(--pavan-border);
+}
+
+:root[data-theme='light'] .pavan-cta {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(155, 28, 28, 0.1) 0%, transparent 70%),
+    var(--pavan-deep);
 }
 
 .pavan-cta__inner {
@@ -22,7 +28,7 @@
 
 .pavan-cta__sub {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--pavan-text-dim);
   line-height: 1.7;
   margin-bottom: 3rem;
 }

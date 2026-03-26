@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 
 const navLinks = [
-    { name: 'Home', to: '/' },
-    { name: 'Pavan', to: '/pavan' },
-    { name: 'Careers', to: '/careers' },
+    { name: 'Pavan', to: '/' },
+    { name: 'Showcase', to: '/showcase' },
+    // { name: 'Careers', to: '/careers' }, // Removed for now
     { name: 'About', to: '/about' },
     { name: 'Contact', to: '/contact' },
 ];
@@ -51,9 +51,9 @@ const Navbar = () => {
                             <div className="nav-underline" />
                         </NavLink>
                     ))}
-                    <NavLink to="/login" className="btn btn-outline font-w nav-login-btn">
-                        Sign In
-                    </NavLink>
+                    <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="nav-work-btn">
+                        Work With Us
+                    </a>
                     <ThemeToggle />
                 </div>
                 {/* Mobile hamburger */}
@@ -87,12 +87,12 @@ const Navbar = () => {
                                 {link.name}
                             </NavLink>
                         ))}
-                        <NavLink to="/login" className="nav-drawer__link" onClick={handleLinkClick}>
-                            Sign In
-                            <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
-                                <ThemeToggle />
-                            </div>
-                        </NavLink>
+                        <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="nav-drawer__link" onClick={handleLinkClick}>
+                            Work With Us
+                        </a>
+                        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+                            <ThemeToggle />
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

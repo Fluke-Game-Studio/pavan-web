@@ -29,7 +29,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PageLoader = () => <GameLoader message="Loading Game..." />;
 
 // Pages where the ambient canvas background is suppressed
-const NO_BG_PATHS = ['/pavan', '/login', '/queenbee'];
+const NO_BG_PATHS = ['/', '/pavan', '/login', '/queenbee'];
 
 function AppShell() {
   const { pathname } = useLocation();
@@ -37,7 +37,7 @@ function AppShell() {
   const isQueenBee = pathname === '/queenbee';
 
   // Pavan page gets its own full-screen layout (no shared footer padding)
-  const isPavan = pathname === '/pavan';
+  const isPavan = pathname === '/pavan' || pathname === '/';
 
   // Animate favicon when tab is inactive
   useFavicon('/pavan_icon.png', 1000);
@@ -54,16 +54,14 @@ function AppShell() {
 
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<PavanPage />} />
+          <Route path="/pavan" element={<PavanPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/careers/apply" element={<ApplyPage />} />
-          <Route path="/pavan" element={<PavanPage />} />
           <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/queenbee" element={<QueenBeeGame />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/login" element={<LoginPage />} />
           {/* Catch-all → 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

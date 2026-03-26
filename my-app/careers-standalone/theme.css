@@ -1,0 +1,68 @@
+/* careers-standalone/theme.css */
+
+:root {
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-title: var(--font-body); /* Falling back to body font for standalone */
+  
+  /* Dark Mode Default */
+  --bg-color: #0F0F11;
+  --surface-color: #1A1A1D;
+  --volt-primary: #FFD700;
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --border-color: rgba(255, 215, 0, 0.15);
+  --transition-smooth: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Base resets for the standalone component */
+.careers-standalone-wrapper {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.careers-standalone-wrapper .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Hex Pulse Loader */
+.hex-pulse {
+  width: 48px;
+  height: 48px;
+  background: var(--volt-primary);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  animation: hexPulse 1.2s ease-in-out infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes hexPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Button styles that page depends on */
+.careers-standalone-wrapper .btn-gold {
+  background: var(--volt-primary);
+  color: #000;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.careers-standalone-wrapper .btn-gold:hover {
+  opacity: 0.9;
+}
+
+.careers-standalone-wrapper .phi-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--volt-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+}
