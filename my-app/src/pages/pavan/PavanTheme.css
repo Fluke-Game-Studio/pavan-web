@@ -4,6 +4,19 @@
   --pavan-accent: #E8383A;
   --pavan-gold: #FFD700;
   --pavan-surface: rgba(26, 5, 5, 0.85);
+  --pavan-bg-layer: rgba(10, 0, 5, 0.8);
+  --pavan-text-dim: rgba(255, 255, 255, 0.5);
+  --pavan-border: rgba(155, 28, 28, 0.3);
+}
+
+:root[data-theme='light'] {
+  --pavan-deep: #F5F5F7;
+  --pavan-surface: rgba(255, 255, 255, 0.7);
+  --pavan-bg-layer: rgba(240, 240, 245, 0.9);
+  --pavan-text-dim: rgba(0, 0, 0, 0.5);
+  --pavan-border: rgba(155, 28, 28, 0.15);
+  --text-primary: #1A1A1D;
+  --pavan-gold: #C49A00; /* Darker gold for better contrast on light bg */
 }
 
 .pavan-page {
@@ -11,6 +24,7 @@
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
 /* Common Typography & Utilities */
@@ -45,7 +59,7 @@
 .pavan-body-text {
   font-size: 1.05rem;
   line-height: 1.85;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--pavan-text-dim);
   margin-bottom: 1.2rem;
   max-width: 560px;
 }

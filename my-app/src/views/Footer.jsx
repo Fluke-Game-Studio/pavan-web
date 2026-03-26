@@ -11,16 +11,16 @@ const Footer = () => {
                     <div className="footer-col">
                         <h4 className="footer-title">Studio</h4>
                         <ul className="footer-links">
-                            <li><Link to="/home">Home</Link></li>
+                            <li><Link to="/">Home</Link></li>
                             <li><Link to="/about">About Us</Link></li>
-                            <li><Link to="/careers">Careers</Link></li>
+                            <li><a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer">Careers</a></li>
                             <li><a href="https://www.arcade.flukegamestudio.com" target="_blank" rel="noreferrer">Arcade Internal</a></li>
                         </ul>
                     </div>
                     <div className="footer-col">
                         <h4 className="footer-title">Projects</h4>
                         <ul className="footer-links">
-                            <li><Link to="/pavan">Pavan Game</Link></li>
+                            <li><Link to="/">Pavan Game</Link></li>
                             <li><Link to="/showcase">Showcase</Link></li>
                         </ul>
                     </div>

@@ -1,4 +1,5 @@
-import React, { Suspense, useRef, useEffect } from 'react';
+import React, { Suspense, useRef, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, PerspectiveCamera, Center } from '@react-three/drei';
 import * as THREE from 'three';
@@ -57,7 +58,12 @@ function TitleModel({ url, mousePositionRef }) {
 
 const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
     const mousePosition = useRef({ x: 0, y: 0 });
-    const [isScrolled, setIsScrolled] = React.useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // Scroll-linked motion for the backdrop
+    const { scrollY } = useScroll();
+    const backdropScale = useTransform(scrollY, [0, 500], [1, 1.4]);
+    const backdropOpacity = useTransform(scrollY, [0, 300], [0.1, 0]);
 
     const handleMouseMove = (event) => {
         if (isScrolled) return; // Don't track mouse if scrolled
@@ -90,10 +96,18 @@ const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
 
     return (
         <div className="pavan-title-3d" onMouseMove={handleMouseMove}>
-            <div className={`pavan-hero__backdrop ${isScrolled ? 'pavan-hero__backdrop--scrolled' : ''}`}>
+            <motion.div 
+                className={`pavan-hero__backdrop ${isScrolled ? 'pavan-hero__backdrop--scrolled' : ''}`}
+                style={{ 
+                    scale: backdropScale,
+                    opacity: backdropOpacity,
+                    x: "-50%",
+                    y: "-50%"
+                }}
+            >
                 <img src="/hanuman.png" alt="Hanuman Backdrop" className="pavan-hero__backdrop-img" />
                 <div className="pavan-hero__backdrop-glow" />
-            </div>
+            </motion.div>
             <Canvas
                 shadows={false}
                 dpr={[1, 1.5]}

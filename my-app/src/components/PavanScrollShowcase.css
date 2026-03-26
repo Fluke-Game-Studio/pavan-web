@@ -2,7 +2,7 @@
 
 .pss-section {
     padding: 2rem 0 8rem;
-    background: var(--pavan-bg, #0e0e16);
+    background: var(--pavan-deep);
     position: relative;
     overflow: hidden;
     transition: background 1.2s ease;
@@ -57,7 +57,7 @@
     transform: translateY(-50%);
     width: 1px;
     height: 60%;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--pavan-border);
 }
 
 .pss-tab--v {
@@ -218,7 +218,7 @@
 .pss-spec-track {
     width: 100%;
     height: 2px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--pavan-border);
 }
 
 .pss-spec-fill {
@@ -298,4 +298,53 @@
     .pss-content-viewbox {
         height: 400px;
     }
+}
+
+
+:root[data-theme='light'] .pss-section {
+    background: var(--pavan-deep);
+}
+
+:root[data-theme='light'] .pss-section__title {
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme='light'] .pss-tabs-track {
+    background: var(--pavan-border);
+}
+
+:root[data-theme='light'] .pss-spec-track {
+    background: var(--pavan-border);
+}
+
+:root[data-theme='light'] .pss-tab-number {
+    opacity: 0.7;
+}
+
+:root[data-theme='light'] .pss-title {
+    color: var(--text-primary);
+}
+
+:root[data-theme='light'] .pss-description {
+    color: var(--pavan-text-dim);
+}
+
+:root[data-theme='light'] .pss-tab--v {
+    color: #444444 !important; /* Darker gray for high contrast on light bg */
+    opacity: 0.9;
+}
+
+:root[data-theme='light'] .pss-tab--v.pss-tab--active {
+    opacity: 1;
+    color: var(--active-glow) !important;
+}
+
+:root[data-theme='light'] .pss-tab--v:hover {
+    color: var(--active-glow) !important;
+    opacity: 1;
+}
+
+
+:root[data-theme='light'] .pss-tab-name {
+    color: inherit;
 }

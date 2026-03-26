@@ -1,7 +1,7 @@
 @import '../../components/pavan/PavanLore.css';
 
 .pavan-lore-cards {
-  background: rgba(10, 0, 5, 0.8);
+  background: var(--pavan-bg-layer);
 }
 
 .pavan-lore-grid {

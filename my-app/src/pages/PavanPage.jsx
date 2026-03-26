@@ -52,7 +52,7 @@ const PavanPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                     >
-                        <Link to="/careers" className="btn pavan-btn-primary">Join the Team</Link>
+                        <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="btn pavan-btn-primary">Join the Team</a>
                         <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="btn pavan-btn-ghost">
                             Watch Prototype
                         </a>
@@ -191,9 +191,9 @@ const PavanPage = () => {
                         We're looking for artists, developers, writers, and composers.
                         No salary. Just legacy.
                     </motion.p>
-                    <Link to="/careers" className="btn pavan-btn-primary">
-                        View Open Roles →
-                    </Link>
+                    <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="btn pavan-btn-primary">
+                        Work With Us →
+                    </a>
                 </div>
             </section>
 

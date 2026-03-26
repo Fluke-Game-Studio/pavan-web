@@ -126,22 +126,19 @@
   position: absolute;
   top: 40%;
   left: 49%;
-  transform: translate(-50%, -50%);
+  /* transform: translate(-50%, -50%); <-- Now handled by Framer Motion (x: "-50%", y: "-50%") to avoid conflict with scale */
   width: clamp(400px, 85vw, 1400px);
   aspect-ratio: 1;
   pointer-events: none;
   /* z-index: 10; */
-  opacity: 0.1;
-  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  /* opacity: 0.1;  <-- Now controlled via Framer Motion */
+  /* transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); <-- Removed to avoid conflict with motion.div */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.pavan-hero__backdrop--scrolled {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-}
+/* Removed .pavan-hero__backdrop--scrolled as Framer Motion now handles dynamic scale/opacity */
 
 .pavan-hero__backdrop-img {
   width: 100%;
@@ -178,7 +175,7 @@
 .pavan-hero__title-sub {
   display: block;
   font-size: clamp(1.2rem, 3vw, 2.5rem);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--pavan-text-dim);
   letter-spacing: 0.15em;
   font-weight: 400;
   font-family: var(--font-title);
@@ -188,7 +185,7 @@
 
 .pavan-hero__tagline {
   font-size: clamp(1rem, 2vw, 1.3rem);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--pavan-text-dim);
   margin: 1rem 0 2rem;
   font-style: italic;
 }
@@ -241,7 +238,7 @@
   gap: 0.8rem;
   font-size: 0.65rem;
   letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--pavan-text-dim);
 }
 
 .pavan-scroll-line {
@@ -261,4 +258,18 @@
   50% {
     opacity: 0.3;
   }
+
+}
+
+:root[data-theme='light'] .pavan-hero {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 80%, rgba(155, 28, 28, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(232, 56, 58, 0.05) 0%, transparent 60%),
+    var(--pavan-deep);
+}
+
+:root[data-theme='light'] .pavan-hero__grid-overlay {
+  background-image:
+    linear-gradient(rgba(155, 28, 28, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155, 28, 28, 0.03) 1px, transparent 1px);
 }

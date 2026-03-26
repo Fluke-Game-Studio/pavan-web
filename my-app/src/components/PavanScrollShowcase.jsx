@@ -1,7 +1,7 @@
 import React, { useRef, Suspense, useMemo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useGLTF, OrbitControls } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import * as THREE from 'three';
 import SciChartMap from './scichart/SciChartMap';
@@ -21,7 +21,7 @@ const SECTIONS = [
         tag: 'WIP — Prototype Phase',
         modelUrl: '/gada.glb',
         scale: 2.5,
-        position: [0, -0.2, 0], // Sat lower to be on pedestal
+        position: [0, -0.6, 0], // Adjusted to be closer to pedestal
         specs: [
             { label: 'Power Level', value: 90 },
             { label: 'Divine Weight', value: 100 },
@@ -40,7 +40,7 @@ const SECTIONS = [
         tag: 'WIP — Character Design',
         modelUrl: '/hanuman.glb',
         scale: 1.4,
-        position: [0, -1.8, 0], // Sat lower to be "just on top" of pedestal
+        position: [0, -1.5, 0], // Adjusted to be closer to pedestal
         specs: [
             { label: 'Strength', value: 95 },
             { label: 'Agility', value: 88 },
@@ -82,9 +82,6 @@ function ModelViewer({ item, mousePos }) {
 
     useFrame((state, delta) => {
         if (groupRef.current) {
-            // Constant rotation
-            groupRef.current.rotation.y += delta * 0.4;
-
             // Subtle mouse tilt - Disbled for Hanuman ji as requested
             if (item.id !== 'hanuman') {
                 const targetX = mousePos.y * 0.15;
@@ -109,38 +106,78 @@ function ModelViewer({ item, mousePos }) {
     );
 }
 
-// ─── Holographic Pedestal ─────────────────────────────────────────────────────
-function Pedestal({ color }) {
-    const ringRef = useRef();
-    const glowRef = useRef();
+// ─── Holographic Platform Redesign ──────────────────────────────────────────
+function HolographicPlatform({ color }) {
+    const ring1Ref = useRef();
+    const ring2Ref = useRef();
+    const ring3Ref = useRef();
+    const shardsRef = useRef();
 
     useFrame((state) => {
         const t = state.clock.getElapsedTime();
-        if (ringRef.current) {
-            ringRef.current.rotation.z = t * 0.2;
-            ringRef.current.scale.setScalar(1 + Math.sin(t * 2) * 0.05);
+        
+        // Rotating concentric rings
+        if (ring1Ref.current) ring1Ref.current.rotation.z = t * 0.4;
+        if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.25;
+        if (ring3Ref.current) ring3Ref.current.rotation.z = t * 0.15;
+
+        // Floating shards bobbing
+        if (shardsRef.current) {
+            shardsRef.current.children.forEach((shard, i) => {
+                const angle = (i / 4) * Math.PI * 2;
+                shard.position.y = Math.sin(t * 2 + i) * 0.15;
+                shard.rotation.x = t * 0.5 + i;
+                shard.rotation.y = t * 0.8;
+            });
         }
     });
 
     return (
-        <group position={[0, -2.4, 0]}>
-            {/* The Main Base */}
+        <group position={[0, -1.5, 0]}>
+            {/* Base Glowing Disc */}
             <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                <circleGeometry args={[2.2, 32]} />
-                <meshBasicMaterial color={color} transparent opacity={0.1} />
+                <circleGeometry args={[2.5, 32]} />
+                <meshBasicMaterial color={color} transparent opacity={0.05} />
             </mesh>
 
-            {/* Floating Ring Overlay */}
-            <mesh ref={ringRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
-                <ringGeometry args={[2.0, 2.1, 64]} />
-                <meshBasicMaterial color={color} transparent opacity={0.4} />
+            {/* Concentric Data Rings */}
+            <mesh ref={ring1Ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+                <ringGeometry args={[2.1, 2.15, 64]} />
+                <meshBasicMaterial color={color} transparent opacity={0.5} />
+            </mesh>
+            <mesh ref={ring2Ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.08, 0]}>
+                <ringGeometry args={[1.7, 1.75, 48]} />
+                <meshBasicMaterial color={color} transparent opacity={0.3} />
+            </mesh>
+            <mesh ref={ring3Ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.11, 0]}>
+                <ringGeometry args={[1.3, 1.35, 32]} />
+                <meshBasicMaterial color={color} transparent opacity={0.2} />
             </mesh>
 
-            {/* Core Floor Glow */}
+            {/* Inner Core Pulsing Disc */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-                <circleGeometry args={[0.8, 32]} />
-                <meshBasicMaterial color={color} transparent opacity={0.8} />
+                <circleGeometry args={[0.9, 32]} />
+                <meshBasicMaterial color={color} transparent opacity={0.6} >
+                    {/* Pulsing shader-like effect via prop if we had more time, simple opacity for now */}
+                </meshBasicMaterial>
             </mesh>
+
+            {/* Floating Data Shards (Cardinal points) */}
+            <group ref={shardsRef}>
+                {[0, 90, 180, 270].map((deg, i) => {
+                    const rad = (deg * Math.PI) / 180;
+                    const dist = 2.4;
+                    return (
+                        <mesh key={i} position={[Math.cos(rad) * dist, 0, Math.sin(rad) * dist]}>
+                            <boxGeometry args={[0.15, 0.15, 0.15]} />
+                            <meshBasicMaterial color={color} transparent opacity={0.8} />
+                        </mesh>
+                    );
+                })}
+            </group>
+
+            {/* Vertical Light Columns (Subtle) */}
+            <pointLight position={[0, 1, 0]} intensity={1.5} color={color} distance={4} decay={2} />
         </group>
     );
 }
@@ -307,11 +344,7 @@ const PavanScrollShowcase = () => {
                             key={item.id}
                             className={`pss-tab pss-tab--v ${i === activeIndex ? 'pss-tab--active' : ''}`}
                             onClick={() => setActiveIndex(i)}
-                            style={{
-                                '--tab-glow': item.glow,
-                                borderColor: i === activeIndex ? item.glow : 'rgba(255,255,255,0.05)',
-                                color: i === activeIndex ? item.glow : 'rgba(255,255,255,0.3)',
-                            }}
+                            style={{ '--tab-glow': item.glow }}
                         >
                             {i === activeIndex && (
                                 <motion.div
@@ -371,9 +404,11 @@ const PavanScrollShowcase = () => {
                             });
                         }}
                     >
-                        {activeItem.id === 'world' ? (
+                        {/* Render both but toggle visibility to prevent WebGL context loss from unmounting */}
+                        <div style={{ position: 'absolute', inset: 0, opacity: activeItem.id === 'world' ? 1 : 0, pointerEvents: activeItem.id === 'world' ? 'auto' : 'none', zIndex: activeItem.id === 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
                             <SciChartMap />
-                        ) : (
+                        </div>
+                        <div style={{ position: 'absolute', inset: 0, opacity: activeItem.id !== 'world' ? 1 : 0, pointerEvents: activeItem.id !== 'world' ? 'auto' : 'none', zIndex: activeItem.id !== 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
                             <Canvas
                                 camera={{ position: [0, 0, 7], fov: 40 }}
                                 gl={{ alpha: true, antialias: true }}
@@ -386,7 +421,15 @@ const PavanScrollShowcase = () => {
                                 <ParticleBurst triggerKey={activeIndex} />
 
                                 <Suspense fallback={null}>
-                                    <Pedestal color={activeItem.glow} />
+                                    <OrbitControls 
+                                        enableZoom={false} 
+                                        enablePan={false} 
+                                        autoRotate 
+                                        autoRotateSpeed={2} 
+                                        minPolarAngle={Math.PI / 2.5} 
+                                        maxPolarAngle={Math.PI / 1.5} 
+                                    />
+                                    <HolographicPlatform color={activeItem.glow} />
                                     <AnimatePresence mode="wait">
                                         <motion.group
                                             key={activeItem.id}
@@ -400,7 +443,7 @@ const PavanScrollShowcase = () => {
                                     </AnimatePresence>
                                 </Suspense>
                             </Canvas>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>

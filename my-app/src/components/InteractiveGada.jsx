@@ -124,7 +124,7 @@ const useSoundEffects = () => {
 };
 
 // ─── Dynamic Star Field Component (Custom Shaders) ──────────────────────────
-const STAR_COUNT = 1200;
+const STAR_COUNT = 400;
 
 function DynamicStarField({ currentPosition, throwState, throwProgress }) {
     const pointsRef = useRef();
@@ -141,7 +141,6 @@ function DynamicStarField({ currentPosition, throwState, throwProgress }) {
     const geometry = useMemo(() => {
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        // Random sizes and twinkles
         const sizes = new Float32Array(STAR_COUNT);
         const offsets = new Float32Array(STAR_COUNT);
         for (let i = 0; i < STAR_COUNT; i++) {
@@ -168,16 +167,10 @@ function DynamicStarField({ currentPosition, throwState, throwProgress }) {
             
             void main() {
                 vGlow = 0.6 + 0.4 * sin(uTime * 2.0 + offset);
-                
                 vec3 pos = position;
-                
-                // Parallax shift is handled by group position
-                
-                // Warp effect: stretch along Z as uWarp increases
                 if (uWarp > 0.0) {
                     pos.z += uWarp * 10.0;
                 }
-                
                 vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
                 gl_PointSize = size * (300.0 / -mvPosition.z) * (1.0 + uWarp * 0.5);
                 gl_Position = projectionMatrix * mvPosition;
@@ -186,7 +179,6 @@ function DynamicStarField({ currentPosition, throwState, throwProgress }) {
         fragmentShader: `
             varying float vGlow;
             uniform vec3 uColor;
-            
             void main() {
                 float dist = length(gl_PointCoord - vec2(0.5));
                 if (dist > 0.5) discard;
@@ -199,6 +191,28 @@ function DynamicStarField({ currentPosition, throwState, throwProgress }) {
         depthWrite: false
     }), []);
 
+    useEffect(() => {
+        const updateStarColor = () => {
+            const starColorHex = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim() || '#ffffff';
+            material.uniforms.uColor.value.set(starColorHex);
+        };
+
+        // Initial update
+        updateStarColor();
+
+        // Listen for theme changes on the html element
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'data-theme') {
+                    updateStarColor();
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+        return () => observer.disconnect();
+    }, [material]);
+
     useFrame((state) => {
         if (!pointsRef.current) return;
         material.uniforms.uTime.value = state.clock.getElapsedTime();
@@ -209,10 +223,7 @@ function DynamicStarField({ currentPosition, throwState, throwProgress }) {
         } else if (throwState === 'returning') {
             targetWarp = Math.sin((1 - throwProgress) * Math.PI) * 1.2;
         }
-
         material.uniforms.uWarp.value = THREE.MathUtils.lerp(material.uniforms.uWarp.value, targetWarp, 0.1);
-
-        // Deep parallax
         pointsRef.current.position.x = -currentPosition.x * 0.08;
         pointsRef.current.position.y = -currentPosition.y * 0.08;
     });

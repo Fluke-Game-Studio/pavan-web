@@ -1,71 +1,71 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Hero from '../views/Hero';
+import Philosophy from '../views/Philosophy';
 
 const ShowcasePage = () => {
-    const videoIds = [
-        'QggJzZdIYPI', // Example YouTube video ID - replace with actual
-    ];
-
     return (
         <div className="showcase-page">
-            <section className="page-hero container">
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.9 }}
-                >
-                    <span className="phi-label">Witness the Vision</span>
-                    <h1 className="page-hero__title">Pavan Game Showcase</h1>
-                    <p className="page-hero__sub">
-                        Dive into the prototype builds, cinematic gameplay reveals, and behind-the-scenes
-                        development of Pavan: The Primal Saga.
-                    </p>
-                </motion.div>
-            </section>
+            <Hero />
+            <div className="content-sheet">
+                <section className="page-hero container section-padding" style={{ paddingBottom: 0 }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.9 }}
+                    >
+                        <span className="phi-label">Witness the Vision</span>
+                        <h1 className="page-hero__title">Studio Showcase</h1>
+                        <p className="page-hero__sub">
+                            Explore the core philosophy, cinematic reveals, and the expanding universe of Fluke Games.
+                        </p>
+                    </motion.div>
+                </section>
 
-            <div className="container section-padding">
-                {/* Video Grid */}
-                <div className="showcase-videos">
-                    {videoIds.map((id, index) => (
-                        <motion.div
-                            key={id}
-                            className="showcase-video-card"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: index * 0.1 }}
-                        >
-                            <div className="showcase-video-frame">
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${id}`}
-                                    title={`Pavan Showcase ${index + 1}`}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
+                <section className="devlog-section container section-padding">
+                    <motion.div
+                        className="devlog-card"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <div className="devlog-card__content">
+                            <span className="phi-label">Behind the Scenes</span>
+                            <h2 className="devlog-title">Development Log</h2>
+                            <p className="devlog-sub">
+                                Follow our journey as we build Pavan: The Primal Saga. 
+                                Updates on mechanics, lore, and art arriving soon.
+                            </p>
+                            <div className="coming-soon-badge">
+                                <div className="pulse-dot" />
+                                Coming Soon
                             </div>
-                            <div className="showcase-video-info">
-                                <h3>Prototype Build v{index + 1}</h3>
-                                <p>Early gameplay demonstration and world exploration.</p>
-                            </div>
-                        </motion.div>
-                    ))}
+                        </div>
+                        <div className="devlog-card__bg" />
+                    </motion.div>
+                </section>
+                
+                <div className="mythic-line" />
+                
+                <Philosophy />
+
+                {/* CTA back to Pavan (Home) */}
+                <div className="container section-padding">
+                    <motion.div
+                        className="showcase-cta"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        style={{ textAlign: 'center', marginTop: '4rem' }}
+                    >
+                        <h2>Experience the Legend</h2>
+                        <p>Step into the world of Pavan: The Primal Saga</p>
+                        <a href="/" className="btn btn-gold" style={{ display: 'inline-block', marginTop: '1rem' }}>
+                            Discover Pavan →
+                        </a>
+                    </motion.div>
                 </div>
-
-                {/* CTA back to Pavan */}
-                <motion.div
-                    className="showcase-cta"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                >
-                    <h2>Ready to Learn More?</h2>
-                    <p>Explore the full vision behind Pavan: The Primal Saga.</p>
-                    <Link to="/pavan" className="btn btn-gold">
-                        Discover Pavan →
-                    </Link>
-                </motion.div>
             </div>
         </div>
     );
