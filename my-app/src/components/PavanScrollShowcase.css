@@ -72,9 +72,14 @@
     flex-direction: column;
     align-items: flex-end;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .pss-tab--v:hover {
+    color: var(--tab-glow) !important;
+}
+
+.pss-tab--v.pss-tab--active {
     color: var(--tab-glow) !important;
 }
 

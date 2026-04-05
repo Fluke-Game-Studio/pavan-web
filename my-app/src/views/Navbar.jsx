@@ -35,7 +35,6 @@ const Navbar = () => {
                             className="logo-img"
                         />
                     </div>
-                    <span className="logo-text logo-text--navbar">Fluke Games™</span>
                 </NavLink>
                 {/* Desktop links */}
                 <div className="nav-links nav-links--desktop">
