@@ -10,6 +10,7 @@ import GameLoader from './components/GameLoader';
 import Breadcrumbs from './components/Breadcrumbs';
 import ScrollProgress from './components/ScrollProgress';
 import ParticleField from './components/ParticleField';
+import FloatingDiscordJoin from './components/FloatingDiscordJoin';
 import { ThemeProvider } from './contexts/ThemeContext';
 import useFavicon from './hooks/useFavicon';
 
@@ -68,6 +69,7 @@ function AppShell() {
       </Suspense>
 
       {!isPavan && <Footer />}
+      <FloatingDiscordJoin />
     </div>
   );
 }
