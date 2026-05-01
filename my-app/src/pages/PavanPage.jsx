@@ -191,7 +191,7 @@ const PavanPage = () => {
                         We're looking for artists, developers, writers, and composers.
                         No salary. Just legacy.
                     </motion.p>
-                    <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="btn pavan-btn-primary">
+                    <a href="https://www.flukegamestudio.com/careers" target="_blank" rel="noreferrer" className="btn pavan-btn-primary">
                         Work With Us →
                     </a>
                 </div>
