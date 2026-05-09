@@ -7,6 +7,9 @@
   --pavan-bg-layer: rgba(10, 0, 5, 0.8);
   --pavan-text-dim: rgba(255, 255, 255, 0.5);
   --pavan-border: rgba(155, 28, 28, 0.3);
+  /* sensible defaults for dark theme text colors */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.9);
 }
 
 :root[data-theme='light'] {

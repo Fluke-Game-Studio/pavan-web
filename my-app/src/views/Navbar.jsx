@@ -35,7 +35,6 @@ const Navbar = () => {
                             className="logo-img"
                         />
                     </div>
-                    <span className="logo-text logo-text--navbar">Fluke Games™</span>
                 </NavLink>
                 {/* Desktop links */}
                 <div className="nav-links nav-links--desktop">
@@ -51,7 +50,7 @@ const Navbar = () => {
                             <div className="nav-underline" />
                         </NavLink>
                     ))}
-                    <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="nav-work-btn">
+                    <a href="https://www.flukegamestudio.com/careers" target="_blank" rel="noreferrer" className="nav-work-btn">
                         Work With Us
                     </a>
                     <ThemeToggle />
@@ -87,7 +86,7 @@ const Navbar = () => {
                                 {link.name}
                             </NavLink>
                         ))}
-                        <a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer" className="nav-drawer__link" onClick={handleLinkClick}>
+                        <a href="https://www.flukegamestudio.com/careers" target="_blank" rel="noreferrer" className="nav-drawer__link" onClick={handleLinkClick}>
                             Work With Us
                         </a>
                         <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
