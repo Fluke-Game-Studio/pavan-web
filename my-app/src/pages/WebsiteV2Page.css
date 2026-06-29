@@ -7,8 +7,8 @@
   position: relative;
 }
 
-/* Restore system cursor — global CSS sets cursor:none for the custom cursor component,
-   but v2 doesn't render CustomCursor so we need the system cursor back */
+/* Restore system cursor — global CSS forces cursor:none for custom cursor,
+   but v2 doesn't render CustomCursor */
 .v2-root *,
 .v2-root *:hover {
   cursor: auto !important;
@@ -26,16 +26,141 @@
   z-index: 10;
 }
 
-/* ─── PERSISTENT BUTTONS ─── */
-.v2-persistent-btns {
+/* ─── TOP LEFT: LOGO ─── */
+.v2-logo {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  display: flex;
-  gap: 0.75rem;
-  z-index: 999;
+  top: 1.25rem;
+  left: 1.5rem;
+  z-index: 900;
+  pointer-events: none;
 }
 
+.v2-logo__img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.1);
+}
+
+/* ─── TOP RIGHT: SOCIAL EXPAND ─── */
+.v2-socials {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.v2-socials__toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  background: rgba(10, 0, 5, 0.7);
+  color: var(--volt-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.v2-socials__toggle:hover,
+.v2-socials__toggle--open {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: var(--volt-primary);
+}
+
+.v2-socials__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: rgba(10, 0, 5, 0.85);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 8px;
+  padding: 0.6rem 0.5rem;
+  backdrop-filter: blur(14px);
+  min-width: 160px;
+}
+
+.v2-social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  transition: 0.2s ease;
+}
+
+.v2-social-link:hover {
+  background: rgba(255, 215, 0, 0.08);
+  color: var(--volt-primary);
+}
+
+.v2-social-link svg {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ─── BOTTOM BAR ─── */
+.v2-bottom-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.v2-bottom-bar__left,
+.v2-bottom-bar__right {
+  pointer-events: auto;
+}
+
+.v2-bottom-bar__arrows {
+  display: flex;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.v2-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: rgba(10, 0, 5, 0.6);
+  color: var(--volt-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: 0.25s ease;
+  backdrop-filter: blur(6px);
+}
+
+.v2-arrow-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed !important;
+}
+
+.v2-arrow-btn:not(:disabled):hover {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: var(--volt-primary);
+}
+
+/* CTA Buttons */
 .v2-persist-btn {
   display: inline-block;
   padding: 0.6rem 1.4rem;
@@ -58,15 +183,27 @@
   transform: translateY(-2px);
 }
 
-.v2-persist-btn--ghost {
-  background: transparent;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  color: var(--volt-primary);
+/* Dot nav */
+.v2-dots {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
 }
 
-.v2-persist-btn--ghost:hover {
-  background: rgba(255, 215, 0, 0.08);
+.v2-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: transparent;
+  transition: 0.3s ease;
+  padding: 0;
+}
+
+.v2-dot--active {
+  background: var(--volt-primary);
   border-color: var(--volt-primary);
+  transform: scale(1.35);
 }
 
 /* ─── PARTICLE ENTER BUTTON ─── */
@@ -106,7 +243,7 @@
 
 .v2-track {
   display: flex;
-  width: 300vw; /* 3 panels */
+  width: 300vw;
   height: 100%;
   transition: transform 0.85s cubic-bezier(0.77, 0, 0.175, 1);
   will-change: transform;
@@ -121,24 +258,35 @@
   overflow: hidden;
 }
 
-/* ─── PANEL 0: HERO — uses PavanPage v1 classes directly ─── */
-/* pavan-hero class already handles all layout, just ensure it fills the panel */
+/* ─── PANEL 0: HERO — reuses pavan-hero ─── */
 .v2-panel.pavan-hero {
   display: flex;
   align-items: center;
 }
 
-/* Keep the eyebrow inline (v1 has it fixed-positioned) */
-.v2-panel .pavan-eyebrow {
+/* Override v1's fixed eyebrow pill */
+.v2-hero-content .pavan-eyebrow,
+.v2-eyebrow-inline {
   position: static !important;
   border: none !important;
   background: none !important;
-  padding: 0 !important;
-  font-size: 0.72rem;
-  margin-bottom: 1.25rem;
-  display: block;
-  border-radius: 0 !important;
   backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--pavan-accent, #E8383A);
+  margin-bottom: 1.25rem;
+}
+
+.v2-hero-content {
+  max-width: none !important;
+  width: 100% !important;
+  padding-left: 6vw !important;
+  padding-right: 6vw !important;
 }
 
 .v2-hero-next {
@@ -159,25 +307,63 @@
   border-color: var(--volt-primary);
 }
 
-/* ─── PANEL 1: SCROLL SHOWCASE (fills full viewport) ─── */
+/* ─── PANEL 1: SCROLL SHOWCASE ─── */
 .v2-panel--showcase-section {
   display: block;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* no scrollbar — content fits in viewport */
 }
 
-.v2-showcase-wrap {
+/* Make PavanScrollShowcase fill 100vh without internal scroll */
+.v2-showcase-inner {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* PavanScrollShowcase uses pavan-deep background; ensure it fills the panel */
-.v2-showcase-wrap .pss-section {
-  min-height: 100vh;
-  padding-top: 4rem;
+.v2-showcase-inner .pss-section {
+  height: 100vh;
+  overflow: hidden;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-/* ─── PANEL 2: DISCOVER / SHOWCASE ─── */
+.v2-showcase-inner .pss-section__header {
+  margin-bottom: 2rem;
+}
+
+.v2-showcase-inner .pss-container {
+  flex: 1;
+  min-height: 0;
+}
+
+.v2-showcase-inner .pss-content-area {
+  min-height: 0;
+}
+
+/* "Next section" link at bottom of showcase panel */
+.v2-panel-next-btn {
+  position: absolute;
+  bottom: 5rem;
+  right: 2rem;
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  color: rgba(255, 215, 0, 0.6);
+  padding: 0.5rem 1.2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+  transition: 0.3s ease;
+  z-index: 10;
+}
+
+.v2-panel-next-btn:hover {
+  border-color: var(--volt-primary);
+  color: var(--volt-primary);
+}
+
+/* ─── PANEL 2: DISCOVER ─── */
 .v2-panel--discover {
   display: flex;
   align-items: center;
@@ -201,8 +387,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 900px;
-  padding: 2rem 6vw;
+  padding: 0 6vw;
 }
 
 .v2-eyebrow {
@@ -237,8 +422,9 @@
 .v2-showcase-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
+  max-width: 860px;
 }
 
 .v2-showcase-card {
@@ -249,7 +435,7 @@
 
 .v2-showcase-thumb {
   aspect-ratio: 16/9;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 215, 0, 0.12);
   display: flex;
   align-items: center;
@@ -278,7 +464,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.04em;
 }
@@ -298,47 +484,23 @@
   50% { opacity: 0.35; transform: scale(0.65); }
 }
 
-/* ─── DOT NAV ─── */
-.v2-dots {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.65rem;
-  z-index: 50;
-}
-
-.v2-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  background: transparent;
-  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-  padding: 0;
-}
-
-.v2-dot--active {
-  background: var(--volt-primary);
-  border-color: var(--volt-primary);
-  transform: scale(1.35);
-}
-
 /* ─── MOBILE ─── */
 @media (max-width: 768px) {
   .v2-showcase-cards {
     grid-template-columns: 1fr;
   }
 
-  .v2-persistent-btns {
+  .v2-bottom-bar {
     bottom: 1rem;
-    right: 1rem;
-    gap: 0.5rem;
+    padding: 0 1rem;
   }
 
   .v2-persist-btn {
     padding: 0.5rem 1rem;
     font-size: 0.72rem;
+  }
+
+  .v2-logo__img {
+    height: 28px;
   }
 }
