@@ -14,13 +14,15 @@
   cursor: default !important;
 }
 .v2-root a,
+.v2-root a *,
 .v2-root button:not(:disabled),
+.v2-root button:not(:disabled) *,
 .v2-root [role="button"],
+.v2-root .v2-social-icon,
 .v2-root .v2-player-video,
 .v2-root .v2-player-progress,
 .v2-root .v2-player-portal__backdrop {
   cursor: pointer !important;
-  color: inherit;
 }
 /* Yellow colour on interactive elements */
 .v2-root a:hover,
@@ -376,8 +378,7 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  /* top padding clears the social icons bar (~1.1rem top + ~42px height + gap) */
-  padding: 5.5rem 5vw 5rem;
+  padding: 3.5rem 5vw 5rem;
 }
 
 .v2-discover-header {
@@ -395,6 +396,8 @@
   margin-bottom: 0.5rem;
   opacity: 0.8;
   text-align: center;
+  /* push down enough to not sit behind the social icons bar */
+  padding-top: 2.5rem;
 }
 
 .v2-discover-title {
