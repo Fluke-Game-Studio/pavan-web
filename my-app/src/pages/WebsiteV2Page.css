@@ -7,7 +7,8 @@
   position: relative;
 }
 
-/* Restore system cursor (global CSS sets cursor:none for custom cursor) */
+/* Restore system cursor — global CSS sets cursor:none for the custom cursor component,
+   but v2 doesn't render CustomCursor so we need the system cursor back */
 .v2-root *,
 .v2-root *:hover {
   cursor: auto !important;
@@ -18,15 +19,6 @@
   cursor: pointer !important;
 }
 
-/* PavanTitleModel container — must match PavanHero.css sizing */
-.v2-title-model {
-  width: 100%;
-  height: clamp(160px, 20vw, 300px);
-  position: relative;
-  overflow: visible;
-  margin-bottom: 0.25rem;
-}
-
 /* ─── STACKING LAYER ─── */
 .v2-layer {
   position: fixed;
@@ -34,7 +26,7 @@
   z-index: 10;
 }
 
-/* ─── PERSISTENT BUTTONS (always on top) ─── */
+/* ─── PERSISTENT BUTTONS ─── */
 .v2-persistent-btns {
   position: fixed;
   bottom: 2rem;
@@ -42,8 +34,6 @@
   display: flex;
   gap: 0.75rem;
   z-index: 999;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .v2-persist-btn {
@@ -55,7 +45,6 @@
   text-decoration: none;
   border-radius: 2px;
   transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-  cursor: pointer;
   white-space: nowrap;
 }
 
@@ -87,22 +76,19 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
-  pointer-events: auto;
 }
 
 .v2-enter-saga-btn {
-  background: transparent;
   border: 1px solid rgba(255, 215, 0, 0.5);
   color: var(--volt-primary);
   padding: 0.8rem 2.5rem;
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  cursor: pointer;
   border-radius: 2px;
   transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   backdrop-filter: blur(6px);
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .v2-enter-saga-btn:hover {
@@ -120,95 +106,105 @@
 
 .v2-track {
   display: flex;
-  width: 500vw; /* 5 panels */
+  width: 300vw; /* 3 panels */
   height: 100%;
   transition: transform 0.85s cubic-bezier(0.77, 0, 0.175, 1);
   will-change: transform;
 }
 
-/* ─── PANELS ─── */
+/* ─── BASE PANEL ─── */
 .v2-panel {
   position: relative;
   width: 100vw;
   height: 100vh;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
 }
 
-.v2-panel__content {
-  position: relative;
-  z-index: 2;
-  max-width: 700px;
-  width: 90%;
-  padding: 2rem;
+/* ─── PANEL 0: HERO — uses PavanPage v1 classes directly ─── */
+/* pavan-hero class already handles all layout, just ensure it fills the panel */
+.v2-panel.pavan-hero {
+  display: flex;
+  align-items: center;
 }
 
-.v2-panel__content--center {
+/* Keep the eyebrow inline (v1 has it fixed-positioned) */
+.v2-panel .pavan-eyebrow {
+  position: static !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  font-size: 0.72rem;
+  margin-bottom: 1.25rem;
+  display: block;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+}
+
+.v2-hero-next {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: var(--volt-primary);
+  padding: 0.75rem 2rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  margin-top: 0.5rem;
+}
+
+.v2-hero-next:hover {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: var(--volt-primary);
+}
+
+/* ─── PANEL 1: SCROLL SHOWCASE (fills full viewport) ─── */
+.v2-panel--showcase-section {
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.v2-showcase-wrap {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* PavanScrollShowcase uses pavan-deep background; ensure it fills the panel */
+.v2-showcase-wrap .pss-section {
+  min-height: 100vh;
+  padding-top: 4rem;
+}
+
+/* ─── PANEL 2: DISCOVER / SHOWCASE ─── */
+.v2-panel--discover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.v2-panel-bg--discover {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 215, 0, 0.07) 0%, transparent 70%),
+    linear-gradient(180deg, #060607 0%, #0a0005 100%);
+  z-index: 0;
+}
+
+.v2-discover-content {
+  position: relative;
+  z-index: 2;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 2rem 6vw;
 }
 
-/* ─── PANEL BACKGROUNDS ─── */
-.v2-hero-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 80%, rgba(155, 28, 28, 0.35) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(232, 56, 58, 0.12) 0%, transparent 60%),
-    #0A0005;
-  z-index: 0;
-}
-
-.v2-hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(155, 28, 28, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(155, 28, 28, 0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.v2-panel-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.v2-panel-bg--weapons {
-  background:
-    radial-gradient(ellipse 70% 60% at 80% 50%, rgba(232, 56, 58, 0.15) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(255, 215, 0, 0.06) 0%, transparent 50%),
-    linear-gradient(135deg, #0a0005 0%, #060607 60%, #0a0000 100%);
-}
-
-.v2-panel-bg--warriors {
-  background:
-    radial-gradient(ellipse 80% 70% at 30% 40%, rgba(255, 215, 0, 0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(155, 28, 28, 0.2) 0%, transparent 55%),
-    linear-gradient(135deg, #060607 0%, #0a0005 100%);
-}
-
-.v2-panel-bg--worlds {
-  background:
-    radial-gradient(ellipse 90% 70% at 50% 30%, rgba(30, 80, 180, 0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 50% at 20% 70%, rgba(255, 215, 0, 0.07) 0%, transparent 55%),
-    linear-gradient(180deg, #020508 0%, #060607 100%);
-}
-
-.v2-panel-bg--showcase {
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 215, 0, 0.07) 0%, transparent 70%),
-    linear-gradient(180deg, #060607 0%, #0a0005 100%);
-}
-
-/* ─── COMMON TEXT ─── */
 .v2-eyebrow {
   display: block;
   font-size: 0.7rem;
@@ -220,7 +216,7 @@
   opacity: 0.8;
 }
 
-.v2-panel-title {
+.v2-discover-title {
   font-family: var(--font-title);
   font-size: clamp(2.5rem, 6vw, 5rem);
   color: var(--volt-primary);
@@ -230,130 +226,19 @@
   margin: 0 0 1.25rem;
 }
 
-.v2-panel-sub {
+.v2-discover-sub {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.75;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
   max-width: 520px;
 }
 
-/* ─── HERO PANEL ─── */
-.v2-title-model {
-  margin-bottom: 0.25rem;
-}
-
-.v2-title-sub {
-  display: block;
-  font-size: 0.75rem;
-  letter-spacing: 0.38em;
-  color: var(--volt-primary);
-  opacity: 0.6;
-  text-transform: uppercase;
-  margin-bottom: 1.5rem;
-}
-
-.v2-hero-tagline {
-  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 2.5rem;
-  line-height: 1.65;
-}
-
-.v2-hero-next {
-  background: transparent;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  color: var(--volt-primary);
-  padding: 0.7rem 1.8rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-  border-radius: 2px;
-}
-
-.v2-hero-next:hover {
-  background: rgba(255, 215, 0, 0.08);
-  border-color: var(--volt-primary);
-}
-
-.v2-scroll-hint {
-  position: absolute;
-  right: 3rem;
-  bottom: 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0.3;
-  z-index: 2;
-}
-
-.v2-scroll-hint span {
-  font-size: 0.55rem;
-  letter-spacing: 0.25em;
-  color: #fff;
-  writing-mode: vertical-rl;
-}
-
-.v2-scroll-line {
-  width: 1px;
-  height: 60px;
-  background: linear-gradient(to bottom, var(--volt-primary), transparent);
-}
-
-/* ─── COMING SOON CARDS (weapons/warriors/worlds) ─── */
-.v2-coming-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  max-width: 420px;
-}
-
-.v2-coming-card {
-  border: 1px solid rgba(255, 215, 0, 0.12);
-  border-radius: 4px;
-  padding: 1.25rem 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.v2-coming-card:hover {
-  border-color: rgba(255, 215, 0, 0.3);
-  background: rgba(255, 215, 0, 0.04);
-}
-
-.v2-coming-card__icon {
-  font-size: 1.4rem;
-  opacity: 0.4;
-}
-
-.v2-coming-card span {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.05em;
-}
-
-.v2-coming-soon-tag {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.04em;
-}
-
-/* ─── SHOWCASE PANEL ─── */
 .v2-showcase-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   width: 100%;
-  max-width: 640px;
 }
 
 .v2-showcase-card {
@@ -385,6 +270,17 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 0;
+  text-align: left;
+}
+
+/* ─── COMING SOON TAG ─── */
+.v2-coming-soon-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
 }
 
 /* ─── PULSE DOT ─── */
@@ -419,7 +315,6 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 215, 0, 0.4);
   background: transparent;
-  cursor: pointer;
   transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   padding: 0;
 }
@@ -430,32 +325,10 @@
   transform: scale(1.35);
 }
 
-/* ─── PANEL LABEL ─── */
-.v2-panel-label {
-  position: fixed;
-  top: 1.5rem;
-  left: 2rem;
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
-  color: rgba(255, 215, 0, 0.4);
-  text-transform: uppercase;
-  z-index: 50;
-  pointer-events: none;
-}
-
 /* ─── MOBILE ─── */
 @media (max-width: 768px) {
-  .v2-coming-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
   .v2-showcase-cards {
     grid-template-columns: 1fr;
-  }
-
-  .v2-scroll-hint {
-    display: none;
   }
 
   .v2-persistent-btns {
