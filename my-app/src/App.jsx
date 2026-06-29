@@ -26,33 +26,35 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
 const QueenBeeGame = lazy(() => import('./pages/QueenBeeGame'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const WebsiteV2Page = lazy(() => import('./pages/WebsiteV2Page'));
 
 // Loading fallback component
 const PageLoader = () => <GameLoader message="Loading Game..." />;
 
 // Pages where the ambient canvas background is suppressed
-const NO_BG_PATHS = ['/', '/pavan', '/login', '/queenbee', '/gada'];
+const NO_BG_PATHS = ['/', '/pavan', '/login', '/queenbee', '/gada', '/v2'];
 
 function AppShell() {
   const { pathname } = useLocation();
   const showBg = !NO_BG_PATHS.includes(pathname);
   const isQueenBee = pathname === '/queenbee';
   const isStandaloneGada = pathname === '/gada';
+  const isV2 = pathname === '/v2';
 
   // Pavan page gets its own full-screen layout (no shared footer padding)
   const isPavan = pathname === '/pavan' || pathname === '/';
-  const isMinimalScreen = isStandaloneGada;
+  const isMinimalScreen = isStandaloneGada || isV2;
 
   // Animate favicon when tab is inactive
   useFavicon('/pavan_icon.png', 1000);
 
   useEffect(() => {
-    document.body.classList.toggle('gada-standalone-page', isStandaloneGada);
+    document.body.classList.toggle('gada-standalone-page', isStandaloneGada || isV2);
 
     return () => {
       document.body.classList.remove('gada-standalone-page');
     };
-  }, [isStandaloneGada]);
+  }, [isStandaloneGada, isV2]);
 
   const fallback = isStandaloneGada ? (
     <div
@@ -89,6 +91,7 @@ function AppShell() {
           <Route path="/queenbee" element={<QueenBeeGame />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/v2" element={<WebsiteV2Page />} />
           {/* Catch-all → 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
