@@ -228,10 +228,6 @@ export default function WebsiteV2Page() {
                       </p>
                     </motion.div>
                   </div>
-                  <div className="pavan-hero__scroll-hint" onClick={() => goTo(1)} style={{ cursor: 'pointer' }}>
-                    <span>SCROLL</span>
-                    <div className="pavan-scroll-line" />
-                  </div>
                 </section>
 
                 {/* ── PANEL 1: WEAPONS · WARRIORS · WORLDS ── */}
