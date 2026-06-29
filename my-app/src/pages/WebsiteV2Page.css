@@ -47,7 +47,7 @@
 }
 
 .v2-logo__img {
-  height: 72px;
+  height: 96px;
   width: auto;
   object-fit: contain;
   filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,215,0,0.25));
@@ -324,7 +324,17 @@
 
 .v2-showcase-inner .pss-section__header {
   margin-bottom: 2rem;
-  padding-top: 2.5rem;
+  padding-top: 4rem !important;
+}
+
+/* The eyebrow inside showcase is v1's fixed-pill style — reset it to static */
+.v2-showcase-inner .pavan-eyebrow {
+  position: static !important;
+  border: none !important;
+  background: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
 
 .v2-showcase-inner .pss-container {
