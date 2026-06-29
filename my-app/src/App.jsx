@@ -26,7 +26,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
 const QueenBeeGame = lazy(() => import('./pages/QueenBeeGame'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const WebsiteV2Page = lazy(() => import('./pages/WebsiteV2Page'));
+import WebsiteV2Page from './pages/WebsiteV2Page';
 
 // Loading fallback component
 const PageLoader = () => <GameLoader message="Loading Game..." />;
@@ -56,7 +56,7 @@ function AppShell() {
     };
   }, [isStandaloneGada, isV2]);
 
-  const fallback = isStandaloneGada ? (
+  const fallback = (isStandaloneGada || isV2) ? (
     <div
       aria-hidden="true"
       style={{
