@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord, FaShare, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord, FaShare, FaTimes, FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaExpand, FaCompress } from 'react-icons/fa';
 
 import BlackHoleIntro from '../components/BlackHoleIntro';
 import BlackHoleMorphOverlay from '../components/BlackHoleMorphOverlay';
@@ -257,46 +257,37 @@ export default function WebsiteV2Page() {
                   </div>
                 </section>
 
-                {/* ── PANEL 2: STUDIO SHOWCASE (video + cards) ── */}
+                {/* ── PANEL 2: STUDIO SHOWCASE ── */}
                 <section className="v2-panel v2-panel--discover">
                   <div className="v2-panel-bg--discover" />
                   <motion.div
                     className="v2-discover-content"
-                    animate={{ opacity: activePanel === 2 ? 1 : 0, scale: activePanel === 2 ? 1 : 0.97 }}
+                    animate={{ opacity: activePanel === 2 ? 1 : 0 }}
                     transition={{ duration: 0.7 }}
                   >
-                    <span className="v2-eyebrow">Witness the Vision</span>
-                    <h2 className="v2-discover-title">Studio Showcase</h2>
-
-                    {/* ── Video ── */}
-                    <div className="v2-video-wrap">
-                      <video
-                        className="v2-video"
-                        src="/trailer.mp4"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        controls
-                      />
-                      <div className="v2-video-label">
-                        <div className="v2-pulse" /> Prototype Trailer
-                      </div>
+                    {/* header */}
+                    <div className="v2-discover-header">
+                      <span className="v2-eyebrow">Witness the Vision</span>
+                      <h2 className="v2-discover-title">Studio Showcase</h2>
                     </div>
 
-                    {/* ── Coming-soon cards ── */}
-                    <div className="v2-showcase-cards">
-                      <div className="v2-showcase-card">
-                        <div className="v2-showcase-thumb v2-showcase-thumb--devlog">
-                          <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Dev Log — Coming Soon</div>
+                    {/* two-column: video left, cards right */}
+                    <div className="v2-discover-grid">
+                      <VideoPlayer src="/trailer.mp4" />
+
+                      <div className="v2-discover-cards">
+                        <div className="v2-showcase-card">
+                          <div className="v2-showcase-thumb v2-showcase-thumb--devlog">
+                            <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Dev Log — Coming Soon</div>
+                          </div>
+                          <p className="v2-showcase-label">Behind the Scenes</p>
                         </div>
-                        <p className="v2-showcase-label">Behind the Scenes</p>
-                      </div>
-                      <div className="v2-showcase-card">
-                        <div className="v2-showcase-thumb v2-showcase-thumb--gameplay">
-                          <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Gameplay Reveal — Coming Soon</div>
+                        <div className="v2-showcase-card">
+                          <div className="v2-showcase-thumb v2-showcase-thumb--gameplay">
+                            <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Gameplay Reveal — Coming Soon</div>
+                          </div>
+                          <p className="v2-showcase-label">First Look</p>
                         </div>
-                        <p className="v2-showcase-label">First Look</p>
                       </div>
                     </div>
                   </motion.div>
@@ -307,6 +298,97 @@ export default function WebsiteV2Page() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function VideoPlayer({ src }) {
+  const videoRef  = useRef(null);
+  const [playing, setPlaying]   = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [hovering, setHovering] = useState(false);
+
+  const toggle = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else          { v.pause(); setPlaying(false); }
+  };
+
+  const onTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v || !v.duration) return;
+    setProgress(v.currentTime / v.duration);
+  };
+
+  const onLoadedMetadata = () => {
+    if (videoRef.current) setDuration(videoRef.current.duration);
+  };
+
+  const seek = (e) => {
+    const bar = e.currentTarget;
+    const ratio = (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth;
+    const v = videoRef.current;
+    if (v) { v.currentTime = ratio * v.duration; setProgress(ratio); }
+  };
+
+  const fmt = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div
+      className={`v2-player ${expanded ? 'v2-player--expanded' : ''}`}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
+      <div className="v2-player-badge">
+        <div className="v2-pulse" /> Prototype Trailer
+      </div>
+
+      <video
+        ref={videoRef}
+        className="v2-player-video"
+        src={src}
+        playsInline
+        loop
+        onTimeUpdate={onTimeUpdate}
+        onLoadedMetadata={onLoadedMetadata}
+        onClick={toggle}
+      />
+
+      {/* Big play overlay when paused */}
+      {!playing && (
+        <button className="v2-player-overlay-play" onClick={toggle} aria-label="Play">
+          <FaPlay />
+        </button>
+      )}
+
+      {/* Controls — show on hover or when paused */}
+      <div className={`v2-player-controls ${hovering || !playing ? 'v2-player-controls--visible' : ''}`}>
+        <div className="v2-player-progress" onClick={seek}>
+          <div className="v2-player-progress__fill" style={{ width: `${progress * 100}%` }} />
+        </div>
+        <div className="v2-player-bar">
+          <button className="v2-player-btn" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
+            {playing ? <FaPause /> : <FaPlay />}
+          </button>
+          <span className="v2-player-time">
+            {fmt(progress * duration)} / {fmt(duration)}
+          </span>
+          <button
+            className="v2-player-btn v2-player-btn--expand"
+            onClick={() => setExpanded(e => !e)}
+            aria-label={expanded ? 'Shrink' : 'Expand'}
+          >
+            {expanded ? <FaCompress /> : <FaExpand />}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
