@@ -182,7 +182,7 @@ export default function WebsiteV2Page() {
                   >
                     <span className="v2-eyebrow">A Fluke Games Production</span>
                     <div className="v2-title-model">
-                      <PavanTitleModel />
+                      <PavanTitleModel modelPath="/titlenew.glb" />
                     </div>
                     <span className="v2-title-sub">THE PRIMAL SAGA</span>
                     <p className="v2-hero-tagline">

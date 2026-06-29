@@ -7,6 +7,26 @@
   position: relative;
 }
 
+/* Restore system cursor (global CSS sets cursor:none for custom cursor) */
+.v2-root *,
+.v2-root *:hover {
+  cursor: auto !important;
+}
+.v2-root button,
+.v2-root a,
+.v2-root [role="button"] {
+  cursor: pointer !important;
+}
+
+/* PavanTitleModel container — must match PavanHero.css sizing */
+.v2-title-model {
+  width: 100%;
+  height: clamp(160px, 20vw, 300px);
+  position: relative;
+  overflow: visible;
+  margin-bottom: 0.25rem;
+}
+
 /* ─── STACKING LAYER ─── */
 .v2-layer {
   position: fixed;
