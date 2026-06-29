@@ -1,32 +1,55 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import BlackHoleIntro from '../components/BlackHoleIntro';
+import BlackHoleMorphOverlay from '../components/BlackHoleMorphOverlay';
+import ParticleMorphScreen from '../components/ParticleMorphScreen';
 import PavanTitleModel from '../components/PavanTitleModel';
+
 import './WebsiteV2Page.css';
 
-const PANELS = ['hero', 'showcase', 'cta'];
+// ── Narrative phases ──────────────────────────────────────────────────────────
+// blackhole → morph → particle → panels
+// ─────────────────────────────────────────────────────────────────────────────
 
-const WebsiteV2Page = () => {
-  const [narrativeDone, setNarrativeDone] = useState(false);
+const HORIZONTAL_PANELS = ['hero', 'weapons', 'warriors', 'worlds', 'showcase'];
+
+const DISCORD_URL = 'https://discord.gg/flukegames';
+const CAREERS_URL = 'https://www.flukegamestudio.com/careers';
+
+export default function WebsiteV2Page() {
+  const [phase, setPhase] = useState('blackhole'); // blackhole | morph | particle | panels
+  const [morphPhase, setMorphPhase] = useState('collapse');
   const [activePanel, setActivePanel] = useState(0);
-  const scrollerRef = useRef(null);
+  const trackRef = useRef(null);
   const isScrollingRef = useRef(false);
+  const timerRef = useRef(null);
 
-  const handleNarrativeEnter = useCallback(() => {
-    setTimeout(() => setNarrativeDone(true), 3200);
+  // ── Narrative: blackhole click ──
+  const handleBlackholeEnter = useCallback(() => {
+    setPhase('morph');
+    setMorphPhase('expand');
+
+    timerRef.current = setTimeout(() => {
+      setPhase('particle');
+    }, 2800);
   }, []);
 
-  // Wheel-based panel navigation
+  // ── Particle screen → panels ──
+  const handleEnterSaga = useCallback(() => {
+    setPhase('panels');
+  }, []);
+
+  // ── Horizontal scroll ──
   useEffect(() => {
-    if (!narrativeDone) return;
+    if (phase !== 'panels') return;
 
     const onWheel = (e) => {
       if (isScrollingRef.current) return;
       e.preventDefault();
-
       const dir = e.deltaY > 0 ? 1 : -1;
       setActivePanel((prev) => {
-        const next = Math.max(0, Math.min(PANELS.length - 1, prev + dir));
+        const next = Math.max(0, Math.min(HORIZONTAL_PANELS.length - 1, prev + dir));
         if (next !== prev) {
           isScrollingRef.current = true;
           setTimeout(() => { isScrollingRef.current = false; }, 900);
@@ -35,202 +58,271 @@ const WebsiteV2Page = () => {
       });
     };
 
-    window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
-  }, [narrativeDone]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    if (!narrativeDone) return;
     const onKey = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        setActivePanel((p) => Math.min(PANELS.length - 1, p + 1));
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        setActivePanel((p) => Math.max(0, p - 1));
-      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') setActivePanel(p => Math.min(HORIZONTAL_PANELS.length - 1, p + 1));
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') setActivePanel(p => Math.max(0, p - 1));
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [narrativeDone]);
 
-  // Sync scroll position
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [phase]);
+
   useEffect(() => {
-    if (!scrollerRef.current) return;
-    scrollerRef.current.style.transform = `translateX(-${activePanel * 100}vw)`;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${activePanel * 100}vw)`;
+    }
   }, [activePanel]);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
     <div className="v2-root">
+      {/* ── Persistent CTA buttons (all screens) ── */}
+      <div className="v2-persistent-btns">
+        <a href={DISCORD_URL} target="_blank" rel="noreferrer" className="v2-persist-btn v2-persist-btn--ghost">
+          Join Discord
+        </a>
+        <a href={CAREERS_URL} target="_blank" rel="noreferrer" className="v2-persist-btn v2-persist-btn--gold">
+          Work With Us
+        </a>
+      </div>
+
+      {/* ── PHASE: BLACKHOLE ── */}
       <AnimatePresence>
-        {!narrativeDone && (
+        {phase === 'blackhole' && (
           <motion.div
-            key="narrative"
-            className="v2-narrative"
-            initial={{ opacity: 1 }}
+            key="blackhole"
+            className="v2-layer"
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
-            <BlackHoleIntro onEnter={handleNarrativeEnter} />
+            <BlackHoleIntro onEnter={handleBlackholeEnter} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {narrativeDone && (
-        <motion.div
-          className="v2-experience"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Panel dots nav */}
-          <div className="v2-dots">
-            {PANELS.map((_, i) => (
-              <button
-                key={i}
-                className={`v2-dot ${i === activePanel ? 'v2-dot--active' : ''}`}
-                onClick={() => setActivePanel(i)}
-                aria-label={`Go to panel ${i + 1}`}
-              />
-            ))}
-          </div>
-
-          {/* Horizontal strip */}
-          <div className="v2-track-wrap">
-            <div className="v2-track" ref={scrollerRef}>
-
-              {/* ── PANEL 1: HERO ── */}
-              <section className="v2-panel v2-panel--hero">
-                <div className="v2-panel__bg v2-panel__bg--hero" />
-                <motion.div
-                  className="v2-panel__content"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: activePanel === 0 ? 1 : 0, y: activePanel === 0 ? 0 : 40 }}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                >
-                  <span className="v2-eyebrow">A Fluke Games Production</span>
-                  <div className="v2-hero__model">
-                    <PavanTitleModel />
-                  </div>
-                  <span className="v2-hero__sub">THE PRIMAL SAGA</span>
-                  <p className="v2-hero__tagline">
-                    Where divine wrath meets the pulse of the future.
-                  </p>
-                  <button
-                    className="v2-hero__next"
-                    onClick={() => setActivePanel(1)}
-                  >
-                    Discover the Saga →
-                  </button>
-                </motion.div>
-                <div className="v2-scroll-hint">
-                  <span>SCROLL</span>
-                  <div className="v2-scroll-line" />
-                </div>
-              </section>
-
-              {/* ── PANEL 2: SHOWCASE ── */}
-              <section className="v2-panel v2-panel--showcase">
-                <div className="v2-panel__bg v2-panel__bg--showcase" />
-                <motion.div
-                  className="v2-panel__content"
-                  initial={{ opacity: 0, x: 60 }}
-                  animate={{ opacity: activePanel === 1 ? 1 : 0, x: activePanel === 1 ? 0 : 60 }}
-                  transition={{ duration: 0.7, delay: 0.15 }}
-                >
-                  <span className="v2-eyebrow">Witness the Vision</span>
-                  <h2 className="v2-section-title">Studio Showcase</h2>
-                  <p className="v2-section-sub">
-                    Cinematic reveals and the expanding universe of Pavan: The Primal Saga.
-                  </p>
-
-                  <div className="v2-showcase-grid">
-                    <div className="v2-showcase-card">
-                      <div className="v2-showcase-card__thumb v2-showcase-card__thumb--devlog">
-                        <div className="v2-coming-soon">
-                          <div className="v2-pulse" />
-                          Development Log — Coming Soon
-                        </div>
-                      </div>
-                      <p className="v2-showcase-card__label">Behind the Scenes</p>
-                    </div>
-                    <div className="v2-showcase-card">
-                      <div className="v2-showcase-card__thumb v2-showcase-card__thumb--gameplay">
-                        <div className="v2-coming-soon">
-                          <div className="v2-pulse" />
-                          Gameplay Reveal — Coming Soon
-                        </div>
-                      </div>
-                      <p className="v2-showcase-card__label">First Look</p>
-                    </div>
-                  </div>
-
-                  <button
-                    className="v2-btn v2-btn--ghost"
-                    onClick={() => setActivePanel(2)}
-                  >
-                    Join the Journey →
-                  </button>
-                </motion.div>
-              </section>
-
-              {/* ── PANEL 3: CTA ── */}
-              <section className="v2-panel v2-panel--cta">
-                <div className="v2-panel__bg v2-panel__bg--cta" />
-                <motion.div
-                  className="v2-panel__content v2-panel__content--center"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: activePanel === 2 ? 1 : 0, scale: activePanel === 2 ? 1 : 0.95 }}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                >
-                  <span className="v2-eyebrow">Be Part of the Legend</span>
-                  <h2 className="v2-cta-title">Ready to Build<br />Something Eternal?</h2>
-                  <p className="v2-cta-sub">
-                    We're looking for artists, developers, writers, and composers.<br />
-                    No salary. Just legacy.
-                  </p>
-
-                  <div className="v2-cta-actions">
-                    <a
-                      href="https://www.flukegamestudio.com/careers"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="v2-btn v2-btn--gold"
-                    >
-                      Work With Us
-                    </a>
-                    <a
-                      href="https://discord.gg/flukegames"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="v2-btn v2-btn--ghost"
-                    >
-                      Join Discord
-                    </a>
-                  </div>
-
-                  <div className="v2-cta-stats">
-                    <div className="v2-stat">
-                      <span className="v2-stat__num">∞</span>
-                      <span className="v2-stat__label">Branching Choices</span>
-                    </div>
-                    <div className="v2-stat">
-                      <span className="v2-stat__num">7</span>
-                      <span className="v2-stat__label">Ancient Pantheons</span>
-                    </div>
-                    <div className="v2-stat">
-                      <span className="v2-stat__num">2050+</span>
-                      <span className="v2-stat__label">Lines of Lore</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </section>
-
-            </div>
-          </div>
-        </motion.div>
+      {/* ── PHASE: MORPH OVERLAY ── */}
+      {(phase === 'morph' || phase === 'particle') && (
+        <div className="v2-layer">
+          <BlackHoleMorphOverlay active={true} phase={morphPhase} />
+        </div>
       )}
+
+      {/* ── PHASE: PARTICLE MORPH SCREEN ── */}
+      <AnimatePresence>
+        {phase === 'particle' && (
+          <motion.div
+            key="particle"
+            className="v2-layer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+          >
+            <ParticleMorphScreen />
+
+            {/* Enter button overlaid on particle screen */}
+            <motion.div
+              className="v2-particle-enter"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.5, duration: 0.8 }}
+            >
+              <button className="v2-enter-saga-btn" onClick={handleEnterSaga}>
+                Enter the Saga ↓
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── PHASE: HORIZONTAL PANELS ── */}
+      <AnimatePresence>
+        {phase === 'panels' && (
+          <motion.div
+            key="panels"
+            className="v2-layer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9 }}
+          >
+            {/* Dot nav */}
+            <div className="v2-dots">
+              {HORIZONTAL_PANELS.map((name, i) => (
+                <button
+                  key={name}
+                  className={`v2-dot ${i === activePanel ? 'v2-dot--active' : ''}`}
+                  onClick={() => setActivePanel(i)}
+                  aria-label={name}
+                />
+              ))}
+            </div>
+
+            {/* Panel label */}
+            <div className="v2-panel-label">
+              {HORIZONTAL_PANELS[activePanel].toUpperCase()}
+            </div>
+
+            {/* Horizontal track */}
+            <div className="v2-track-wrap">
+              <div className="v2-track" ref={trackRef}>
+
+                {/* ── PANEL 0: HERO ── */}
+                <section className="v2-panel v2-panel--hero">
+                  <div className="v2-hero-bg" />
+                  <div className="v2-hero-grid" />
+                  <motion.div
+                    className="v2-panel__content"
+                    animate={{ opacity: activePanel === 0 ? 1 : 0, y: activePanel === 0 ? 0 : 30 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <span className="v2-eyebrow">A Fluke Games Production</span>
+                    <div className="v2-title-model">
+                      <PavanTitleModel />
+                    </div>
+                    <span className="v2-title-sub">THE PRIMAL SAGA</span>
+                    <p className="v2-hero-tagline">
+                      Where divine wrath meets the pulse of the future.
+                    </p>
+                    <button className="v2-hero-next" onClick={() => setActivePanel(1)}>
+                      Explore the World →
+                    </button>
+                  </motion.div>
+                  <ScrollHint />
+                </section>
+
+                {/* ── PANEL 1: WEAPONS ── */}
+                <section className="v2-panel v2-panel--weapons">
+                  <div className="v2-panel-bg v2-panel-bg--weapons" />
+                  <motion.div
+                    className="v2-panel__content"
+                    animate={{ opacity: activePanel === 1 ? 1 : 0, x: activePanel === 1 ? 0 : 40 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <span className="v2-eyebrow">Arsenal of the Gods</span>
+                    <h2 className="v2-panel-title">Weapons</h2>
+                    <p className="v2-panel-sub">
+                      Forged in celestial fire and tempered by ancient rites —
+                      each weapon carries the memory of a thousand battles.
+                    </p>
+                    <div className="v2-coming-grid">
+                      {['Gada', 'Trishul', 'Chakra', 'Khadga'].map((w) => (
+                        <div key={w} className="v2-coming-card">
+                          <div className="v2-coming-card__icon">⚔</div>
+                          <span>{w}</span>
+                          <div className="v2-coming-soon-tag">
+                            <div className="v2-pulse" /> Coming Soon
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </section>
+
+                {/* ── PANEL 2: WARRIORS ── */}
+                <section className="v2-panel v2-panel--warriors">
+                  <div className="v2-panel-bg v2-panel-bg--warriors" />
+                  <motion.div
+                    className="v2-panel__content"
+                    animate={{ opacity: activePanel === 2 ? 1 : 0, x: activePanel === 2 ? 0 : 40 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <span className="v2-eyebrow">Legends of the Realm</span>
+                    <h2 className="v2-panel-title">Warriors</h2>
+                    <p className="v2-panel-sub">
+                      Demigods, rebels, and ancient protectors — every warrior
+                      carries a destiny written before time began.
+                    </p>
+                    <div className="v2-coming-grid">
+                      {['Pavan', 'Yodha', 'Devi', 'Rakshasa'].map((w) => (
+                        <div key={w} className="v2-coming-card">
+                          <div className="v2-coming-card__icon">⚡</div>
+                          <span>{w}</span>
+                          <div className="v2-coming-soon-tag">
+                            <div className="v2-pulse" /> Coming Soon
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </section>
+
+                {/* ── PANEL 3: WORLDS ── */}
+                <section className="v2-panel v2-panel--worlds">
+                  <div className="v2-panel-bg v2-panel-bg--worlds" />
+                  <motion.div
+                    className="v2-panel__content"
+                    animate={{ opacity: activePanel === 3 ? 1 : 0, x: activePanel === 3 ? 0 : 40 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <span className="v2-eyebrow">The Fractured Realm</span>
+                    <h2 className="v2-panel-title">Worlds</h2>
+                    <p className="v2-panel-sub">
+                      Ancient temples and neon megacities coexist in a realm
+                      where mythology was uploaded and something older awoke.
+                    </p>
+                    <div className="v2-coming-grid">
+                      {['Svarga Loka', 'Neon Kashi', 'Pataal Net', 'The Rift'].map((w) => (
+                        <div key={w} className="v2-coming-card">
+                          <div className="v2-coming-card__icon">🌐</div>
+                          <span>{w}</span>
+                          <div className="v2-coming-soon-tag">
+                            <div className="v2-pulse" /> Coming Soon
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </section>
+
+                {/* ── PANEL 4: SHOWCASE ── */}
+                <section className="v2-panel v2-panel--showcase">
+                  <div className="v2-panel-bg v2-panel-bg--showcase" />
+                  <motion.div
+                    className="v2-panel__content v2-panel__content--center"
+                    animate={{ opacity: activePanel === 4 ? 1 : 0, scale: activePanel === 4 ? 1 : 0.97 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <span className="v2-eyebrow">Witness the Vision</span>
+                    <h2 className="v2-panel-title">Studio Showcase</h2>
+                    <p className="v2-panel-sub" style={{ maxWidth: 500, margin: '0 auto 2.5rem' }}>
+                      Cinematic reveals and devlogs from the making of Pavan: The Primal Saga.
+                    </p>
+                    <div className="v2-showcase-cards">
+                      <div className="v2-showcase-card">
+                        <div className="v2-showcase-thumb v2-showcase-thumb--devlog">
+                          <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Dev Log — Coming Soon</div>
+                        </div>
+                        <p className="v2-showcase-label">Behind the Scenes</p>
+                      </div>
+                      <div className="v2-showcase-card">
+                        <div className="v2-showcase-thumb v2-showcase-thumb--gameplay">
+                          <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Gameplay Reveal — Coming Soon</div>
+                        </div>
+                        <p className="v2-showcase-label">First Look</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </section>
+
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
+}
 
-export default WebsiteV2Page;
+function ScrollHint() {
+  return (
+    <div className="v2-scroll-hint">
+      <span>SCROLL</span>
+      <div className="v2-scroll-line" />
+    </div>
+  );
+}
