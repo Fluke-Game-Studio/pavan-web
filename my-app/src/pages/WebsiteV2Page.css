@@ -7,16 +7,25 @@
   position: relative;
 }
 
-/* Restore system cursor — global CSS forces cursor:none for custom cursor,
-   but v2 doesn't render CustomCursor */
+/* Restore cursors — global CSS sets cursor:none for the custom cursor component,
+   but v2 doesn't render CustomCursor so we override everything here */
 .v2-root *,
 .v2-root *:hover {
-  cursor: auto !important;
+  cursor: default !important;
 }
-.v2-root button,
 .v2-root a,
-.v2-root [role="button"] {
+.v2-root button:not(:disabled),
+.v2-root [role="button"],
+.v2-root .v2-player-video,
+.v2-root .v2-player-progress,
+.v2-root .v2-player-portal__backdrop {
   cursor: pointer !important;
+  color: inherit;
+}
+/* Yellow colour on interactive elements */
+.v2-root a:hover,
+.v2-root button:not(:disabled):hover {
+  color: var(--volt-primary);
 }
 
 /* ─── STACKING LAYER ─── */
@@ -367,10 +376,12 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: 3.5rem 5vw 5rem;
+  /* top padding clears the social icons bar (~1.1rem top + ~42px height + gap) */
+  padding: 5.5rem 5vw 5rem;
 }
 
 .v2-discover-header {
+  text-align: center;
   margin-bottom: 1.5rem;
 }
 
@@ -383,6 +394,7 @@
   color: var(--volt-primary);
   margin-bottom: 0.5rem;
   opacity: 0.8;
+  text-align: center;
 }
 
 .v2-discover-title {
@@ -393,6 +405,7 @@
   letter-spacing: -0.02em;
   line-height: 1;
   margin: 0;
+  text-align: center;
 }
 
 /* Two-column: video left (bigger), cards right */

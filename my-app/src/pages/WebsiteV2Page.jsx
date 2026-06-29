@@ -332,7 +332,7 @@ function VideoPlayer({ src }) {
     setExpanded(e => !e);
   };
 
-  // When portal mounts, seek to same time and resume if was playing
+  // Sync time on expand/collapse
   useEffect(() => {
     if (expanded && portalVideoRef.current && videoRef.current) {
       portalVideoRef.current.currentTime = videoRef.current.currentTime;
@@ -343,6 +343,14 @@ function VideoPlayer({ src }) {
       if (playing) videoRef.current.play();
     }
   }, [expanded]); // eslint-disable-line
+
+  // ESC closes expanded player
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e) => { if (e.key === 'Escape') setExpanded(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [expanded]);
 
   const Controls = ({ vRef }) => (
     <div className={`v2-player-controls ${hovering || !playing ? 'v2-player-controls--visible' : ''}`}>
