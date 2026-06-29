@@ -29,17 +29,17 @@
 /* ─── TOP LEFT: LOGO ─── */
 .v2-logo {
   position: fixed;
-  top: 1.25rem;
+  top: 1rem;
   left: 1.5rem;
   z-index: 900;
   pointer-events: none;
 }
 
 .v2-logo__img {
-  height: 38px;
+  height: 56px;
   width: auto;
   object-fit: contain;
-  filter: brightness(1.1);
+  filter: brightness(1.15) drop-shadow(0 0 8px rgba(255,215,0,0.2));
 }
 
 /* ─── TOP RIGHT: SOCIAL EXPAND ─── */
@@ -127,11 +127,18 @@
 .v2-bottom-bar__left,
 .v2-bottom-bar__right {
   pointer-events: auto;
+  flex: 1;
 }
 
-.v2-bottom-bar__arrows {
+.v2-bottom-bar__right {
   display: flex;
-  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.v2-bottom-bar__center {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   pointer-events: auto;
 }
 
@@ -183,7 +190,7 @@
   transform: translateY(-2px);
 }
 
-/* Dot nav */
+/* Dot nav — sits inline between arrows in bottom-bar__center */
 .v2-dots {
   display: flex;
   gap: 0.6rem;
@@ -387,7 +394,45 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 0 6vw;
+  padding: 4rem 6vw 5rem;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+/* ─── VIDEO ─── */
+.v2-video-wrap {
+  width: 100%;
+  max-width: 860px;
+  margin-bottom: 1rem;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.v2-video {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16/9;
+  background: #000;
+  object-fit: cover;
+}
+
+.v2-video-label {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--volt-primary);
+  background: rgba(0,0,0,0.55);
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
 .v2-eyebrow {

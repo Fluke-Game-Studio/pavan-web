@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord, FaShare, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord, FaShare, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 import BlackHoleIntro from '../components/BlackHoleIntro';
 import BlackHoleMorphOverlay from '../components/BlackHoleMorphOverlay';
@@ -12,7 +12,8 @@ import './WebsiteV2Page.css';
 import './pavan/PavanTheme.css';
 import './pavan/PavanHero.css';
 
-const HORIZONTAL_PANELS = ['hero', 'showcase', 'discover'];
+const PANELS = ['hero', 'showcase', 'discover'];
+const SHOWCASE_TABS = 3; // Gada, Hanuman, World
 
 const SOCIALS = [
   { icon: FaDiscord,   label: 'Discord',   url: 'https://discord.gg/xDQPgXkj5X' },
@@ -25,10 +26,11 @@ const SOCIALS = [
 const CAREERS_URL = 'https://www.flukegamestudio.com/careers';
 
 export default function WebsiteV2Page() {
-  const [phase, setPhase]             = useState('blackhole');
-  const [morphPhase, setMorphPhase]   = useState('collapse');
-  const [activePanel, setActivePanel] = useState(0);
-  const [socialsOpen, setSocialsOpen] = useState(false);
+  const [phase, setPhase]               = useState('blackhole');
+  const [morphPhase, setMorphPhase]     = useState('collapse');
+  const [activePanel, setActivePanel]   = useState(0);
+  const [showcaseTab, setShowcaseTab]   = useState(0);
+  const [socialsOpen, setSocialsOpen]   = useState(false);
   const trackRef       = useRef(null);
   const isScrollingRef = useRef(false);
   const timerRef       = useRef(null);
@@ -42,34 +44,51 @@ export default function WebsiteV2Page() {
   const handleEnterSaga = useCallback(() => setPhase('panels'), []);
 
   const goTo = useCallback((i) => {
-    setActivePanel(Math.max(0, Math.min(HORIZONTAL_PANELS.length - 1, i)));
+    const next = Math.max(0, Math.min(PANELS.length - 1, i));
+    setActivePanel(next);
+    if (next !== 1) setShowcaseTab(0); // reset tabs when leaving showcase
   }, []);
 
-  // Wheel + keyboard horizontal navigation
+  // Wheel navigation — showcase panel does internal tab cycling first
   useEffect(() => {
     if (phase !== 'panels') return;
 
     const onWheel = (e) => {
-      // If we're on the showcase panel, let it scroll internally first
-      if (activePanel === 1) return;
       if (isScrollingRef.current) return;
       e.preventDefault();
       const dir = e.deltaY > 0 ? 1 : -1;
-      setActivePanel((prev) => {
-        const next = Math.max(0, Math.min(HORIZONTAL_PANELS.length - 1, prev + dir));
-        if (next !== prev) {
+
+      if (activePanel === 1) {
+        // On showcase panel: cycle internal tabs first
+        const nextTab = showcaseTab + dir;
+        if (nextTab >= 0 && nextTab < SHOWCASE_TABS) {
+          setShowcaseTab(nextTab);
           isScrollingRef.current = true;
-          setTimeout(() => { isScrollingRef.current = false; }, 900);
+          setTimeout(() => { isScrollingRef.current = false; }, 600);
+        } else {
+          // Exhausted tabs — move to next/prev panel
+          const nextPanel = activePanel + dir;
+          if (nextPanel >= 0 && nextPanel < PANELS.length) {
+            setActivePanel(nextPanel);
+            setShowcaseTab(0);
+            isScrollingRef.current = true;
+            setTimeout(() => { isScrollingRef.current = false; }, 900);
+          }
         }
-        return next;
-      });
+        return;
+      }
+
+      const next = Math.max(0, Math.min(PANELS.length - 1, activePanel + dir));
+      if (next !== activePanel) {
+        setActivePanel(next);
+        isScrollingRef.current = true;
+        setTimeout(() => { isScrollingRef.current = false; }, 900);
+      }
     };
 
     const onKey = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown')
-        goTo(activePanel + 1);
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
-        goTo(activePanel - 1);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(activePanel + 1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(activePanel - 1);
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
@@ -78,7 +97,7 @@ export default function WebsiteV2Page() {
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('keydown', onKey);
     };
-  }, [phase, activePanel, goTo]);
+  }, [phase, activePanel, showcaseTab, goTo]);
 
   useEffect(() => {
     if (trackRef.current)
@@ -126,7 +145,7 @@ export default function WebsiteV2Page() {
         </AnimatePresence>
       </div>
 
-      {/* ── BOTTOM: Persistent CTAs + panel arrows ── */}
+      {/* ── BOTTOM BAR ── */}
       <div className="v2-bottom-bar">
         <div className="v2-bottom-bar__left">
           <a href={CAREERS_URL} target="_blank" rel="noreferrer" className="v2-persist-btn v2-persist-btn--gold">
@@ -135,30 +154,17 @@ export default function WebsiteV2Page() {
         </div>
 
         {showNav && (
-          <div className="v2-bottom-bar__arrows">
+          <div className="v2-bottom-bar__center">
             <button
               className="v2-arrow-btn"
               disabled={activePanel === 0}
               onClick={() => goTo(activePanel - 1)}
               aria-label="Previous section"
             >
-              <FaChevronUp />
+              <FaChevronLeft />
             </button>
-            <button
-              className="v2-arrow-btn"
-              disabled={activePanel === HORIZONTAL_PANELS.length - 1}
-              onClick={() => goTo(activePanel + 1)}
-              aria-label="Next section"
-            >
-              <FaChevronDown />
-            </button>
-          </div>
-        )}
-
-        <div className="v2-bottom-bar__right">
-          {showNav && (
             <div className="v2-dots">
-              {HORIZONTAL_PANELS.map((name, i) => (
+              {PANELS.map((name, i) => (
                 <button
                   key={name}
                   className={`v2-dot ${i === activePanel ? 'v2-dot--active' : ''}`}
@@ -167,8 +173,18 @@ export default function WebsiteV2Page() {
                 />
               ))}
             </div>
-          )}
-        </div>
+            <button
+              className="v2-arrow-btn"
+              disabled={activePanel === PANELS.length - 1}
+              onClick={() => goTo(activePanel + 1)}
+              aria-label="Next section"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
+        )}
+
+        <div className="v2-bottom-bar__right" />
       </div>
 
       {/* ── BLACK HOLE ── */}
@@ -190,21 +206,9 @@ export default function WebsiteV2Page() {
       {/* ── PARTICLE MORPH SCREEN ── */}
       <AnimatePresence>
         {phase === 'particle' && (
-          <motion.div
-            key="particle"
-            className="v2-layer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-          >
+          <motion.div key="particle" className="v2-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}>
             <ParticleMorphScreen />
-            <motion.div
-              className="v2-particle-enter"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.5, duration: 0.8 }}
-            >
+            <motion.div className="v2-particle-enter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.5, duration: 0.8 }}>
               <button className="v2-enter-saga-btn" onClick={handleEnterSaga}>
                 Enter the Saga ↓
               </button>
@@ -216,13 +220,7 @@ export default function WebsiteV2Page() {
       {/* ── HORIZONTAL PANELS ── */}
       <AnimatePresence>
         {phase === 'panels' && (
-          <motion.div
-            key="panels"
-            className="v2-layer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.9 }}
-          >
+          <motion.div key="panels" className="v2-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9 }}>
             <div className="v2-track-wrap">
               <div className="v2-track" ref={trackRef}>
 
@@ -230,7 +228,6 @@ export default function WebsiteV2Page() {
                 <section className="v2-panel pavan-hero">
                   <div className="pavan-hero__gradient" />
                   <div className="pavan-hero__grid-overlay" />
-
                   <div className="pavan-hero__content container v2-hero-content">
                     <motion.div
                       initial={{ opacity: 0, y: 50 }}
@@ -246,18 +243,7 @@ export default function WebsiteV2Page() {
                         Where divine wrath meets the pulse of the future.
                       </p>
                     </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: activePanel === 0 ? 1 : 0, y: activePanel === 0 ? 0 : 20 }}
-                      transition={{ duration: 0.8, delay: 0.4 }}
-                    >
-                      <button className="v2-hero-next" onClick={() => goTo(1)}>
-                        Explore the World →
-                      </button>
-                    </motion.div>
                   </div>
-
                   <div className="pavan-hero__scroll-hint" onClick={() => goTo(1)} style={{ cursor: 'pointer' }}>
                     <span>SCROLL</span>
                     <div className="pavan-scroll-line" />
@@ -267,15 +253,11 @@ export default function WebsiteV2Page() {
                 {/* ── PANEL 1: WEAPONS · WARRIORS · WORLDS ── */}
                 <section className="v2-panel v2-panel--showcase-section">
                   <div className="v2-showcase-inner">
-                    <PavanScrollShowcase />
+                    <PavanScrollShowcase activeIndex={showcaseTab} onIndexChange={setShowcaseTab} />
                   </div>
-                  {/* Next section arrow overlay */}
-                  <button className="v2-panel-next-btn" onClick={() => goTo(2)}>
-                    Studio Showcase →
-                  </button>
                 </section>
 
-                {/* ── PANEL 2: STUDIO SHOWCASE ── */}
+                {/* ── PANEL 2: STUDIO SHOWCASE (video + cards) ── */}
                 <section className="v2-panel v2-panel--discover">
                   <div className="v2-panel-bg--discover" />
                   <motion.div
@@ -285,9 +267,24 @@ export default function WebsiteV2Page() {
                   >
                     <span className="v2-eyebrow">Witness the Vision</span>
                     <h2 className="v2-discover-title">Studio Showcase</h2>
-                    <p className="v2-discover-sub">
-                      Cinematic reveals and devlogs from the making of Pavan: The Primal Saga.
-                    </p>
+
+                    {/* ── Video ── */}
+                    <div className="v2-video-wrap">
+                      <video
+                        className="v2-video"
+                        src="/trailer.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        controls
+                      />
+                      <div className="v2-video-label">
+                        <div className="v2-pulse" /> Prototype Trailer
+                      </div>
+                    </div>
+
+                    {/* ── Coming-soon cards ── */}
                     <div className="v2-showcase-cards">
                       <div className="v2-showcase-card">
                         <div className="v2-showcase-thumb v2-showcase-thumb--devlog">
