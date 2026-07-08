@@ -4,11 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 
 const navLinks = [
-    { name: 'Pavan', to: '/' },
-    { name: 'Showcase', to: '/showcase' },
     // { name: 'Careers', to: '/careers' }, // Removed for now
-    { name: 'About', to: '/about' },
-    { name: 'Contact', to: '/contact' },
 ];
 
 const Navbar = () => {

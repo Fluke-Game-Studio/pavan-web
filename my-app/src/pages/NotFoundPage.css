@@ -1,151 +1,145 @@
-.not-found {
-  min-height: 100vh;
+/* ─── ROOT ─── */
+.nf-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: var(--bg-color);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.10) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(232, 56, 58, 0.08) 0%, transparent 40%),
+    linear-gradient(180deg, #060607 0%, #0f0f11 100%);
+  cursor: default;
 }
 
-.not-found__content {
+/* Restore cursors — global CSS sets cursor:none everywhere */
+.nf-root *,
+.nf-root *:hover {
+  cursor: default !important;
+}
+
+.nf-root a,
+.nf-root a *,
+.nf-root button,
+.nf-root button * {
+  cursor: pointer !important;
+}
+
+/* ─── LOGO (mirrors .v2-logo) ─── */
+.nf-logo {
+  position: fixed;
+  top: 0.75rem;
+  left: 1.5rem;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.nf-logo__img {
+  height: 96px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 215, 0, 0.25));
+}
+
+/* ─── CONTENT ─── */
+.nf-content {
   text-align: center;
-  max-width: 600px;
-}
-
-.not-found__glitch {
-  margin-bottom: 1rem;
-}
-
-.not-found__code {
-  font-family: var(--font-title), monospace;
-  font-size: clamp(6rem, 15vw, 10rem);
-  line-height: 1;
-  letter-spacing: 0.1em;
-  color: var(--volt-primary);
-  margin: 0;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-}
-
-.not-found__title {
-  font-family: var(--font-title), monospace;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  line-height: 1.4;
-  letter-spacing: 0.08em;
-  color: var(--text-primary);
-  margin: 1rem 0;
-  text-transform: uppercase;
-}
-
-.not-found__message {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-}
-
-.not-found__pixel-art {
-  margin: 2rem 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
-.not-found__actions {
+/* ─── 404 GLITCH NUMBER ─── */
+.nf-code {
+  font-family: var(--font-title, 'Cinzel', serif);
+  font-size: clamp(7rem, 18vw, 13rem);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: #ffd700;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  margin: 0;
+  user-select: none;
+}
+
+/* ─── DIVIDER ─── */
+.nf-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+  margin: 1.5rem auto;
+}
+
+/* ─── TITLE ─── */
+.nf-title {
+  font-family: var(--font-title, 'Cinzel', serif);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 0.75rem;
+}
+
+/* ─── MESSAGE ─── */
+.nf-message {
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 2.5rem;
+}
+
+/* ─── ACTIONS ─── */
+.nf-actions {
   display: flex;
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 2rem 0;
 }
 
-.not-found__button {
+/* ─── BUTTONS ─── */
+.nf-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  font-family: var(--font-body), monospace;
-  font-size: 0.875rem;
-  letter-spacing: 0.08em;
-  text-decoration: none;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border: none;
+  text-decoration: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: all var(--transition-smooth);
+  border: none;
+  transition: box-shadow 0.2s ease;
 }
 
-.not-found__button--primary {
-  background: var(--volt-primary);
-  color: var(--black-pure);
+.nf-btn--primary {
+  background: #ffd700;
+  color: #06060a;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.3);
 }
 
-.not-found__button--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+.nf-btn--primary:hover {
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.55);
 }
 
-.not-found__button--secondary {
+.nf-btn--secondary {
   background: transparent;
-  color: var(--volt-primary);
-  border: 2px solid var(--volt-primary);
+  color: rgba(255, 215, 0, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.35);
 }
 
-.not-found__button--secondary:hover {
-  background: var(--volt-primary);
-  color: var(--black-pure);
+.nf-btn--secondary:hover {
+  border-color: rgba(255, 215, 0, 0.7);
+  color: #ffd700;
 }
 
-.not-found__hint {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.not-found__hint p {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-}
-
-.not-found__links {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.not-found__links a {
-  font-family: var(--font-body), monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  text-decoration: none;
-  text-transform: uppercase;
-  transition: color var(--transition-smooth);
-}
-
-.not-found__links a:hover {
-  color: var(--volt-primary);
-}
-
-@media (max-width: 768px) {
-  .not-found {
-    padding: 1rem;
-  }
-  
-  .not-found__code {
-    font-size: 5rem;
-  }
-  
-  .not-found__title {
-    font-size: 1.5rem;
-  }
-  
-  .not-found__actions {
-    flex-direction: column;
-  }
-  
-  .not-found__button {
-    width: 100%;
-    justify-content: center;
-  }
+/* ─── MOBILE ─── */
+@media (max-width: 600px) {
+  .nf-logo__img { height: 64px; }
+  .nf-actions { flex-direction: column; width: 100%; padding: 0 2rem; }
+  .nf-btn { width: 100%; }
 }

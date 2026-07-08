@@ -15,15 +15,9 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import useFavicon from './hooks/useFavicon';
 
 // Lazy load pages for better code splitting
-const HomePage = lazy(() => import('./pages/HomePage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));
 const ApplyPage = lazy(() => import('./pages/ApplyPage'));
-const PavanPage = lazy(() => import('./pages/PavanPage'));
 const GadaPage = lazy(() => import('./pages/GadaPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
 const QueenBeeGame = lazy(() => import('./pages/QueenBeeGame'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import WebsiteV2Page from './pages/WebsiteV2Page';
@@ -32,18 +26,18 @@ import WebsiteV2Page from './pages/WebsiteV2Page';
 const PageLoader = () => <GameLoader message="Loading Game..." />;
 
 // Pages where the ambient canvas background is suppressed
-const NO_BG_PATHS = ['/', '/pavan', '/login', '/queenbee', '/gada', '/v2'];
+const NO_BG_PATHS = ['/', '/login', '/queenbee', '/gada'];
 
 function AppShell() {
   const { pathname } = useLocation();
   const showBg = !NO_BG_PATHS.includes(pathname);
   const isQueenBee = pathname === '/queenbee';
   const isStandaloneGada = pathname === '/gada';
-  const isV2 = pathname === '/v2';
+  const isV2 = pathname === '/';
 
-  // Pavan page gets its own full-screen layout (no shared footer padding)
-  const isPavan = pathname === '/pavan' || pathname === '/';
-  const isMinimalScreen = isStandaloneGada || isV2;
+  const KNOWN_PATHS = ['/', '/gada', '/careers', '/careers/apply', '/queenbee'];
+  const isNotFound = !KNOWN_PATHS.includes(pathname);
+  const isMinimalScreen = isStandaloneGada || isV2 || isNotFound;
 
   // Animate favicon when tab is inactive
   useFavicon('/pavan_icon.png', 1000);
@@ -82,22 +76,17 @@ function AppShell() {
 
       <Suspense fallback={fallback}>
         <Routes>
-          <Route path="/" element={<PavanPage />} />
-          <Route path="/pavan" element={<PavanPage />} />
+          <Route path="/" element={<WebsiteV2Page />} />
           <Route path="/gada" element={<GadaPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/careers/apply" element={<ApplyPage />} />
-          <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/queenbee" element={<QueenBeeGame />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/v2" element={<WebsiteV2Page />} />
           {/* Catch-all → 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
 
-      {!isPavan && !isMinimalScreen && <Footer />}
+      {!isMinimalScreen && <Footer />}
       {!isMinimalScreen && <FloatingDiscordJoin />}
     </div>
   );

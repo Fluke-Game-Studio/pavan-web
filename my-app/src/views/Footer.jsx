@@ -12,7 +12,6 @@ const Footer = () => {
                         <h4 className="footer-title">Studio</h4>
                         <ul className="footer-links">
                             <li><Link to="/">Home</Link></li>
-                            <li><Link to="/about">About Us</Link></li>
                             <li><a href="https://www.linkedin.com/company/fluke-games" target="_blank" rel="noreferrer">Careers</a></li>
                             <li><a href="https://www.arcade.flukegamestudio.com" target="_blank" rel="noreferrer">Arcade Internal</a></li>
                         </ul>
@@ -21,13 +20,11 @@ const Footer = () => {
                         <h4 className="footer-title">Projects</h4>
                         <ul className="footer-links">
                             <li><Link to="/">Pavan Game</Link></li>
-                            <li><Link to="/showcase">Showcase</Link></li>
                         </ul>
                     </div>
                     <div className="footer-col">
                         <h4 className="footer-title">Legal</h4>
                         <ul className="footer-links">
-                            <li><Link to="/contact">Contact</Link></li>
                             <li><a href="#">Privacy Policy</a></li>
                             <li><a href="#">Terms</a></li>
                         </ul>

@@ -134,7 +134,7 @@ const BlackHoleIntro = ({ onEnter }) => {
             }
           }
         } else if (expanseRef.current && !returningRef.current) {
-          this.rotation = this.startRotation + (currentTime * (this.speed / 2));
+          this.rotation = this.startRotation + (currentTime * this.speed);
           if (this.y > this.expansePos) {
             this.y -= Math.floor(this.expansePos - this.y) / -80;
           }
