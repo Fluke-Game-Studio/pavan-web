@@ -26,7 +26,7 @@ const SHAPES = [
 // Model IS included — driven by uploaded gadaPointsSource
 const PARTICLE_SHAPES = SHAPES.filter((shape) => shape.name !== 'Gada');
 
-const COLOR_SCHEMES = {
+export const COLOR_SCHEMES = {
   ember: { label: 'Ember', startHue: 8, endHue: 38, saturation: 1, lightness: 0.62 },
   neon: { label: 'Neon', startHue: 295, endHue: 175, saturation: 1, lightness: 0.67 },
   ocean: { label: 'Ocean', startHue: 195, endHue: 235, saturation: 0.95, lightness: 0.62 },
@@ -34,17 +34,17 @@ const COLOR_SCHEMES = {
   mono: { label: 'Mono', startHue: 0, endHue: 0, saturation: 0, lightness: 0.8 },
 };
 
-const MOTION_PRESETS = {
+export const MOTION_PRESETS = {
   calm: { label: 'Calm', swirl: 0.18, jitter: 0.08, spin: 0.08 },
   surge: { label: 'Surge', swirl: 0.55, jitter: 0.22, spin: 0.18 },
   storm: { label: 'Storm', swirl: 0.95, jitter: 0.42, spin: 0.28 },
 };
 
-function easeInOutCubic(t) {
+export function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-function createStarTexture() {
+export function createStarTexture() {
   const size = 64;
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -154,7 +154,7 @@ function generateTorus(count, size) {
   return points;
 }
 
-function generateGalaxy(count, size) {
+export function generateGalaxy(count, size) {
   const points = new Float32Array(count * 3);
   const arms = 4;
   const armWidth = 0.6;
@@ -194,7 +194,7 @@ function generateWave(count, size) {
   return points;
 }
 
-function generatePointCloudFromSource(sourcePoints, count, size) {
+export function generatePointCloudFromSource(sourcePoints, count, size) {
   const points = new Float32Array(count * 3);
   const sourceCount = Math.max(1, Math.floor(sourcePoints.length / 3));
   const center = new THREE.Vector3();
@@ -232,10 +232,10 @@ function generateGada(count, size) {
   return generatePointCloudFromSource(GADA_POINTS, count, size);
 }
 
-function buildColors(positions, schemeName) {
+export function buildColors(positions, schemeName, shapeSize = CONFIG.shapeSize) {
   const scheme = COLOR_SCHEMES[schemeName];
   const colors = new Float32Array(positions.length);
-  const maxRadius = CONFIG.shapeSize * 1.2;
+  const maxRadius = shapeSize * 1.2;
   const center = new THREE.Vector3();
   const temp = new THREE.Vector3();
 

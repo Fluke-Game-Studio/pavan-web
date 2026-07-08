@@ -4,13 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord,
   FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaExpand, FaCompress, FaTimes,
+  FaRedo,
 } from 'react-icons/fa';
 
 import BlackHoleIntro from '../components/BlackHoleIntro';
 import BlackHoleMorphOverlay from '../components/BlackHoleMorphOverlay';
-import ParticleMorphScreen from '../components/ParticleMorphScreen';
+import ParticleStoryScreen, { STORY_CONFIG } from '../components/ParticleStoryScreen';
 import PavanTitleModel from '../components/PavanTitleModel';
 import PavanScrollShowcase from '../components/PavanScrollShowcase';
+import { loadGlbPoints } from '../utils/glbPointSampler';
 
 import './WebsiteV2Page.css';
 import './pavan/PavanTheme.css';
@@ -31,15 +33,116 @@ const SOCIALS = [
 
 const CAREERS_URL = 'https://www.flukegamestudio.com/careers';
 
+// Hero entrance — the title lands first (settling from a zoom), then the
+// other elements cascade in around it. `custom` = per-element delay.
+const HERO_CONTAINER = { hidden: {}, show: {} };
+const HERO_ITEM = {
+  hidden: { opacity: 0, y: 40 },
+  show: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+const HERO_TITLE = {
+  hidden: { opacity: 0, scale: 1.08 },
+  show: { opacity: 1, scale: 1, transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } },
+};
+
+// Chrome (logo / socials / bottom bar) entrance + micro-interactions
+const CHROME_SPRING = { type: 'spring', stiffness: 260, damping: 20 };
+const SOCIALS_WRAP = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.5 } },
+};
+const SOCIAL_ICON = {
+  hidden: { opacity: 0, y: -18, scale: 0.4 },
+  show: { opacity: 1, y: 0, scale: 1, transition: CHROME_SPRING },
+};
+
+// Discover panel: header, video, and cards cascade in when the panel activates
+const DISCOVER_CONTAINER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+};
+const DISCOVER_ITEM = {
+  hidden: { opacity: 0, y: 36 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+};
+const DISCOVER_CARD = {
+  hidden: { opacity: 0, x: 48 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+};
+
 export default function WebsiteV2Page() {
   const [phase, setPhase]             = useState('blackhole');
   const [morphPhase, setMorphPhase]   = useState('collapse');
   const [activePanel, setActivePanel] = useState(0);
   const [showcaseTab, setShowcaseTab] = useState(0);
+  const [storyPoints, setStoryPoints] = useState(null);
+  // Pre-mounts the panels layer (invisible) during the story outro so the
+  // hero 3D title is already rendered when the crossfade lands
+  const [panelsWarm, setPanelsWarm]   = useState(false);
+  // Measured screen rect of the hero title — the outro zoom targets it exactly
+  const [heroTitleRect, setHeroTitleRect] = useState(null);
+  const heroTitleRef = useRef(null);
+  // Heavy home-screen widgets (SciChart map, showcase canvas, video) mount only
+  // after arrival — mounting them during the blast/warm phase janks the explosion
+  const [heavyReady, setHeavyReady] = useState(false);
+
+  useEffect(() => {
+    if (phase !== 'panels') return undefined;
+    const timer = setTimeout(() => setHeavyReady(true), 900);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (!panelsWarm) return undefined;
+    const timer = setTimeout(() => {
+      const el = heroTitleRef.current;
+      if (!el) return;
+      // Measure the 3D canvas itself, not the wrapper — the wrapper includes
+      // the "THE PRIMAL SAGA" text below, which skews the center/height
+      const canvasEl = el.querySelector('canvas');
+      const r = (canvasEl || el).getBoundingClientRect();
+      if (!r.width) return;
+      // The hidden hero state is scaled 1.08 — correct back to resting size
+      const cx = (r.left + r.width / 2) / window.innerWidth;
+      const cy = (r.top + r.height / 2) / window.innerHeight;
+      const h = (r.height / 1.08) / window.innerHeight;
+      // Discard implausible measurements (e.g. taken while the panel track is
+      // translated) — the fallback exit constants are centered and safe
+      if (cx < 0.35 || cx > 0.65 || cy < 0.1 || cy > 0.9 || h < 0.05 || h > 0.8) return;
+      setHeroTitleRect({ cx, cy, h });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [panelsWarm]);
   const trackRef        = useRef(null);
   const isScrollingRef  = useRef(false);
   const accDeltaRef     = useRef(0);   // accumulated wheel delta for trackpad
   const timerRef        = useRef(null);
+
+  // Preload story point clouds during the black-hole phase so morphs are instant
+  useEffect(() => {
+    let cancelled = false;
+    const { particleCount, shapeSize } = STORY_CONFIG;
+
+    Promise.allSettled([
+      loadGlbPoints('/gada.glb', particleCount, shapeSize),
+      // detailBias pulls points toward dense geometry (face, hands, ornaments)
+      loadGlbPoints('/hanuman.glb', particleCount, shapeSize, { detailBias: 0.6 }),
+    ]).then(([gada, hanuman]) => {
+      if (cancelled) return;
+      if (gada.status === 'rejected') console.error('Failed to sample gada.glb', gada.reason);
+      if (hanuman.status === 'rejected') console.error('Failed to sample hanuman.glb', hanuman.reason);
+      setStoryPoints({
+        gada: gada.status === 'fulfilled' ? gada.value : null,
+        hanuman: hanuman.status === 'fulfilled' ? hanuman.value : null,
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, []);
 
   const handleBlackholeEnter = useCallback(() => {
     setPhase('morph');
@@ -48,6 +151,19 @@ export default function WebsiteV2Page() {
   }, []);
 
   const handleEnterSaga = useCallback(() => setPhase('panels'), []);
+
+  // Replay the full narrative from the black hole onward. Story points stay
+  // loaded, so the replay is instant.
+  const handleReplay = useCallback(() => {
+    window.clearTimeout(timerRef.current);
+    setPhase('blackhole');
+    setMorphPhase('collapse');
+    setActivePanel(0);
+    setShowcaseTab(0);
+    setPanelsWarm(false);
+    setHeroTitleRect(null);
+    setHeavyReady(false);
+  }, []);
 
   const goTo = useCallback((i) => {
     const next = Math.max(0, Math.min(PANELS.length - 1, i));
@@ -125,44 +241,112 @@ export default function WebsiteV2Page() {
     <div className="v2-root">
 
       {/* ── TOP LEFT: Logo ── */}
-      <div className="v2-logo">
+      <motion.div
+        className="v2-logo"
+        initial={{ opacity: 0, x: -28 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ ...CHROME_SPRING, delay: 0.3 }}
+      >
         <img src="/logo.png" alt="Fluke Games" className="v2-logo__img" />
-      </div>
+      </motion.div>
 
       {/* ── TOP RIGHT: Social icons (horizontal) ── */}
-      <div className="v2-socials">
+      <motion.div className="v2-socials" variants={SOCIALS_WRAP} initial="hidden" animate="show">
         {SOCIALS.map(({ icon: Icon, label, url }) => (
-          <a key={label} href={url} target="_blank" rel="noreferrer" className="v2-social-icon" title={label}>
+          <motion.a
+            key={label}
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="v2-social-icon"
+            title={label}
+            variants={SOCIAL_ICON}
+            whileHover={{ scale: 1.22, y: -3 }}
+            whileTap={{ scale: 0.88 }}
+          >
             <Icon />
-          </a>
+          </motion.a>
         ))}
-      </div>
+      </motion.div>
 
       {/* ── BOTTOM BAR ── */}
       <div className="v2-bottom-bar">
-        <div className="v2-bottom-bar__left">
-          <a href={CAREERS_URL} target="_blank" rel="noreferrer" className="v2-persist-btn v2-persist-btn--gold">
+        <motion.div
+          className="v2-bottom-bar__left"
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...CHROME_SPRING, delay: 0.7 }}
+        >
+          <motion.a
+            href={CAREERS_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="v2-persist-btn v2-persist-btn--gold"
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.94 }}
+          >
             Work With Us
-          </a>
-        </div>
+          </motion.a>
+        </motion.div>
 
         {showNav && (
-          <div className="v2-bottom-bar__center">
-            <button className="v2-arrow-btn" disabled={activePanel === 0} onClick={() => goTo(activePanel - 1)} aria-label="Previous">
+          <motion.div
+            className="v2-bottom-bar__center"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...CHROME_SPRING, delay: 0.25 }}
+          >
+            <motion.button
+              className="v2-arrow-btn"
+              disabled={activePanel === 0}
+              onClick={() => goTo(activePanel - 1)}
+              aria-label="Previous"
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.85 }}
+            >
               <FaChevronLeft />
-            </button>
+            </motion.button>
             <div className="v2-dots">
               {PANELS.map((name, i) => (
-                <button key={name} className={`v2-dot ${i === activePanel ? 'v2-dot--active' : ''}`} onClick={() => goTo(i)} aria-label={name} />
+                <motion.button
+                  key={name}
+                  className={`v2-dot ${i === activePanel ? 'v2-dot--active' : ''}`}
+                  onClick={() => goTo(i)}
+                  aria-label={name}
+                  whileHover={{ scale: 1.6 }}
+                  whileTap={{ scale: 0.8 }}
+                />
               ))}
             </div>
-            <button className="v2-arrow-btn" disabled={activePanel === PANELS.length - 1} onClick={() => goTo(activePanel + 1)} aria-label="Next">
+            <motion.button
+              className="v2-arrow-btn"
+              disabled={activePanel === PANELS.length - 1}
+              onClick={() => goTo(activePanel + 1)}
+              aria-label="Next"
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.85 }}
+            >
               <FaChevronRight />
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         )}
 
-        <div className="v2-bottom-bar__right" />
+        <div className="v2-bottom-bar__right">
+          {phase === 'panels' && (
+            <motion.button
+              className="v2-replay-btn"
+              onClick={handleReplay}
+              title="Replay the intro experience"
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...CHROME_SPRING, delay: 1.2 }}
+              whileHover={{ scale: 1.06, y: -2 }}
+              whileTap={{ scale: 0.94 }}
+            >
+              <FaRedo /> Replay Intro
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* ── BLACK HOLE ── */}
@@ -181,30 +365,38 @@ export default function WebsiteV2Page() {
         </div>
       )}
 
-      {/* ── PARTICLE MORPH SCREEN ── */}
+      {/* ── PARTICLE STORY SCREEN (Galaxy → Gada → Hanuman) ── */}
       <AnimatePresence>
         {phase === 'particle' && (
           <motion.div key="particle" className="v2-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}>
-            <ParticleMorphScreen />
-            {/* Centered button — use flex on a full-size container to avoid transform conflict */}
-            <motion.div
-              className="v2-particle-enter"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.5, duration: 0.8 }}
-            >
-              <button className="v2-enter-saga-btn" onClick={handleEnterSaga}>
-                Enter the Saga ↓
-              </button>
-            </motion.div>
+            {/* The story screen owns the Enter button + title-zoom outro; it
+                calls onEnterSaga once the transition is ready to hand off */}
+            <ParticleStoryScreen
+              modelPoints={storyPoints}
+              onEnterSaga={handleEnterSaga}
+              onExitBegin={() => setPanelsWarm(true)}
+              heroTitleRect={heroTitleRect}
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* ── HORIZONTAL PANELS ── */}
       <AnimatePresence>
-        {phase === 'panels' && (
-          <motion.div key="panels" className="v2-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9 }}>
+        {(phase === 'panels' || panelsWarm) && (
+          <motion.div
+            key="panels"
+            className="v2-layer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: phase === 'panels' ? 1 : 0 }}
+            transition={{ duration: 0.9 }}
+            style={{
+              // visibility (not just pointer-events) so no descendant can
+              // steal drags from the title canvas while pre-warming
+              pointerEvents: phase === 'panels' ? 'auto' : 'none',
+              visibility: phase === 'panels' ? 'visible' : 'hidden',
+            }}
+          >
             <div className="v2-track-wrap">
               <div className="v2-track" ref={trackRef}>
 
@@ -214,27 +406,38 @@ export default function WebsiteV2Page() {
                   <div className="pavan-hero__grid-overlay" />
                   <div className="pavan-hero__content container v2-hero-content">
                     <motion.div
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: activePanel === 0 ? 1 : 0, y: activePanel === 0 ? 0 : 50 }}
-                      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                      variants={HERO_CONTAINER}
+                      initial="hidden"
+                      animate={phase === 'panels' && activePanel === 0 ? 'show' : 'hidden'}
                     >
-                      <span className="v2-eyebrow-inline">A Fluke Games Production</span>
-                      <div className="pavan-hero__title-wrapper">
+                      <motion.span className="v2-eyebrow-inline" variants={HERO_ITEM} custom={0.55}>
+                        A Fluke Games Production
+                      </motion.span>
+                      <motion.div className="pavan-hero__title-wrapper" variants={HERO_TITLE} ref={heroTitleRef}>
                         <PavanTitleModel modelPath="/titlenew.glb" />
                         <span className="pavan-hero__title-sub">THE PRIMAL SAGA</span>
-                      </div>
-                      <p className="pavan-hero__tagline">
+                      </motion.div>
+                      <motion.p className="pavan-hero__tagline" variants={HERO_ITEM} custom={0.75}>
                         Where divine wrath meets the pulse of the future.
-                      </p>
+                      </motion.p>
                     </motion.div>
                   </div>
                 </section>
 
                 {/* ── PANEL 1: WEAPONS · WARRIORS · WORLDS ── */}
                 <section className="v2-panel v2-panel--showcase-section">
-                  <div className="v2-showcase-inner">
-                    <PavanScrollShowcase activeIndex={showcaseTab} onIndexChange={setShowcaseTab} />
-                  </div>
+                  <motion.div
+                    className="v2-showcase-inner"
+                    animate={{
+                      opacity: activePanel === 1 ? 1 : 0.25,
+                      scale: activePanel === 1 ? 1 : 0.94,
+                    }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {heavyReady && (
+                      <PavanScrollShowcase activeIndex={showcaseTab} onIndexChange={setShowcaseTab} />
+                    )}
+                  </motion.div>
                 </section>
 
                 {/* ── PANEL 2: STUDIO SHOWCASE ── */}
@@ -242,28 +445,39 @@ export default function WebsiteV2Page() {
                   <div className="v2-panel-bg--discover" />
                   <motion.div
                     className="v2-discover-content"
-                    animate={{ opacity: activePanel === 2 ? 1 : 0 }}
-                    transition={{ duration: 0.7 }}
+                    variants={DISCOVER_CONTAINER}
+                    initial="hidden"
+                    animate={activePanel === 2 ? 'show' : 'hidden'}
                   >
                     <div className="v2-discover-header">
-                      <span className="v2-eyebrow">Witness the Vision</span>
-                      <h2 className="v2-discover-title">Studio Showcase</h2>
+                      <motion.span className="v2-eyebrow" variants={DISCOVER_ITEM}>Witness the Vision</motion.span>
+                      <motion.h2 className="v2-discover-title" variants={DISCOVER_ITEM}>Studio Showcase</motion.h2>
                     </div>
                     <div className="v2-discover-grid">
-                      <VideoPlayer src="/trailer.mp4" />
+                      <motion.div variants={DISCOVER_ITEM}>
+                        {heavyReady ? <VideoPlayer src="/trailer.mp4" /> : <div className="v2-player" />}
+                      </motion.div>
                       <div className="v2-discover-cards">
-                        <div className="v2-showcase-card">
+                        <motion.div
+                          className="v2-showcase-card"
+                          variants={DISCOVER_CARD}
+                          whileHover={{ y: -6, scale: 1.02 }}
+                        >
                           <div className="v2-showcase-thumb v2-showcase-thumb--devlog">
                             <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Dev Log — Coming Soon</div>
                           </div>
                           <p className="v2-showcase-label">Behind the Scenes</p>
-                        </div>
-                        <div className="v2-showcase-card">
+                        </motion.div>
+                        <motion.div
+                          className="v2-showcase-card"
+                          variants={DISCOVER_CARD}
+                          whileHover={{ y: -6, scale: 1.02 }}
+                        >
                           <div className="v2-showcase-thumb v2-showcase-thumb--gameplay">
                             <div className="v2-coming-soon-tag"><div className="v2-pulse" /> Gameplay Reveal — Coming Soon</div>
                           </div>
                           <p className="v2-showcase-label">First Look</p>
-                        </div>
+                        </motion.div>
                       </div>
                     </div>
                   </motion.div>

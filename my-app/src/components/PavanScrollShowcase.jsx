@@ -336,7 +336,7 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {
     return (
         <section className="pss-section">
             <div className="pss-section__header container">
-                <span className="pavan-eyebrow">The Universe of Pavan</span>
+                <span className="pavan-eyebrow ">The Universe of Pavan</span>
                 <h2 className="pss-section__title">Weapons. Warriors. Worlds.</h2>
             </div>
 
