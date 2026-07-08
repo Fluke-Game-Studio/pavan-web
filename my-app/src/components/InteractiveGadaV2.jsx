@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, PerspectiveCamera, Stars, useProgress, Html, OrbitControls, Center } from '@react-three/drei';
+import { useGLTF, PerspectiveCamera, Stars, useProgress, Html, OrbitControls } from '@react-three/drei';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import * as THREE from 'three';
 import { EffectComposer, RenderPass, UnrealBloomPass, SkeletonUtils } from 'three-stdlib';
@@ -254,17 +254,19 @@ function randomPointInSphere(radius) {
     return direction.multiplyScalar(distance);
 }
 
-function GadaBlast({ active, triggerKey }) {
+function GadaBlast({ active, triggerKey, count = BLAST_PARTICLE_COUNT }) {
     const pointsRef = useRef();
     const flashRef = useRef();
-    const particlesRef = useRef([]);
+    // Flat typed arrays instead of 20k JS objects — no GC churn during the blast
+    const simRef = useRef(null);
 
     const geometry = useMemo(() => {
         const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(BLAST_PARTICLE_COUNT * 3), 3));
-        geo.setAttribute('opacity', new THREE.BufferAttribute(new Float32Array(BLAST_PARTICLE_COUNT), 1));
+        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+        geo.setAttribute('opacity', new THREE.BufferAttribute(new Float32Array(count), 1));
+        geo.setDrawRange(0, count);
         return geo;
-    }, []);
+    }, [count]);
 
     const material = useMemo(() => new THREE.ShaderMaterial({
         uniforms: { color: { value: new THREE.Color('#ff9aa4') } },
@@ -275,7 +277,9 @@ function GadaBlast({ active, triggerKey }) {
                 vOpacity = opacity;
                 vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
                 float depth = max(0.1, -mvPosition.z);
-                gl_PointSize = clamp(1800.0 / depth, 1.5, 500.0) * vOpacity;
+                // Cap sprite size — huge near-camera additive sprites are a
+                // GPU fill-rate spike with thousands of particles
+                gl_PointSize = clamp(1800.0 / depth, 1.5, 280.0) * vOpacity;
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
@@ -299,7 +303,13 @@ function GadaBlast({ active, triggerKey }) {
     useEffect(() => {
         if (!active) return;
 
-        particlesRef.current = Array.from({ length: BLAST_PARTICLE_COUNT }).map(() => {
+        const velocities = new Float32Array(count * 3);
+        const life = new Float32Array(count);
+        const decay = new Float32Array(count);
+        const positions = geometry.attributes.position.array;
+        const opacities = geometry.attributes.opacity.array;
+
+        for (let i = 0; i < count; i += 1) {
             const dir = randomUnitVector();
             // Bias toward +Z (camera direction) so particles sweep past the viewer
             dir.z += 0.55;
@@ -308,59 +318,63 @@ function GadaBlast({ active, triggerKey }) {
             const start = randomPointInSphere(0.4);
             const speed = 0.12 + Math.random() * 0.48;
 
-            return {
-                x: start.x,
-                y: start.y,
-                z: start.z,
-                vx: dir.x * speed,
-                vy: dir.y * speed,
-                vz: dir.z * speed,
-                life: 1,
-                decay: 0.0016 + Math.random() * 0.003,
-            };
-        });
+            positions[i * 3] = start.x;
+            positions[i * 3 + 1] = start.y;
+            positions[i * 3 + 2] = start.z;
+            velocities[i * 3] = dir.x * speed;
+            velocities[i * 3 + 1] = dir.y * speed;
+            velocities[i * 3 + 2] = dir.z * speed;
+            life[i] = 1;
+            decay[i] = 0.0016 + Math.random() * 0.003;
+            opacities[i] = 1;
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.opacity.needsUpdate = true;
+        simRef.current = { velocities, life, decay };
 
         if (flashRef.current) {
             flashRef.current.scale.setScalar(0.55);
             flashRef.current.material.opacity = 1;
         }
-    }, [active, triggerKey]);
+    }, [active, count, geometry, triggerKey]);
 
     useFrame((_, delta) => {
-        if (!active || !pointsRef.current) return;
+        if (!active || !pointsRef.current || !simRef.current) return;
 
+        const { velocities, life, decay } = simRef.current;
         const positions = pointsRef.current.geometry.attributes.position.array;
         const opacities = pointsRef.current.geometry.attributes.opacity.array;
+        // Time-normalized (per-second) sim so the blast completes on schedule
+        // even if the frame rate dips — per-frame decay ran in slow motion
+        const step = delta * 30;
+        const frames = delta * 60;
+        const damp = Math.pow(0.999, frames);
         let alive = false;
 
-        particlesRef.current.forEach((particle, index) => {
-            if (particle.life <= 0) {
-                opacities[index] = 0;
-                return;
+        for (let i = 0; i < count; i += 1) {
+            if (life[i] <= 0) {
+                opacities[i] = 0;
+                continue;
             }
 
             alive = true;
-            particle.x += particle.vx * delta * 30;
-            particle.y += particle.vy * delta * 30;
-            particle.z += particle.vz * delta * 30;
-            particle.vx *= 0.999;
-            particle.vy *= 0.999;
-            particle.vz *= 0.999;
-            particle.life -= particle.decay;
-
-            positions[index * 3] = particle.x;
-            positions[index * 3 + 1] = particle.y;
-            positions[index * 3 + 2] = particle.z;
-            opacities[index] = Math.max(0, particle.life);
-        });
+            positions[i * 3] += velocities[i * 3] * step;
+            positions[i * 3 + 1] += velocities[i * 3 + 1] * step;
+            positions[i * 3 + 2] += velocities[i * 3 + 2] * step;
+            velocities[i * 3] *= damp;
+            velocities[i * 3 + 1] *= damp;
+            velocities[i * 3 + 2] *= damp;
+            life[i] -= decay[i] * frames;
+            opacities[i] = Math.max(0, life[i]);
+        }
 
         pointsRef.current.geometry.attributes.position.needsUpdate = true;
         pointsRef.current.geometry.attributes.opacity.needsUpdate = true;
-        pointsRef.current.geometry.setDrawRange(0, BLAST_PARTICLE_COUNT);
 
         if (flashRef.current) {
             flashRef.current.scale.multiplyScalar(1 + delta * 0.95);
-            flashRef.current.material.opacity *= 0.988;
+            flashRef.current.material.opacity *= Math.pow(0.988, frames);
         }
 
         if (!alive && flashRef.current) {
@@ -559,6 +573,11 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
         const shiftVal = typeof scrollShift === 'number' ? scrollShift : scrollShift.get();
         const totalXOffset = initialXOffset + shiftVal;
 
+        // Tilt scales with screen position: ±210° at the extreme edges
+        const halfViewportWidth = Math.max(0.001, state.viewport.width / 2);
+        const maxTilt = THREE.MathUtils.degToRad(210);
+        const tiltFor = (px) => -THREE.MathUtils.clamp(px / halfViewportWidth, -1, 1) * maxTilt;
+
         const scrollVal = scrollYProgress ? scrollYProgress.get() : 0;
         const scrollT = THREE.MathUtils.smoothstep(scrollVal, 0.1, 0.4);
 
@@ -589,8 +608,7 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
                     modelRef.current.position.z = -easedT * 15;
                     if (!manualRotation) {
                         xRotAccum.current -= Math.PI * 3 * 0.035; // spin forward on local X
-                        const tiltZ = -(modelRef.current.position.x / 6);
-                        applyLocalXSpin(tiltZ);
+                        applyLocalXSpin(tiltFor(modelRef.current.position.x));
                     }
                 } else if (throwState === 'returning') {
                     const easedT = t * t * t;
@@ -602,8 +620,7 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
                     modelRef.current.position.z = -returnT * 15;
                     if (!manualRotation) {
                         xRotAccum.current -= Math.PI * 3 * 0.04; // continue same-direction spin
-                        const tiltZ = -(modelRef.current.position.x / 6); // track actual position, no snap
-                        applyLocalXSpin(tiltZ);
+                        applyLocalXSpin(tiltFor(modelRef.current.position.x)); // track actual position, no snap
                     }
                 }
             } else {
@@ -625,7 +642,7 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
                     modelRef.current.rotation.z = manualRotation.z;
                 } else {
                     xRotAccum.current += (0 - xRotAccum.current) * 0.1;
-                    const tiltZ = -(currentPosition.x / 6);
+                    const tiltZ = tiltFor(currentPosition.x);
                     const qZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), tiltZ);
                     const qX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), xRotAccum.current);
                     modelRef.current.quaternion.slerp(qZ.multiply(qX), 0.1);
@@ -749,7 +766,7 @@ export function GadaScene({
     showGrid = false,
     onBlastTrigger = null,
 }) {
-    const { gl } = useThree();
+    const { gl, camera } = useThree();
     const [glowIntensity, setGlowIntensity] = useState(0.3);
     const [currentPosition, setCurrentPosition] = useState({ x: 0, y: 0, z: 0 });
     const [isMoving, setIsMoving] = useState(false);
@@ -766,17 +783,25 @@ export function GadaScene({
 
     useEffect(() => {
         const updateFromMouse = (event) => {
-            if (throwState !== 'idle') return;
+            // Keep tracking during throw/return so the gada comes back
+            // directly to the live mouse position
             const rect = gl.domElement.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
             const ndcX = (x / rect.width) * 2 - 1;
             const ndcY = -(y / rect.height) * 2 + 1;
-            const fov = 50 * (Math.PI / 180);
-            const halfHeight = Math.tan(fov / 2) * cameraDistance;
+            // Use the live camera fov/position so the gada lands exactly under
+            // the cursor regardless of the host scene's camera setup
+            const fov = (camera.fov || 50) * (Math.PI / 180);
+            const distance = Math.abs(camera.position.z) || cameraDistance;
+            const halfHeight = Math.tan(fov / 2) * distance;
             const aspect = rect.width / rect.height;
             const halfWidth = halfHeight * aspect;
-            setCurrentPosition({ x: ndcX * halfWidth, y: ndcY * halfHeight, z: 0 });
+            setCurrentPosition({
+                x: camera.position.x + ndcX * halfWidth,
+                y: camera.position.y + ndcY * halfHeight,
+                z: 0,
+            });
             setIsMoving(true);
             setGlowIntensity(1.2);
         };
@@ -793,7 +818,7 @@ export function GadaScene({
             gl.domElement.removeEventListener('mousemove', updateFromMouse);
             gl.domElement.removeEventListener('mouseleave', handleLeave);
         };
-    }, [cameraDistance, gl, throwState]);
+    }, [camera, cameraDistance, gl, throwState]);
 
     useEffect(() => {
         const prev = prevThrowStateRef.current;
@@ -923,48 +948,134 @@ export function GadaScene({
     );
 }
 
-function BlastTitleModel({ url, visible }) {
+// Hero title canvas constants (PavanTitleModel): model scale 3.2, fov 50 @ z=5
+// → visible world height 2·tan(25°)·5. Used to translate the measured hero
+// rect into an equivalent scale in the blast scene.
+const HERO_CANVAS_WORLD_HEIGHT = 2 * Math.tan((50 / 2) * (Math.PI / 180)) * 5;
+const HERO_TITLE_MODEL_SCALE = 3.2;
+const EXIT_TITLE_Z = 5;
+
+function BlastTitleModel({ url, visible, exiting = false, calm = false, exitTarget = null }) {
     const { scene: rawScene } = useGLTF(url);
-    const scene = useMemo(() => {
+    const { scene, centerOffset } = useMemo(() => {
         const cloned = SkeletonUtils.clone(rawScene);
+        // Match the home-screen hero title (PavanTitleModel): natural materials,
+        // only the V glows gold
         cloned.traverse((child) => {
             if (child.isMesh && child.material) {
-                child.material = child.material.clone();
-                child.material.emissive = new THREE.Color('#ffd36a');
-                child.material.emissiveIntensity = 1.5;
-                child.material.transparent = true;
+                child.castShadow = false;
+                child.receiveShadow = false;
+                const meshName = child.name.toLowerCase();
+                if (meshName.includes('v') || meshName.includes('letter') || child.position.x > 0.1) {
+                    child.material = child.material.clone();
+                    child.material.emissive = new THREE.Color(0xFFD700);
+                    child.material.emissiveIntensity = 1.5;
+                    child.material.color = new THREE.Color(0xFFFFFF);
+                }
+                child.material.needsUpdate = true;
             }
         });
-        return cloned;
+        // Explicit bbox centering (instead of <Center>) so the animated group
+        // position is exactly the model's visual center at any scale — <Center>
+        // bakes a one-time offset at the initial tiny scale, which skews the
+        // exit-zoom landing position
+        const box = new THREE.Box3().setFromObject(cloned);
+        const offset = box.getCenter(new THREE.Vector3());
+        return { scene: cloned, centerOffset: offset };
     }, [rawScene]);
 
     const modelRef = useRef();
 
     useFrame((state, delta) => {
         if (!modelRef.current) return;
-        const targetScale = visible ? 4.5 : 0.05;
+        // exiting: zoom up to the exact size/position the hero title occupies
+        // on the home screen (from its measured rect), then settle there
+        let exitScale = 6;
+        let exitY = 1.6;
+        // The hero title is horizontally centered by design — never derive x
+        // from the measured rect (a skewed measurement slides the title sideways)
+        const exitX = 0;
+        if (exiting && exitTarget) {
+            const camera = state.camera;
+            const fovRad = (camera.fov * Math.PI) / 180;
+            const dist = Math.max(1, camera.position.z - EXIT_TITLE_Z);
+            const halfH = Math.tan(fovRad / 2) * dist;
+            exitY = (1 - exitTarget.cy * 2) * halfH;
+            exitScale = (HERO_TITLE_MODEL_SCALE / HERO_CANVAS_WORLD_HEIGHT)
+                * 2 * Math.tan(fovRad / 2) * dist * exitTarget.h;
+        }
+
+        const targetScale = exiting ? exitScale : (visible ? 4.5 : 0.05);
         const current = modelRef.current.scale.x;
-        const next = THREE.MathUtils.lerp(current, targetScale, delta * 2.2);
+        const next = THREE.MathUtils.lerp(current, targetScale, delta * (exiting ? 3.2 : 2.2));
         modelRef.current.scale.setScalar(next);
-        const targetX = visible ? state.mouse.x * 0.7 : 0;
-        const targetY = visible ? state.mouse.y * 0.5 : 0;
-        const targetZ = visible ? 1.25 : -1.4;
+        const followMouse = visible && !exiting && !calm;
+        const targetX = exiting ? exitX : (followMouse ? state.mouse.x * 0.7 : 0);
+        const targetY = exiting ? exitY : (followMouse ? state.mouse.y * 0.5 : 0);
+        const targetZ = exiting ? EXIT_TITLE_Z : (visible ? 1.25 : -1.4);
         modelRef.current.position.x += (targetX - modelRef.current.position.x) * delta * 4.5;
         modelRef.current.position.y += (targetY - modelRef.current.position.y) * delta * 4.5;
         modelRef.current.position.z += (targetZ - modelRef.current.position.z) * delta * 3.5;
-        modelRef.current.rotation.y += (targetX * 0.28 - modelRef.current.rotation.y) * delta * 4.0;
-        modelRef.current.rotation.x += (-targetY * 0.2 - modelRef.current.rotation.x) * delta * 4.0;
+        // Rotation sway is mouse-only; during the exit the title must face the
+        // camera dead-on, otherwise the landing coordinates would tilt it
+        const swayRotY = (exiting || calm) ? 0 : targetX * 0.28;
+        const swayRotX = (exiting || calm) ? 0 : -targetY * 0.2;
+        modelRef.current.rotation.y += (swayRotY - modelRef.current.rotation.y) * delta * 4.0;
+        modelRef.current.rotation.x += (swayRotX - modelRef.current.rotation.x) * delta * 4.0;
     });
 
     return (
-        <Center>
-            <primitive ref={modelRef} object={scene} scale={0.05} position={[0, -0.2, -1.4]} />
-        </Center>
+        <group ref={modelRef} scale={0.05} position={[0, -0.2, -1.4]}>
+            <primitive
+                object={scene}
+                position={[-centerOffset.x, -centerOffset.y, -centerOffset.z]}
+            />
+        </group>
     );
 }
 
-export function BlastScene({ triggerKey, modelPath = '/titlenew.glb' }) {
+// Glides the camera back to the front view before the exit zoom — the user may
+// have orbited the title, and zooming from an off-axis camera looks wrong
+function ExitCameraRig({ active, onHomed }) {
+    const { camera } = useThree();
+    const home = useMemo(() => new THREE.Vector3(0, 0, 30), []);
+    const homedRef = useRef(false);
+
+    useEffect(() => {
+        if (!active) homedRef.current = false;
+    }, [active]);
+
+    useFrame((_, delta) => {
+        if (!active) return;
+        camera.position.lerp(home, Math.min(1, delta * 3.5));
+        camera.up.set(0, 1, 0);
+        camera.lookAt(0, 0, 0);
+        if (!homedRef.current && camera.position.distanceTo(home) < 1) {
+            homedRef.current = true;
+            if (typeof onHomed === 'function') onHomed();
+        }
+    });
+
+    return null;
+}
+
+// How long the title zoom holds before the home-screen hand-off
+const EXIT_ZOOM_MS = 900;
+
+export function BlastScene({
+    triggerKey,
+    modelPath = '/titlenew.glb',
+    showBlast = true,
+    blastCount = 9000,
+    titleDelayMs = 2600,
+    exiting = false,
+    onExitComplete,
+    titleTarget = null,
+}) {
     const [showTitle, setShowTitle] = useState(false);
+    const [zooming, setZooming] = useState(false);
+    const completeRef = useRef(false);
+    const timersRef = useRef([]);
     const { gl, scene } = useThree();
 
     useEffect(() => {
@@ -974,12 +1085,25 @@ export function BlastScene({ triggerKey, modelPath = '/titlenew.glb' }) {
 
         const timer = window.setTimeout(() => {
             setShowTitle(true);
-        }, 2600);
+        }, titleDelayMs);
 
         return () => {
             window.clearTimeout(timer);
         };
-    }, [gl, scene, triggerKey]);
+    }, [gl, scene, titleDelayMs, triggerKey]);
+
+    useEffect(() => () => timersRef.current.forEach(window.clearTimeout), []);
+
+    // Exit sequence: camera home → title zoom → hand-off
+    const handleHomed = () => {
+        setZooming(true);
+        timersRef.current.push(window.setTimeout(() => {
+            if (!completeRef.current) {
+                completeRef.current = true;
+                if (typeof onExitComplete === 'function') onExitComplete();
+            }
+        }, EXIT_ZOOM_MS));
+    };
 
     return (
         <>
@@ -989,9 +1113,11 @@ export function BlastScene({ triggerKey, modelPath = '/titlenew.glb' }) {
             <pointLight position={[0, 0, 6]} intensity={2.2} color="#ff9aa4" distance={25} />
             <pointLight position={[-4, 2, 3]} intensity={1.2} color="#ffcf7a" distance={20} />
 
-            <GadaBlast active triggerKey={triggerKey} />
+            {showBlast && <GadaBlast active triggerKey={triggerKey} count={blastCount} />}
 
+            <ExitCameraRig active={exiting} onHomed={handleHomed} />
             <OrbitControls
+                enabled={!exiting}
                 enablePan={false}
                 enableZoom
                 minDistance={8}
@@ -1002,7 +1128,13 @@ export function BlastScene({ triggerKey, modelPath = '/titlenew.glb' }) {
             />
 
             <Suspense fallback={null}>
-                <BlastTitleModel url={modelPath} visible={showTitle} />
+                <BlastTitleModel
+                    url={modelPath}
+                    visible={showTitle}
+                    exiting={zooming}
+                    calm={exiting}
+                    exitTarget={titleTarget}
+                />
             </Suspense>
         </>
     );

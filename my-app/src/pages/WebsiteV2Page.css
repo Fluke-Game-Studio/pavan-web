@@ -1,0 +1,715 @@
+/* ─── V2 ROOT ─── */
+.v2-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #060607;
+  position: relative;
+}
+
+/* Restore cursors — global CSS sets cursor:none for the custom cursor component,
+   but v2 doesn't render CustomCursor so we override everything here */
+.v2-root *,
+.v2-root *:hover {
+  cursor: default !important;
+}
+.v2-root a,
+.v2-root a *,
+.v2-root button:not(:disabled),
+.v2-root button:not(:disabled) *,
+.v2-root [role="button"],
+.v2-root .v2-social-icon,
+.v2-root .v2-player-video,
+.v2-root .v2-player-progress,
+.v2-root .v2-player-portal__backdrop {
+  cursor: pointer !important;
+}
+/* Yellow colour on interactive elements */
+.v2-root a:hover,
+.v2-root button:not(:disabled):hover {
+  color: var(--volt-primary);
+}
+
+/* ─── STACKING LAYER ─── */
+.v2-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+/* ─── TOP LEFT: LOGO ─── */
+.v2-logo {
+  position: fixed;
+  top: 0.75rem;
+  left: 1.5rem;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.v2-logo__img {
+  height: 96px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,215,0,0.25));
+}
+
+/* ─── TOP RIGHT: SOCIAL ICONS (horizontal bar) ─── */
+.v2-socials {
+  position: fixed;
+  top: 1.1rem;
+  right: 1.5rem;
+  z-index: 900;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(10, 0, 5, 0.55);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 99px;
+  padding: 0.45rem 0.9rem;
+  backdrop-filter: blur(10px);
+}
+
+.v2-social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 1.35rem;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* transform is driven by framer-motion (hover spring) — CSS only handles color */
+.v2-social-icon:hover {
+  color: var(--volt-primary);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+  .v2-social-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+}
+
+/* ─── BOTTOM BAR ─── */
+.v2-bottom-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.v2-bottom-bar__left,
+.v2-bottom-bar__right {
+  pointer-events: auto;
+  flex: 1;
+}
+
+.v2-bottom-bar__right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.v2-bottom-bar__center {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.v2-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: rgba(10, 0, 5, 0.6);
+  color: var(--volt-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: 0.25s ease;
+  backdrop-filter: blur(6px);
+}
+
+.v2-arrow-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed !important;
+}
+
+.v2-arrow-btn:not(:disabled):hover {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: var(--volt-primary);
+}
+
+/* CTA Buttons */
+.v2-persist-btn {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  white-space: nowrap;
+}
+
+.v2-persist-btn--gold {
+  background: var(--volt-primary);
+  color: #000;
+}
+
+.v2-persist-btn--gold:hover {
+  background: #fff000;
+  transform: translateY(-2px);
+}
+
+/* Replay intro — bottom right, appears once the user reaches the home screen */
+.v2-replay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  color: var(--volt-primary);
+  background: rgba(10, 0, 5, 0.6);
+  backdrop-filter: blur(6px);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.v2-replay-btn:hover {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: var(--volt-primary);
+}
+
+.v2-replay-btn svg {
+  font-size: 0.7rem;
+}
+
+/* Dot nav — sits inline between arrows in bottom-bar__center */
+.v2-dots {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.v2-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: transparent;
+  transition: 0.3s ease;
+  padding: 0;
+}
+
+.v2-dot--active {
+  background: var(--volt-primary);
+  border-color: var(--volt-primary);
+  transform: scale(1.35);
+}
+
+/* ─── PARTICLE ENTER BUTTON ─── */
+/* Use full-size flex container so centering never conflicts with motion transforms */
+.v2-particle-enter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6rem;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.v2-particle-enter .v2-enter-saga-btn {
+  pointer-events: auto;
+}
+
+.v2-enter-saga-btn {
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  color: var(--volt-primary);
+  padding: 0.8rem 2.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.v2-enter-saga-btn:hover {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: var(--volt-primary);
+  transform: translateY(-2px);
+}
+
+/* ─── HORIZONTAL TRACK ─── */
+.v2-track-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.v2-track {
+  display: flex;
+  width: 300vw;
+  height: 100%;
+  transition: transform 0.85s cubic-bezier(0.77, 0, 0.175, 1);
+  will-change: transform;
+}
+
+/* ─── BASE PANEL ─── */
+.v2-panel {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* ─── PANEL 0: HERO — reuses pavan-hero ─── */
+.v2-panel.pavan-hero {
+  display: flex;
+  align-items: center;
+}
+
+/* Override v1's fixed eyebrow pill */
+.v2-hero-content .pavan-eyebrow,
+.v2-eyebrow-inline {
+  position: static !important;
+  border: none !important;
+  background: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--pavan-accent, #E8383A);
+  margin-bottom: 1.25rem;
+}
+
+.v2-hero-content {
+  max-width: none !important;
+  width: 100% !important;
+  padding-left: 6vw !important;
+  padding-right: 6vw !important;
+}
+
+.v2-hero-next {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: var(--volt-primary);
+  padding: 0.75rem 2rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+  transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  margin-top: 0.5rem;
+}
+
+.v2-hero-next:hover {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: var(--volt-primary);
+}
+
+/* ─── PANEL 1: SCROLL SHOWCASE ─── */
+.v2-panel--showcase-section {
+  display: block;
+  overflow: hidden; /* no scrollbar — content fits in viewport */
+}
+
+/* Make PavanScrollShowcase fill 100vh without internal scroll */
+.v2-showcase-inner {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.v2-showcase-inner .pss-section {
+  height: 100vh;
+  overflow: hidden;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.v2-showcase-inner .pss-section__header {
+  margin-bottom: 2rem;
+}
+
+/* The eyebrow inside showcase is v1's fixed-pill style — reset it to static */
+.v2-showcase-inner .pavan-eyebrow {
+  position: static !important;
+  border: none !important;
+  background: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.v2-showcase-inner .pss-container {
+  flex: 1;
+  min-height: 0;
+}
+
+.v2-showcase-inner .pss-content-area {
+  min-height: 0;
+}
+
+/* "Next section" link at bottom of showcase panel */
+.v2-panel-next-btn {
+  position: absolute;
+  bottom: 5rem;
+  right: 2rem;
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  color: rgba(255, 215, 0, 0.6);
+  padding: 0.5rem 1.2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+  transition: 0.3s ease;
+  z-index: 10;
+}
+
+.v2-panel-next-btn:hover {
+  border-color: var(--volt-primary);
+  color: var(--volt-primary);
+}
+
+/* ─── PANEL 2: DISCOVER ─── */
+.v2-panel--discover {
+  display: flex;
+  align-items: stretch;
+}
+
+.v2-panel-bg--discover {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 215, 0, 0.07) 0%, transparent 70%),
+    linear-gradient(180deg, #060607 0%, #0a0005 100%);
+  z-index: 0;
+}
+
+.v2-discover-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 3.5rem 5vw 5rem;
+}
+
+.v2-discover-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.v2-eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--volt-primary);
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.v2-discover-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+  color: var(--volt-primary);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0;
+  text-align: center;
+}
+
+/* Two-column: video left (bigger), cards right */
+.v2-discover-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 2rem;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* ─── CUSTOM VIDEO PLAYER ─── */
+.v2-player {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Portal overlay for expanded video — rendered to document.body to escape CSS transforms */
+.v2-player-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.v2-player-portal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.v2-player-portal__box {
+  position: relative;
+  width: min(85vw, 1100px);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,215,0,0.15);
+  z-index: 1;
+}
+
+.v2-player-badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--volt-primary);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.v2-player-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  cursor: pointer;
+}
+
+.v2-player-portal__box .v2-player-video {
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+}
+
+/* Big centered play button when paused */
+.v2-player-overlay-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.85);
+  border: none;
+  z-index: 4;
+  transition: background 0.2s;
+}
+
+.v2-player-overlay-play:hover {
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--volt-primary);
+}
+
+/* Controls bar */
+.v2-player-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+  padding: 1.5rem 0.75rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 5;
+}
+
+.v2-player-controls--visible {
+  opacity: 1;
+}
+
+.v2-player-progress {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.v2-player-progress__fill {
+  height: 100%;
+  background: var(--volt-primary);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width 0.1s linear;
+}
+
+.v2-player-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.v2-player-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  padding: 0.15rem;
+  transition: color 0.15s;
+}
+
+.v2-player-btn:hover {
+  color: var(--volt-primary);
+}
+
+.v2-player-btn--expand {
+  margin-left: auto;
+}
+
+.v2-player-time {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Right-side cards stack */
+.v2-discover-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.v2-showcase-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.v2-showcase-thumb {
+  flex: 1;
+  min-height: 80px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.v2-showcase-thumb--devlog {
+  background: linear-gradient(135deg, #1a1a1d, #111113);
+}
+
+.v2-showcase-thumb--gameplay {
+  background: linear-gradient(135deg, #120d00, #1a1200);
+}
+
+.v2-showcase-label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+  text-align: left;
+}
+
+/* ─── COMING SOON TAG ─── */
+.v2-coming-soon-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
+}
+
+/* ─── PULSE DOT ─── */
+.v2-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--volt-primary);
+  animation: v2-pulse-anim 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes v2-pulse-anim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.65); }
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  .v2-showcase-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .v2-bottom-bar {
+    bottom: 1rem;
+    padding: 0 1rem;
+  }
+
+  .v2-persist-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.72rem;
+  }
+
+  .v2-logo__img {
+    height: 28px;
+  }
+}
