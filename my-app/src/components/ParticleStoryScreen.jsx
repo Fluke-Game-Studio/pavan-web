@@ -61,6 +61,8 @@ const STORY_STAGE_VISUALS = {
 
 const STORY_DEFAULT_MOTION_PRESET = 'calm';
 const STORY_COLOR_SWAP_RATIO = 0.5;
+const STORY_CONTINUE_FILL_MS = 10000;
+const BLAST_HINT_APPEAR_DELAY_MS = 3400;
 const CLICK_DRAG_TOLERANCE = 8; // px — beyond this it's an orbit drag, not a click
 const LIVE_GADA_STAGE = STORY_STAGES.length - 1;
 
@@ -94,6 +96,61 @@ function CameraRig({ active }) {
   });
 
   return null;
+}
+
+function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0 }) {
+  const [progress, setProgress] = useState(0);
+  const frameRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    completedRef.current = false;
+    setProgress(0);
+
+    const start = () => {
+      const startedAt = performance.now();
+      const tick = () => {
+        const nextProgress = Math.min(1, (performance.now() - startedAt) / durationMs);
+        setProgress(nextProgress);
+
+        if (nextProgress < 1) {
+          frameRef.current = window.requestAnimationFrame(tick);
+          return;
+        }
+
+        if (!completedRef.current) {
+          completedRef.current = true;
+          if (typeof onComplete === 'function') onComplete();
+        }
+      };
+
+      frameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    timeoutRef.current = window.setTimeout(start, startDelayMs);
+
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+    };
+  }, [durationMs, onComplete, startDelayMs]);
+
+  const progressPct = Math.round(progress * 100);
+  const fillStyle = {
+    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.98) ${progressPct}%, rgba(255,255,255,0.34) ${progressPct}%, rgba(255,255,255,0.34) 100%)`,
+  };
+
+  return (
+    <span className="ps-caption__hint ps-caption__hint--countdown">
+      <span className="ps-caption__hint-fillText" style={fillStyle}>
+        {label}
+      </span>
+      <span className="ps-caption__hint-bar" aria-hidden="true">
+        <span className="ps-caption__hint-barFill" style={{ width: `${progressPct}%` }} />
+      </span>
+    </span>
+  );
 }
 
 function StoryParticleField({ target, colorScheme, motionPreset }) {
@@ -224,9 +281,6 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
   );
 }
 
-// Minimum time on the blast/title screen before a click can exit — the user
-// was just clicking rapidly to trigger it, so absorb the leftover clicks
-const BLAST_EXIT_LOCK_MS = 3200;
 // Pre-warm the home screen after the blast burst settles, not during it
 const WARM_DELAY_MS = 1400;
 
@@ -238,7 +292,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   const [exiting, setExiting] = useState(false);
   const [blastToken, setBlastToken] = useState(0);
   const [gadaClicks, setGadaClicks] = useState(0);
-  const blastStartRef = useRef(0);
   const exitStartedRef = useRef(false);
   const exitTimersRef = useRef([]);
   const pointerStartRef = useRef(null);
@@ -293,7 +346,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   }, [onExitBegin]);
 
   const handleBlastTrigger = useCallback(() => {
-    blastStartRef.current = performance.now();
     setBlastToken((value) => value + 1);
     setBlastMode(true);
     scheduleWarm();
@@ -312,7 +364,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   }, [onEnterSaga]);
 
   // Enter the Saga: identical to the 5-click path — blast → title screen,
-  // which stays (orbitable) until the user clicks to continue home
+  // which stays (orbitable) until the timed hand-off begins
   const beginSagaOutro = useCallback(() => {
     if (exitStartedRef.current || blastMode) return;
     handleBlastTrigger();
@@ -330,9 +382,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     if (dist > CLICK_DRAG_TOLERANCE) return;
 
     if (blastMode) {
-      if (performance.now() - blastStartRef.current >= BLAST_EXIT_LOCK_MS) {
-        beginExitZoom();
-      }
       return;
     }
 
@@ -341,6 +390,10 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
 
   const motionPreset = STORY_DEFAULT_MOTION_PRESET;
   const hideChrome = blastMode;
+  const handleContinueComplete = useCallback(() => {
+    if (blastMode || exiting || isLastStage || !nextReady) return;
+    advance();
+  }, [advance, blastMode, exiting, isLastStage, nextReady]);
 
   return (
     <div className="pm-scene">
@@ -364,7 +417,12 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
 
       {blastMode && !exiting && (
         <div className="ps-blast-hint" key={blastToken}>
-          Click anywhere to enter the saga ✦
+          <ContinueCountdownHint
+            label="Click anywhere to enter the saga ✦"
+            durationMs={STORY_CONTINUE_FILL_MS}
+            startDelayMs={BLAST_HINT_APPEAR_DELAY_MS}
+            onComplete={beginExitZoom}
+          />
         </div>
       )}
 
@@ -388,9 +446,15 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
         {activeStage.hint ? (
           <span className="ps-caption__hint">{activeStage.hint}</span>
         ) : !isLastStage && (
-          <span className={`ps-caption__hint${nextReady ? '' : ' ps-caption__hint--loading'}`}>
-            {nextReady ? 'Click to continue ✦' : 'Summoning…'}
-          </span>
+          nextReady ? (
+            <ContinueCountdownHint
+              label="Click to continue ✦"
+              durationMs={STORY_CONTINUE_FILL_MS}
+              onComplete={handleContinueComplete}
+            />
+          ) : (
+            <span className="ps-caption__hint ps-caption__hint--loading">Summoning…</span>
+          )
         )}
       </div>
       )}
