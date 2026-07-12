@@ -49,6 +49,7 @@ function BlackHoleMorphOverlay({ active, phase }) {
       ch = rect.height;
       centerx = cw / 2;
       centery = ch / 2;
+      startTimeRef.current = performance.now();
 
       dpi = Math.min(window.devicePixelRatio || 1, DPI_CAP);
       canvas.width = Math.ceil(cw * dpi);
@@ -56,6 +57,8 @@ function BlackHoleMorphOverlay({ active, phase }) {
       canvas.style.width = `${cw}px`;
       canvas.style.height = `${ch}px`;
       context.setTransform(dpi, 0, 0, dpi, 0, 0);
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
       stars = [];
       for (let i = 0; i < STAR_COUNT; i += 1) {

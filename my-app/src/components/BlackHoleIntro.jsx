@@ -5,6 +5,8 @@ const STAR_COUNT = 2500;
 const DPI_CAP = 2;
 const EXPAND_DURATION_MS = 3000;
 const RETURN_DURATION_MS = 1000;
+const HOTSPOT_ENTER_RATIO = 0.28;
+const HOTSPOT_EXIT_RATIO = 0.36;
 
 function rotate(cx, cy, x, y, angle) {
   const cos = Math.cos(angle);
@@ -74,6 +76,7 @@ const BlackHoleIntro = ({ onEnter }) => {
       ch = rect.height;
       centerx = cw / 2;
       centery = ch / 2;
+      startTimeRef.current = performance.now();
 
       dpi = Math.min(window.devicePixelRatio || 1, DPI_CAP);
       canvas.width = Math.ceil(cw * dpi);
@@ -81,6 +84,8 @@ const BlackHoleIntro = ({ onEnter }) => {
       canvas.style.width = `${cw}px`;
       canvas.style.height = `${ch}px`;
       context.setTransform(dpi, 0, 0, dpi, 0, 0);
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
       stars = [];
       for (let i = 0; i < STAR_COUNT; i += 1) {
@@ -184,10 +189,20 @@ const BlackHoleIntro = ({ onEnter }) => {
       setSize();
     };
 
-    const handleMouseMove = () => {
-      if (!openRef.current) {
-        collapseRef.current = true;
-      }
+    const handleMouseMove = (event) => {
+      if (openRef.current) return;
+
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + (rect.width / 2);
+      const centerY = rect.top + (rect.height / 2);
+      const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+      const shortestSide = Math.min(rect.width, rect.height);
+      const enterRadius = shortestSide * HOTSPOT_ENTER_RATIO;
+      const exitRadius = shortestSide * HOTSPOT_EXIT_RATIO;
+
+      collapseRef.current = collapseRef.current
+        ? distance <= exitRadius
+        : distance <= enterRadius;
     };
 
     const handleMouseLeave = () => {
@@ -219,15 +234,20 @@ const BlackHoleIntro = ({ onEnter }) => {
       className={`blackhole-scene${buttonOpen ? ' blackhole-scene--open' : ''}`}
     >
       <canvas ref={canvasRef} className="blackhole-scene__canvas" />
-      <button
-        type="button"
-        className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
-        aria-label="Enter the black hole scene"
-        onClick={handleClick}
-      >
-        <span>ENTER</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
+      aria-label="Enter the black hole scene"
+      onClick={handleClick}
+    >
+      <img
+        src="/starttextimage.png"
+        alt=""
+        className="blackhole-enter__image"
+        draggable="false"
+      />
+    </button>
+  </div>
   );
 };
 

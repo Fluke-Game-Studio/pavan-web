@@ -4,9 +4,8 @@ import { motion } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { BlastScene, GadaScene } from './InteractiveGadaV2';
+import { BlastScene, GadaScene, BLAST_CLICK_THRESHOLD } from './InteractiveGadaV2';
 import {
-  COLOR_SCHEMES,
   MOTION_PRESETS,
   buildColors,
   createStarTexture,
@@ -30,6 +29,11 @@ export const STORY_STAGES = [
     line: 'Before time was counted, there was only the spiral of stars.',
   },
   {
+    key: 'om2',
+    title: 'OM2',
+    line: 'A new form gathers in the wake of the cosmos.',
+  },
+  {
     key: 'gada',
     title: 'The Gada',
     line: 'From the swirling void, a weapon of divine strength took form.',
@@ -47,6 +51,16 @@ export const STORY_STAGES = [
   },
 ];
 
+const STORY_STAGE_VISUALS = {
+  galaxy: { colorScheme: 'neon' },
+  om2: { colorScheme: 'ember' },
+  gada: { colorScheme: 'ocean' },
+  hanuman: { colorScheme: 'ember' },
+  'gada-live': { colorScheme: 'ocean' },
+};
+
+const STORY_DEFAULT_MOTION_PRESET = 'calm';
+const STORY_COLOR_SWAP_RATIO = 0.5;
 const CLICK_DRAG_TOLERANCE = 8; // px — beyond this it's an orbit drag, not a click
 const LIVE_GADA_STAGE = STORY_STAGES.length - 1;
 
@@ -86,14 +100,15 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
   const pointsRef = useRef(null);
   const groupRef = useRef(null);
   const texture = useMemo(() => createStarTexture(), []);
+  const [displayColorScheme, setDisplayColorScheme] = useState(colorScheme);
   const initial = useMemo(
     () => generateGalaxy(STORY_CONFIG.particleCount, STORY_CONFIG.shapeSize),
     [],
   );
   const positionBuffer = useMemo(() => new Float32Array(initial), [initial]);
   const colorBuffer = useMemo(
-    () => buildColors(initial, colorScheme, STORY_CONFIG.shapeSize),
-    [initial], // eslint-disable-line react-hooks/exhaustive-deps
+    () => buildColors(initial, displayColorScheme, STORY_CONFIG.shapeSize),
+    [initial, displayColorScheme],
   );
   // baseRef holds the clean shape (no drift); drift is a continuous function of
   // time layered on top, so morph start/end never causes a positional jump
@@ -104,6 +119,8 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     from: new Float32Array(initial),
     to: initial,
   });
+  const pendingColorSchemeRef = useRef(colorScheme);
+  const colorSwapAppliedRef = useRef(true);
 
   // Morph to the new target whenever the stage changes
   useEffect(() => {
@@ -114,14 +131,28 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     morphRef.current.active = true;
   }, [target]);
 
+  // Hold the current palette until the morph reaches the midpoint, then swap.
   useEffect(() => {
-    const nextColors = buildColors(baseRef.current, colorScheme, STORY_CONFIG.shapeSize);
+    pendingColorSchemeRef.current = colorScheme;
+    if (!morphRef.current.active || colorScheme === displayColorScheme) {
+      colorSwapAppliedRef.current = true;
+      if (displayColorScheme !== colorScheme) {
+        setDisplayColorScheme(colorScheme);
+      }
+      return;
+    }
+
+    colorSwapAppliedRef.current = false;
+  }, [colorScheme, displayColorScheme]);
+
+  useEffect(() => {
+    const nextColors = buildColors(baseRef.current, displayColorScheme, STORY_CONFIG.shapeSize);
     if (pointsRef.current) {
       const colorAttr = pointsRef.current.geometry.attributes.color;
       colorAttr.array.set(nextColors);
       colorAttr.needsUpdate = true;
     }
-  }, [colorScheme]);
+  }, [displayColorScheme]);
 
   useFrame((state, delta) => {
     const points = pointsRef.current;
@@ -147,6 +178,11 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
         base[i + 2] = THREE.MathUtils.lerp(from[i + 2], to[i + 2], eased);
       }
 
+      if (!colorSwapAppliedRef.current && morphRef.current.progress >= STORY_COLOR_SWAP_RATIO) {
+        colorSwapAppliedRef.current = true;
+        setDisplayColorScheme(pendingColorSchemeRef.current);
+      }
+
       if (morphRef.current.progress >= 1) {
         morphRef.current.active = false;
       }
@@ -161,7 +197,7 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     positionAttr.needsUpdate = true;
 
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * preset.spin;
+      groupRef.current.rotation.y -= delta * preset.spin;
       groupRef.current.rotation.x = Math.sin(elapsed * 0.12) * 0.08;
     }
   });
@@ -194,15 +230,14 @@ const BLAST_EXIT_LOCK_MS = 3200;
 // Pre-warm the home screen after the blast burst settles, not during it
 const WARM_DELAY_MS = 1400;
 
-// Click-driven narrative morph: Galaxy → Gada → Hanuman → live Gada.
+// Click-driven narrative morph: Galaxy → OM2 → Gada → Hanuman → live Gada.
 // `modelPoints` is { gada, hanuman } Float32Arrays preloaded by the parent.
 function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBegin, heroTitleRect }) {
   const [stage, setStage] = useState(0);
-  const [colorScheme, setColorScheme] = useState('ember');
-  const [motionPreset, setMotionPreset] = useState('surge');
   const [blastMode, setBlastMode] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [blastToken, setBlastToken] = useState(0);
+  const [gadaClicks, setGadaClicks] = useState(0);
   const blastStartRef = useRef(0);
   const exitStartedRef = useRef(false);
   const exitTimersRef = useRef([]);
@@ -212,6 +247,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
 
   const targets = useMemo(() => [
     generateGalaxy(STORY_CONFIG.particleCount, STORY_CONFIG.shapeSize),
+    modelPoints?.om2 || null,
     modelPoints?.gada || null,
     modelPoints?.hanuman || null,
   ], [modelPoints]);
@@ -232,6 +268,9 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   useEffect(() => {
     if (typeof onStageChange === 'function') onStageChange(stage);
   }, [stage, onStageChange]);
+
+  const activeStage = STORY_STAGES[stage];
+  const colorScheme = STORY_STAGE_VISUALS[activeStage.key]?.colorScheme || STORY_STAGE_VISUALS.gada.colorScheme;
 
   // Step forward/backward, skipping stages whose points failed to load
   const step = useCallback((dir) => {
@@ -272,7 +311,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     if (typeof onEnterSaga === 'function') onEnterSaga();
   }, [onEnterSaga]);
 
-  // Enter the Saga: identical to the 10-click path — blast → title screen,
+  // Enter the Saga: identical to the 5-click path — blast → title screen,
   // which stays (orbitable) until the user clicks to continue home
   const beginSagaOutro = useCallback(() => {
     if (exitStartedRef.current || blastMode) return;
@@ -300,7 +339,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     advance();
   };
 
-  const activeStage = STORY_STAGES[stage];
+  const motionPreset = STORY_DEFAULT_MOTION_PRESET;
   const hideChrome = blastMode;
 
   return (
@@ -311,9 +350,14 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
           <div className="pm-info__title">
             Chapter {stage + 1} / {STORY_STAGES.length} — {activeStage.title}
           </div>
-          <div className="pm-info__subtitle">
-            Scheme: {COLOR_SCHEMES[colorScheme].label} | Motion: {MOTION_PRESETS[motionPreset].label}
-          </div>
+          {isLiveGada && (
+            <div className="pm-info__counter">
+              <span className="pm-info__counter-label">Gada Clicks</span>
+              <span className="pm-info__counter-value">
+                {String(gadaClicks).padStart(2, '0')} / {String(BLAST_CLICK_THRESHOLD).padStart(2, '0')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
       )}
@@ -374,45 +418,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
       </>
       )}
 
-      {!hideChrome && (
-      <div className="pm-controls ps-controls">
-        <div className="pm-controls__group">
-          <span className="pm-controls__label">Effects</span>
-          <div className="pm-pill-row">
-            {Object.entries(MOTION_PRESETS).map(([key, preset]) => (
-              <button
-                key={key}
-                type="button"
-                className={`pm-pill ${key === motionPreset ? 'active' : ''}`}
-                onClick={() => setMotionPreset(key)}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="pm-controls__group">
-          <span className="pm-controls__label">Glow</span>
-          <div className="pm-color-picker">
-            {Object.entries(COLOR_SCHEMES).map(([key, scheme]) => (
-              <button
-                key={key}
-                type="button"
-                className={`pm-color-option ${colorScheme === key ? 'active' : ''}`}
-                aria-label={scheme.label}
-                title={scheme.label}
-                style={{
-                  background: `linear-gradient(135deg, hsl(${scheme.startHue}, 100%, 56%), hsl(${scheme.endHue}, 100%, 64%))`,
-                }}
-                onClick={() => setColorScheme(key)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-      )}
-
       <div
         className="pm-canvas-host"
         onPointerDown={handlePointerDown}
@@ -467,6 +472,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
                       cameraDistance={32}
                       modelScale={5.5}
                       onBlastTrigger={handleBlastTrigger}
+                      onClickCountChange={setGadaClicks}
                     />
                   </ScaleInGroup>
                 )}

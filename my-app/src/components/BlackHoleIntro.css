@@ -36,47 +36,28 @@
   background: transparent;
   transform: translate(-50%, -50%);
   z-index: 3;
-  line-height: 255px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   transition: opacity 500ms ease, transform 500ms ease;
   cursor: pointer !important;
   pointer-events: auto;
 }
 
-.blackhole-enter span {
-  color: #666;
-  font-family: serif;
-  font-size: 18px;
-  position: relative;
-  transition: all 500ms;
+.blackhole-enter__image {
+  display: block;
+  width: min(180px, 72%);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 500ms ease, filter 500ms ease, opacity 500ms ease;
 }
 
-.blackhole-enter span::before,
-.blackhole-enter span::after {
-  content: "";
-  display: inline-block;
-  height: 1px;
-  width: 16px;
-  margin-bottom: 4px;
-  background-color: #666;
-  transition: all 500ms;
-}
-
-.blackhole-enter span::before {
-  margin-right: 12px;
-}
-
-.blackhole-enter span::after {
-  margin-left: 12px;
-}
-
-.blackhole-enter:hover span {
-  color: #ddd;
-}
-
-.blackhole-enter:hover span::before,
-.blackhole-enter:hover span::after {
-  background-color: #ddd;
+.blackhole-enter:hover .blackhole-enter__image {
+  transform: scale(1.03);
+  filter: brightness(1.15);
 }
 
 .blackhole-enter--open {
@@ -93,6 +74,9 @@
   .blackhole-enter {
     width: 200px;
     height: 200px;
-    line-height: 200px;
+  }
+
+  .blackhole-enter__image {
+    width: min(150px, 70%);
   }
 }

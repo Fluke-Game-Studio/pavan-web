@@ -363,14 +363,6 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
         }
     }, [scene]);
 
-    useEffect(() => {
-        if (showGrid) {
-            const axisHelper = new THREE.AxesHelper(5);
-            axisHelper.name = 'gadaAxisHelper';
-            modelRef.current.add(axisHelper);
-        }
-    }, [scene, showGrid]);
-
     // Emissive intensity override removed to respect original material
 
     useFrame((state) => {
@@ -463,14 +455,6 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
     return (
         <group ref={modelRef}>
             <primitive object={scene} scale={2.5} />
-
-            {showGrid && (
-                <group>
-                    <Html position={[5.2, 0, 0]} center style={{ color: 'red', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>X</Html>
-                    <Html position={[0, 5.2, 0]} center style={{ color: 'green', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>Y</Html>
-                    <Html position={[0, 0, 5.2]} center style={{ color: 'blue', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>Z</Html>
-                </group>
-            )}
 
             <pointLight position={[0, 3, 0]} intensity={2} color="#FFD700" distance={4} decay={2} />
             <pointLight position={[0, 3.5, 0]} intensity={1.5} color="#FFEB3B" distance={3} decay={2} />
@@ -714,14 +698,6 @@ const InteractiveGada = ({ modelPath = '/gada.glb', initialXOffset = 0, scrollSh
                 frameloop="always"
             >
                 <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
-
-                {/* Debug Helpers */}
-                {showGrid && (
-                    <>
-                        <axesHelper args={[5]} />
-                        <gridHelper args={[10, 10]} />
-                    </>
-                )}
 
                 {/* Cinematic Star Field */}
                 <DynamicStarField

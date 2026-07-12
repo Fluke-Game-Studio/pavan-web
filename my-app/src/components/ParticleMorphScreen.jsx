@@ -28,7 +28,7 @@ const PARTICLE_SHAPES = SHAPES.filter((shape) => shape.name !== 'Gada');
 
 export const COLOR_SCHEMES = {
   ember: { label: 'Ember', startHue: 8, endHue: 38, saturation: 1, lightness: 0.62 },
-  neon: { label: 'Neon', startHue: 295, endHue: 175, saturation: 1, lightness: 0.67 },
+  neon: { label: 'Neon', startHue: 175, endHue: 300, saturation: 1, lightness: 0.7 },
   ocean: { label: 'Ocean', startHue: 195, endHue: 235, saturation: 0.95, lightness: 0.62 },
   aurora: { label: 'Aurora', startHue: 120, endHue: 320, saturation: 0.9, lightness: 0.64 },
   mono: { label: 'Mono', startHue: 0, endHue: 0, saturation: 0, lightness: 0.8 },
@@ -368,7 +368,7 @@ function ParticleField({ shapeIndex, colorScheme, motionPreset, gadaPointsSource
     if (colorAttr) colorAttr.needsUpdate = true;
 
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * motion.spin;
+      groupRef.current.rotation.y -= delta * motion.spin;
       groupRef.current.rotation.x = Math.sin(elapsed * 0.12) * 0.08;
     }
   });
@@ -449,7 +449,7 @@ function Scene({
 function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }) {
   const [shapeIndex, setShapeIndex] = useState(0);
   const [colorScheme, setColorScheme] = useState('ember');
-  const [motionPreset, setMotionPreset] = useState('surge');
+  const motionPreset = 'calm';
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
@@ -536,11 +536,11 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
       </div>
 
       {sceneMode !== 'blast' && (
-        <div className="pm-hud">
+      <div className="pm-hud">
         <div className="pm-info">
           <div className="pm-info__title">Shape: {activeShape}</div>
           <div className="pm-info__subtitle">
-            Scheme: {COLOR_SCHEMES[colorScheme].label} | Motion: {MOTION_PRESETS[motionPreset].label}
+            Scheme: {COLOR_SCHEMES[colorScheme].label}
           </div>
         </div>
         </div>
@@ -559,22 +559,6 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
                 onClick={() => runShapeTransition(index)}
               >
                 {name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="pm-controls__group">
-          <span className="pm-controls__label">Effects</span>
-          <div className="pm-pill-row">
-            {Object.entries(MOTION_PRESETS).map(([key, preset]) => (
-              <button
-                key={key}
-                type="button"
-                className={`pm-pill ${key === motionPreset ? 'active' : ''}`}
-                onClick={() => setMotionPreset(key)}
-              >
-                {preset.label}
               </button>
             ))}
           </div>
