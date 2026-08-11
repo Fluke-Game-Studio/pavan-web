@@ -456,6 +456,12 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
   const lastParticleShapeIndexRef = useRef(0);
   const [sceneMode, setSceneMode] = useState('normal');
   const [blastToken, setBlastToken] = useState(0);
+  const omHymAudioRef = useRef(null);
+  const omHymContextRef = useRef(null);
+  const omHymSourceRef = useRef(null);
+  const omHymGainRef = useRef(null);
+  const omHymBufferRef = useRef(null);
+  const omHymStartedRef = useRef(false);
 
   const activeShape = SHAPES[shapeIndex].name;
   const gadaShapeIndex = useMemo(() => SHAPES.findIndex((shape) => shape.name === 'Gada'), []);
@@ -511,6 +517,110 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
       setSceneReady(true);
     }
   }, [sceneMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAudio = async () => {
+      try {
+        const response = await fetch('/OmHym.mp3', { cache: 'force-cache' });
+        if (!response.ok) {
+          throw new Error(`Failed to load OmHym.mp3 (${response.status})`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextCtor || cancelled) return;
+
+        const context = omHymContextRef.current || new AudioContextCtor();
+        omHymContextRef.current = context;
+        const buffer = await context.decodeAudioData(arrayBuffer.slice(0));
+        if (cancelled) return;
+        omHymBufferRef.current = buffer;
+      } catch {}
+    };
+
+    loadAudio();
+
+    return () => {
+      cancelled = true;
+      if (omHymSourceRef.current) {
+        try {
+          omHymSourceRef.current.stop();
+        } catch {}
+        try {
+          omHymSourceRef.current.disconnect();
+        } catch {}
+        omHymSourceRef.current = null;
+      }
+      if (omHymGainRef.current) {
+        try {
+          omHymGainRef.current.disconnect();
+        } catch {}
+        omHymGainRef.current = null;
+      }
+      if (omHymContextRef.current) {
+        try {
+          omHymContextRef.current.close();
+        } catch {}
+        omHymContextRef.current = null;
+      }
+      omHymBufferRef.current = null;
+    };
+  }, []);
+
+  const startOmHymAudio = () => {
+    if (omHymStartedRef.current) return;
+
+    const buffer = omHymBufferRef.current;
+    if (!buffer) return;
+
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+
+    omHymStartedRef.current = true;
+
+    const context = omHymContextRef.current || new AudioContextCtor();
+    omHymContextRef.current = context;
+
+    if (omHymSourceRef.current) {
+      try {
+        omHymSourceRef.current.stop();
+      } catch {}
+      try {
+        omHymSourceRef.current.disconnect();
+      } catch {}
+      omHymSourceRef.current = null;
+    }
+
+    if (!omHymGainRef.current) {
+      const gain = context.createGain();
+      gain.gain.value = 2.0;
+      gain.connect(context.destination);
+      omHymGainRef.current = gain;
+    } else {
+      omHymGainRef.current.gain.value = 2.0;
+    }
+
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.loopStart = 0;
+    source.loopEnd = Math.min(15, buffer.duration);
+    source.connect(omHymGainRef.current);
+    omHymSourceRef.current = source;
+
+    if (context.state === 'suspended') {
+      context.resume().catch(() => {});
+    }
+
+    source.start(0, 0);
+    source.onended = () => {
+      if (omHymSourceRef.current === source) {
+        omHymSourceRef.current = null;
+      }
+    };
+  };
 
   const backgroundShapeIndex = isGadaMode
     ? lastParticleShapeIndexRef.current
@@ -585,7 +695,12 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
         </div>
       )}
 
-      <div className="pm-canvas-host">
+      <div
+        className="pm-canvas-host"
+        onPointerDown={startOmHymAudio}
+        onClick={startOmHymAudio}
+        onTouchStart={startOmHymAudio}
+      >
         <Canvas
           dpr={[1, 1.75]}
           camera={{ position: [0, 8, 32], fov: 55 }}
