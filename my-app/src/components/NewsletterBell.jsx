@@ -122,11 +122,7 @@ export default function NewsletterBell({ stacked = false }) {
         avatar: safeStr(payload?.picture),
       });
       setStatus('success');
-      setMessage(
-        consentNewsletterRef.current || consentMarketingRef.current
-          ? `Google connected. ${preferenceSummary()}`
-          : 'Google connected. Your record is saved with no email consent.'
-      );
+      setMessage('Thank-you email sent');
 
       if (successTimerRef.current) {
         window.clearTimeout(successTimerRef.current);
@@ -213,7 +209,7 @@ export default function NewsletterBell({ stacked = false }) {
           email: safeStr(data.email),
           avatar: '',
         });
-        setMessage(`Discord connected. ${preferenceSummary()}`);
+        setMessage('Thank-you email sent');
         if (successTimerRef.current) {
           window.clearTimeout(successTimerRef.current);
         }
@@ -334,11 +330,7 @@ export default function NewsletterBell({ stacked = false }) {
         avatar: '',
       });
       setStatus('success');
-      setMessage(
-        consentNewsletterRef.current || consentMarketingRef.current
-          ? `Email saved. ${preferenceSummary()}`
-          : 'Email saved. Your record is stored with no email consent.'
-      );
+      setMessage('Thank-you email sent');
 
       if (successTimerRef.current) {
         window.clearTimeout(successTimerRef.current);
@@ -556,14 +548,7 @@ export default function NewsletterBell({ stacked = false }) {
                 {status === 'success' ? (
                   <div className="newsletter-bell__status newsletter-bell__status--success">
                     <CheckCircle2 size={16} />
-                    <div>
-                      <div className="newsletter-bell__status-title">{message}</div>
-                      {identity?.email ? (
-                        <div className="newsletter-bell__status-sub">
-                          Saved as {identity.name || 'subscriber'} {identity.email ? `(${identity.email})` : ''}
-                        </div>
-                      ) : null}
-                    </div>
+                    <div className="newsletter-bell__status-title">{message}</div>
                   </div>
                 ) : null}
 
