@@ -125,6 +125,8 @@ const useSoundEffects = () => {
 
 // ─── Dynamic Star Field Component (Custom Shaders) ──────────────────────────
 const STAR_COUNT = 400;
+export const BLAST_CLICK_THRESHOLD = 5;
+const BLAST_TRIGGER_DELAY_MS = 500;
 
 function DynamicStarField({ currentPosition, throwState, throwProgress }) {
     const pointsRef = useRef();
@@ -558,14 +560,6 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
         }
     }, [scene]);
 
-    useEffect(() => {
-        if (showGrid) {
-            const axisHelper = new THREE.AxesHelper(5);
-            axisHelper.name = 'gadaAxisHelper';
-            modelRef.current.add(axisHelper);
-        }
-    }, [scene, showGrid]);
-
     // Emissive intensity override removed to respect original material
 
     useFrame((state) => {
@@ -662,14 +656,6 @@ function GadaModel({ url, currentPosition, isMoving, glowIntensity, throwState, 
         <group ref={modelRef}>
             <primitive object={scene} scale={modelScale} />
 
-            {showGrid && (
-                <group>
-                    <Html position={[5.2, 0, 0]} center style={{ color: 'red', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>X</Html>
-                    <Html position={[0, 5.2, 0]} center style={{ color: 'green', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>Y</Html>
-                    <Html position={[0, 0, 5.2]} center style={{ color: 'blue', font: 'bold 12px sans-serif', pointerEvents: 'none' }}>Z</Html>
-                </group>
-            )}
-
             <pointLight position={[0, 3, 0]} intensity={2} color="#FFD700" distance={4} decay={2} />
             <pointLight position={[0, 3.5, 0]} intensity={1.5} color="#FFEB3B" distance={3} decay={2} />
         </group>
@@ -704,12 +690,18 @@ function PremiumLoader() {
 }
 
 // ─── Cinematic Top Message Overlay ──────────────────────────────────────────
-function GadaTopMessage({ opacity }) {
+function GadaTopMessage({ opacity, clickCount = 0, blastThreshold = BLAST_CLICK_THRESHOLD }) {
     return (
         <motion.div className="gada-top-message" style={{ opacity }}>
             <div className="gada-top-message__glow" />
             <span className="gada-top-message__label">Interactive Archive</span>
             <h3 className="gada-top-message__title">MACE OF THE PRIMAL WARRIOR</h3>
+            <div className="gada-top-message__meter">
+                <span className="gada-top-message__meter-label">Gada Clicks</span>
+                <span className="gada-top-message__meter-value">
+                    {String(clickCount).padStart(2, '0')} / {String(blastThreshold).padStart(2, '0')}
+                </span>
+            </div>
         </motion.div>
     );
 }
@@ -765,6 +757,7 @@ export function GadaScene({
     scrollShift = 0,
     showGrid = false,
     onBlastTrigger = null,
+    onClickCountChange = null,
 }) {
     const { gl, camera } = useThree();
     const [glowIntensity, setGlowIntensity] = useState(0.3);
@@ -779,6 +772,8 @@ export function GadaScene({
     const gadaWorldPosition = useRef({ x: 0, y: 0, z: 0 });
     const prevThrowStateRef = useRef('idle');
     const clickCountRef = useRef(0);
+    const blastLockRef = useRef(false);
+    const blastTriggerTimeoutRef = useRef(null);
     const { playWhoosh, playImpact, playReturn } = useSoundEffects();
 
     useEffect(() => {
@@ -866,40 +861,68 @@ export function GadaScene({
     }, [throwState]);
 
     useEffect(() => {
-        const handleClick = () => {
-            clickCountRef.current += 1;
-            if (clickCountRef.current >= 10) {
-                clickCountRef.current = 0;
-                if (onBlastTrigger) {
-                    playImpact();
-                    onBlastTrigger();
-                    return;
-                }
+        const beginThrow = () => {
+            setThrowStartPosition({ x: currentPosition.x, y: currentPosition.y });
+            setThrowState('throwing');
+            setThrowProgress(0);
+            setGlowIntensity(2.0);
+        };
 
-                setBlastKey((value) => value + 1);
-                setBlastActive(true);
-                setThrowState('idle');
-                setThrowProgress(0);
-                setGlowIntensity(2.75);
-                setTimeout(() => {
-                    setBlastActive(false);
-                    setGlowIntensity(0.3);
-                }, 3600);
-                playImpact();
+        const handleClick = () => {
+            if (blastLockRef.current) return;
+            clickCountRef.current += 1;
+            if (typeof onClickCountChange === 'function') {
+                onClickCountChange(clickCountRef.current);
+            }
+            if (clickCountRef.current >= BLAST_CLICK_THRESHOLD) {
+                beginThrow();
+                blastLockRef.current = true;
+                blastTriggerTimeoutRef.current = window.setTimeout(() => {
+                    clickCountRef.current = 0;
+                    if (typeof onClickCountChange === 'function') {
+                        onClickCountChange(0);
+                    }
+
+                    if (onBlastTrigger) {
+                        playImpact();
+                        onBlastTrigger();
+                        blastTriggerTimeoutRef.current = null;
+                        return;
+                    }
+
+                    setBlastKey((value) => value + 1);
+                    setBlastActive(true);
+                    setThrowState('idle');
+                    setThrowProgress(0);
+                    setGlowIntensity(2.75);
+                    setTimeout(() => {
+                        setBlastActive(false);
+                        setGlowIntensity(0.3);
+                        blastLockRef.current = false;
+                    }, 3600);
+                    playImpact();
+                    blastTriggerTimeoutRef.current = null;
+                    }, BLAST_TRIGGER_DELAY_MS);
                 return;
             }
 
             if (throwState === 'idle') {
-                setThrowStartPosition({ x: currentPosition.x, y: currentPosition.y });
-                setThrowState('throwing');
-                setThrowProgress(0);
-                setGlowIntensity(2.0);
+                beginThrow();
             }
         };
 
         gl.domElement.addEventListener('click', handleClick);
-        return () => gl.domElement.removeEventListener('click', handleClick);
-    }, [currentPosition.x, currentPosition.y, gl, onBlastTrigger, playImpact, throwState]);
+        return () => {
+            gl.domElement.removeEventListener('click', handleClick);
+        };
+    }, [currentPosition.x, currentPosition.y, gl, onBlastTrigger, onClickCountChange, playImpact, throwState]);
+
+    useEffect(() => () => {
+        if (blastTriggerTimeoutRef.current) {
+            clearTimeout(blastTriggerTimeoutRef.current);
+            blastTriggerTimeoutRef.current = null;
+        }
+    }, []);
 
     return (
         <>
@@ -1164,6 +1187,7 @@ const InteractiveGadaV2 = ({
     const [throwProgress, setThrowProgress] = useState(0);
     const [blastActive, setBlastActive] = useState(false);
     const [blastKey, setBlastKey] = useState(0);
+    const [clickCount, setClickCount] = useState(0);
     const [debugMode, setDebugMode] = useState(false);
     const [showGrid, setShowGrid] = useState(false);
     const [manualRotation, setManualRotation] = useState({ x: 0, y: 0, z: 0 });
@@ -1173,6 +1197,8 @@ const InteractiveGadaV2 = ({
     const gadaWorldPosition = useRef({ x: 0, y: 0, z: 0 });
     const prevThrowStateRef = useRef('idle');
     const clickCountRef = useRef(0);
+    const blastLockRef = useRef(false);
+    const blastTriggerTimeoutRef = useRef(null);
     const { playWhoosh, playImpact, playReturn } = useSoundEffects();
 
     // Global mouse tracking — so Gada follows cursor even when scrolled
@@ -1245,6 +1271,13 @@ const InteractiveGadaV2 = ({
         };
     }, [throwState]);
 
+    useEffect(() => () => {
+        if (blastTriggerTimeoutRef.current) {
+            clearTimeout(blastTriggerTimeoutRef.current);
+            blastTriggerTimeoutRef.current = null;
+        }
+    }, []);
+
     const handleMouseMove = (event) => {
         if (!canvasRef.current || throwState !== 'idle') return;
         // Always use the sticky canvas rect so coords are viewport-relative
@@ -1266,19 +1299,31 @@ const InteractiveGadaV2 = ({
     };
 
     const handleClick = () => {
+        if (blastLockRef.current) return;
         clickCountRef.current += 1;
-        if (clickCountRef.current >= 10) {
-            clickCountRef.current = 0;
-            setBlastKey((value) => value + 1);
-            setBlastActive(true);
-            setThrowState('idle');
+        setClickCount(clickCountRef.current);
+        if (clickCountRef.current >= BLAST_CLICK_THRESHOLD) {
+            setThrowStartPosition({ x: currentPosition.x, y: currentPosition.y });
+            setThrowState('throwing');
             setThrowProgress(0);
-            setGlowIntensity(2.75);
-            setTimeout(() => {
-                setBlastActive(false);
-                setGlowIntensity(0.3);
-            }, 3600);
-            playImpact();
+            setGlowIntensity(2.0);
+            blastLockRef.current = true;
+            blastTriggerTimeoutRef.current = window.setTimeout(() => {
+                clickCountRef.current = 0;
+                setClickCount(0);
+                setBlastKey((value) => value + 1);
+                setBlastActive(true);
+                setThrowState('idle');
+                setThrowProgress(0);
+                setGlowIntensity(2.75);
+                setTimeout(() => {
+                    setBlastActive(false);
+                    setGlowIntensity(0.3);
+                    blastLockRef.current = false;
+                }, 3600);
+                playImpact();
+                blastTriggerTimeoutRef.current = null;
+            }, BLAST_TRIGGER_DELAY_MS);
             return;
         }
 
@@ -1322,14 +1367,6 @@ const InteractiveGadaV2 = ({
             >
                 <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
 
-                {/* Debug Helpers */}
-                {showGrid && (
-                    <>
-                        <axesHelper args={[5]} />
-                        <gridHelper args={[10, 10]} />
-                    </>
-                )}
-
                 {/* Cinematic Star Field */}
                 {showStarField && (
                     <DynamicStarField
@@ -1353,7 +1390,7 @@ const InteractiveGadaV2 = ({
                     isMoving={isMoving}
                 />
 
-                {/* 10th click blast */}
+                {/* 5th click blast */}
                 {blastActive && <GadaBlastBloom active={blastActive} />}
                 <GadaBlast active={blastActive} triggerKey={blastKey} />
 
@@ -1378,7 +1415,7 @@ const InteractiveGadaV2 = ({
             </Canvas>
 
             {/* Cinematic Top Message */}
-            {showChrome && <GadaTopMessage opacity={uiOpacity} />}
+            {showChrome && <GadaTopMessage opacity={uiOpacity} clickCount={clickCount} />}
 
             {/* Bottom Hint */}
             <div className="gada-hint">

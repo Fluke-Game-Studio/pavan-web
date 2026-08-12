@@ -28,7 +28,7 @@ const PARTICLE_SHAPES = SHAPES.filter((shape) => shape.name !== 'Gada');
 
 export const COLOR_SCHEMES = {
   ember: { label: 'Ember', startHue: 8, endHue: 38, saturation: 1, lightness: 0.62 },
-  neon: { label: 'Neon', startHue: 295, endHue: 175, saturation: 1, lightness: 0.67 },
+  neon: { label: 'Neon', startHue: 175, endHue: 300, saturation: 1, lightness: 0.7 },
   ocean: { label: 'Ocean', startHue: 195, endHue: 235, saturation: 0.95, lightness: 0.62 },
   aurora: { label: 'Aurora', startHue: 120, endHue: 320, saturation: 0.9, lightness: 0.64 },
   mono: { label: 'Mono', startHue: 0, endHue: 0, saturation: 0, lightness: 0.8 },
@@ -368,7 +368,7 @@ function ParticleField({ shapeIndex, colorScheme, motionPreset, gadaPointsSource
     if (colorAttr) colorAttr.needsUpdate = true;
 
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * motion.spin;
+      groupRef.current.rotation.y -= delta * motion.spin;
       groupRef.current.rotation.x = Math.sin(elapsed * 0.12) * 0.08;
     }
   });
@@ -449,13 +449,19 @@ function Scene({
 function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }) {
   const [shapeIndex, setShapeIndex] = useState(0);
   const [colorScheme, setColorScheme] = useState('ember');
-  const [motionPreset, setMotionPreset] = useState('surge');
+  const motionPreset = 'calm';
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const lastParticleShapeIndexRef = useRef(0);
   const [sceneMode, setSceneMode] = useState('normal');
   const [blastToken, setBlastToken] = useState(0);
+  const omHymAudioRef = useRef(null);
+  const omHymContextRef = useRef(null);
+  const omHymSourceRef = useRef(null);
+  const omHymGainRef = useRef(null);
+  const omHymBufferRef = useRef(null);
+  const omHymStartedRef = useRef(false);
 
   const activeShape = SHAPES[shapeIndex].name;
   const gadaShapeIndex = useMemo(() => SHAPES.findIndex((shape) => shape.name === 'Gada'), []);
@@ -512,6 +518,110 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
     }
   }, [sceneMode]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAudio = async () => {
+      try {
+        const response = await fetch('/OmHym.mp3', { cache: 'force-cache' });
+        if (!response.ok) {
+          throw new Error(`Failed to load OmHym.mp3 (${response.status})`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextCtor || cancelled) return;
+
+        const context = omHymContextRef.current || new AudioContextCtor();
+        omHymContextRef.current = context;
+        const buffer = await context.decodeAudioData(arrayBuffer.slice(0));
+        if (cancelled) return;
+        omHymBufferRef.current = buffer;
+      } catch {}
+    };
+
+    loadAudio();
+
+    return () => {
+      cancelled = true;
+      if (omHymSourceRef.current) {
+        try {
+          omHymSourceRef.current.stop();
+        } catch {}
+        try {
+          omHymSourceRef.current.disconnect();
+        } catch {}
+        omHymSourceRef.current = null;
+      }
+      if (omHymGainRef.current) {
+        try {
+          omHymGainRef.current.disconnect();
+        } catch {}
+        omHymGainRef.current = null;
+      }
+      if (omHymContextRef.current) {
+        try {
+          omHymContextRef.current.close();
+        } catch {}
+        omHymContextRef.current = null;
+      }
+      omHymBufferRef.current = null;
+    };
+  }, []);
+
+  const startOmHymAudio = () => {
+    if (omHymStartedRef.current) return;
+
+    const buffer = omHymBufferRef.current;
+    if (!buffer) return;
+
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+
+    omHymStartedRef.current = true;
+
+    const context = omHymContextRef.current || new AudioContextCtor();
+    omHymContextRef.current = context;
+
+    if (omHymSourceRef.current) {
+      try {
+        omHymSourceRef.current.stop();
+      } catch {}
+      try {
+        omHymSourceRef.current.disconnect();
+      } catch {}
+      omHymSourceRef.current = null;
+    }
+
+    if (!omHymGainRef.current) {
+      const gain = context.createGain();
+      gain.gain.value = 2.0;
+      gain.connect(context.destination);
+      omHymGainRef.current = gain;
+    } else {
+      omHymGainRef.current.gain.value = 2.0;
+    }
+
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.loopStart = 0;
+    source.loopEnd = Math.min(15, buffer.duration);
+    source.connect(omHymGainRef.current);
+    omHymSourceRef.current = source;
+
+    if (context.state === 'suspended') {
+      context.resume().catch(() => {});
+    }
+
+    source.start(0, 0);
+    source.onended = () => {
+      if (omHymSourceRef.current === source) {
+        omHymSourceRef.current = null;
+      }
+    };
+  };
+
   const backgroundShapeIndex = isGadaMode
     ? lastParticleShapeIndexRef.current
     : (shapeIndex < gadaShapeIndex ? shapeIndex : shapeIndex - 1);
@@ -536,11 +646,11 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
       </div>
 
       {sceneMode !== 'blast' && (
-        <div className="pm-hud">
+      <div className="pm-hud">
         <div className="pm-info">
           <div className="pm-info__title">Shape: {activeShape}</div>
           <div className="pm-info__subtitle">
-            Scheme: {COLOR_SCHEMES[colorScheme].label} | Motion: {MOTION_PRESETS[motionPreset].label}
+            Scheme: {COLOR_SCHEMES[colorScheme].label}
           </div>
         </div>
         </div>
@@ -559,22 +669,6 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
                 onClick={() => runShapeTransition(index)}
               >
                 {name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="pm-controls__group">
-          <span className="pm-controls__label">Effects</span>
-          <div className="pm-pill-row">
-            {Object.entries(MOTION_PRESETS).map(([key, preset]) => (
-              <button
-                key={key}
-                type="button"
-                className={`pm-pill ${key === motionPreset ? 'active' : ''}`}
-                onClick={() => setMotionPreset(key)}
-              >
-                {preset.label}
               </button>
             ))}
           </div>
@@ -601,7 +695,12 @@ function ParticleMorphScreen({ gadaPointsSource, focusOnGeneratedPoints = true }
         </div>
       )}
 
-      <div className="pm-canvas-host">
+      <div
+        className="pm-canvas-host"
+        onPointerDown={startOmHymAudio}
+        onClick={startOmHymAudio}
+        onTouchStart={startOmHymAudio}
+      >
         <Canvas
           dpr={[1, 1.75]}
           camera={{ position: [0, 8, 32], fov: 55 }}

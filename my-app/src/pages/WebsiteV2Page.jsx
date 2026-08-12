@@ -129,13 +129,16 @@ export default function WebsiteV2Page() {
 
     Promise.allSettled([
       loadGlbPoints('/gada.glb', particleCount, shapeSize),
+      loadGlbPoints('/om2.glb', particleCount, shapeSize),
       // detailBias pulls points toward dense geometry (face, hands, ornaments)
       loadGlbPoints('/hanuman.glb', particleCount, shapeSize, { detailBias: 0.6 }),
-    ]).then(([gada, hanuman]) => {
+    ]).then(([gada, om2, hanuman]) => {
       if (cancelled) return;
       if (gada.status === 'rejected') console.error('Failed to sample gada.glb', gada.reason);
+      if (om2.status === 'rejected') console.error('Failed to sample om2.glb', om2.reason);
       if (hanuman.status === 'rejected') console.error('Failed to sample hanuman.glb', hanuman.reason);
       setStoryPoints({
+        om2: om2.status === 'fulfilled' ? om2.value : null,
         gada: gada.status === 'fulfilled' ? gada.value : null,
         hanuman: hanuman.status === 'fulfilled' ? hanuman.value : null,
       });

@@ -81,6 +81,20 @@ export const newsletterApi = {
     return postJsonWithFallback('/newsletter/google/subscribe', body, 'google subscribe');
   },
 
+  async startDiscordConnect(body) {
+    const payload = await postJsonWithFallback('/newsletter/discord/start', {
+      returnTo: safe(body?.returnTo),
+      phone: safe(body?.phone),
+      source: safe(body?.source),
+      consent_newsletter: body?.consent_newsletter,
+      consent_marketing: body?.consent_marketing,
+    }, 'discord start');
+    if (!payload?.authorizeUrl) {
+      throw new Error('newsletter discord start failed (missing-authorize-url)');
+    }
+    return payload;
+  },
+
   async unsubscribe(body) {
     return postJsonWithFallback('/newsletter/unsubscribe', body, 'unsubscribe');
   },
