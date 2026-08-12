@@ -323,15 +323,20 @@ function SpecBar({ label, value, glow }) {
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const PavanScrollShowcase = () => {
-    const [activeIndex, setActiveIndex] = useState(0);
+const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {}) => {
+    const [internalIndex, setInternalIndex] = useState(0);
+    const activeIndex = controlledIndex !== undefined ? controlledIndex : internalIndex;
+    const setActiveIndex = (i) => {
+        setInternalIndex(i);
+        if (onIndexChange) onIndexChange(i);
+    };
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const activeItem = SECTIONS[activeIndex];
 
     return (
         <section className="pss-section">
             <div className="pss-section__header container">
-                <span className="pavan-eyebrow">The Universe of Pavan</span>
+                <span className="pavan-eyebrow ">The Universe of Pavan</span>
                 <h2 className="pss-section__title">Weapons. Warriors. Worlds.</h2>
             </div>
 

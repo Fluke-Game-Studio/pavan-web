@@ -2,8 +2,9 @@
 // Data layer for career/job listings
 
 import { tryJsonParse, unwrapPayload, safeStr } from '../shared/utils';
+import { resolveApiBase } from '../apiBase';
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const API_BASE = resolveApiBase();
 
 /**
  * Normalizes raw job data from API

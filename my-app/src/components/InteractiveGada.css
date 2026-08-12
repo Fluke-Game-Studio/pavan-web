@@ -189,6 +189,36 @@
   line-height: 1.2;
 }
 
+.gada-top-message__meter {
+  margin-top: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: rgba(8, 12, 18, 0.52);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gada-top-message__meter-label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.gada-top-message__meter-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-variant-numeric: tabular-nums;
+  color: var(--pavan-gold);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+}
+
 .gada-top-message__glow {
   position: absolute;
   top: 50%;

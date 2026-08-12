@@ -5,6 +5,8 @@ const STAR_COUNT = 2500;
 const DPI_CAP = 2;
 const EXPAND_DURATION_MS = 3000;
 const RETURN_DURATION_MS = 1000;
+const HOTSPOT_ENTER_RATIO = 0.28;
+const HOTSPOT_EXIT_RATIO = 0.36;
 
 function rotate(cx, cy, x, y, angle) {
   const cos = Math.cos(angle);
@@ -81,6 +83,8 @@ const BlackHoleIntro = ({ onEnter }) => {
       canvas.style.width = `${cw}px`;
       canvas.style.height = `${ch}px`;
       context.setTransform(dpi, 0, 0, dpi, 0, 0);
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
       stars = [];
       for (let i = 0; i < STAR_COUNT; i += 1) {

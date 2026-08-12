@@ -2,8 +2,9 @@
 // Data layer for job applications
 
 import { tryJsonParse, safeStr, humanizeId, inferTypeFromId } from '../shared/utils';
+import { resolveApiBase } from '../apiBase';
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const API_BASE = resolveApiBase();
 
 /**
  * Normalizes a question object from the API

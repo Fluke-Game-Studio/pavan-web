@@ -2,7 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const apiBase = (process.env.VITE_API_BASE || (mode === 'development' ? '/api' : 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com')).trim();
+
+  return {
   plugins: [react()],
   build: {
     // Optimize bundle size
@@ -36,14 +39,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com',
+        target: apiBase,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true,
+        secure: false,
         headers: {
-          'Origin': 'https://xtipeal88c.execute-api.us-east-1.amazonaws.com'
+          'Origin': apiBase
         }
       },
     },
   },
+  }
 })
