@@ -357,6 +357,10 @@ body.newsletter-bell-open *:hover {
   padding-right: 0.8rem;
 }
 
+.newsletter-bell__provider-card--clickable {
+  cursor: pointer;
+}
+
 .newsletter-bell__provider-card--google:hover {
   background: rgba(255, 255, 255, 0.98);
   border-color: rgba(255, 255, 255, 0.32);
@@ -380,6 +384,15 @@ body.newsletter-bell-open *:hover {
 .newsletter-bell__provider-card--google span,
 .newsletter-bell__provider-card--discord span {
   line-height: 1.1;
+}
+
+.newsletter-bell__google-slot {
+  width: 100%;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
 }
 
 .newsletter-bell__waiting {

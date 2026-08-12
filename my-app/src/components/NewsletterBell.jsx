@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, CheckCircle2, Loader2, Mail, Send, Sparkles, X } from 'lucide-react';
-import { FcGoogle } from 'react-icons/fc';
 import { FaDiscord } from 'react-icons/fa';
 
 import { newsletterApi } from '../services/newsletterApi';
@@ -45,11 +44,11 @@ export default function NewsletterBell({ stacked = false }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [identity, setIdentity] = useState(null);
-  const [googleReady, setGoogleReady] = useState(false);
   const emailRef = useRef('');
   const consentNewsletterRef = useRef(true);
   const consentMarketingRef = useRef(true);
   const googleInitializedRef = useRef(false);
+  const googleRef = useRef(null);
   const popupRef = useRef(null);
   const popupTimerRef = useRef(null);
   const successTimerRef = useRef(null);
@@ -244,8 +243,8 @@ export default function NewsletterBell({ stacked = false }) {
 
     let cancelled = false;
     let tries = 0;
-
-    setGoogleReady(false);
+    googleInitializedRef.current = false;
+    setError('');
 
     const initGoogle = () => {
       if (cancelled) return;
@@ -266,6 +265,11 @@ export default function NewsletterBell({ stacked = false }) {
       }
 
       try {
+        if (!googleRef.current) {
+          window.setTimeout(initGoogle, 150);
+          return;
+        }
+
         if (!googleInitializedRef.current) {
           window.google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
@@ -276,7 +280,16 @@ export default function NewsletterBell({ stacked = false }) {
           googleInitializedRef.current = true;
         }
 
-        setGoogleReady(true);
+        googleRef.current.innerHTML = '';
+        window.google.accounts.id.renderButton(googleRef.current, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          text: 'signin_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: 280,
+        });
       } catch {
         setError('Google sign-in could not initialize. You can still continue with Discord or email.');
       }
@@ -386,40 +399,6 @@ export default function NewsletterBell({ stacked = false }) {
       clearPopup();
       setStatus('error');
       setError(safeStr(err?.message || 'Discord connect failed.'));
-    }
-  }
-
-  function handleGoogleConnect() {
-    if (status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual') return;
-
-    if (!googleReady || !window.google?.accounts?.id) {
-      setStatus('error');
-      setError('Google sign-in is still loading. Please try again.');
-      return;
-    }
-
-    setStatus('loading-google');
-    setError('');
-    setMessage('');
-
-    try {
-      window.google.accounts.id.prompt((notification) => {
-        if (!notification) return;
-
-        if (notification.isNotDisplayed?.()) {
-          setStatus('error');
-          setError('Google sign-in could not be displayed. Try email or Discord instead.');
-          return;
-        }
-
-        if (notification.isSkippedMoment?.() || notification.isDismissedMoment?.()) {
-          setStatus('idle');
-          return;
-        }
-      });
-    } catch (err) {
-      setStatus('error');
-      setError(safeStr(err?.message || 'Google sign-in failed.'));
     }
   }
 
@@ -547,24 +526,9 @@ export default function NewsletterBell({ stacked = false }) {
                 </div>
 
                 <div className="newsletter-bell__provider-grid">
-                  <button
-                    type="button"
-                    onClick={handleGoogleConnect}
-                    disabled={!googleReady || status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual'}
-                    className="newsletter-bell__provider-card newsletter-bell__provider-card--google"
-                  >
-                    {status === 'loading-google' ? (
-                      <>
-                        <Loader2 size={16} className="newsletter-bell__spin" />
-                        Connecting Google...
-                      </>
-                    ) : (
-                      <>
-                        <FcGoogle size={22} aria-hidden="true" />
-                        <span>{googleReady ? 'Sign up with Google' : 'Loading Google...'}</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="newsletter-bell__provider-card newsletter-bell__provider-card--google">
+                    <div ref={googleRef} className="newsletter-bell__google-slot" />
+                  </div>
 
                   <button
                     type="button"
@@ -610,6 +574,7 @@ export default function NewsletterBell({ stacked = false }) {
                     Waiting for Discord authorization...
                   </div>
                 ) : null}
+
               </form>
             </motion.div>
           </>
