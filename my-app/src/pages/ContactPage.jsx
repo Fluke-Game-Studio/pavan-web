@@ -223,7 +223,7 @@ const ContactPage = () => {
                             <span className="social-link__icon"><FaTwitter /></span>
                             <span className="social-link__name">Twitter</span>
                         </a>
-                        <a href="https://discord.gg/flukegames" target="_blank" rel="noreferrer" className="social-link">
+                        <a href="https://discord.gg/xDQPgXkj5X" target="_blank" rel="noreferrer" className="social-link">
                             <span className="social-link__icon"><FaDiscord /></span>
                             <span className="social-link__name">Discord</span>
                         </a>
