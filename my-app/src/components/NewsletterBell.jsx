@@ -9,6 +9,7 @@ import { newsletterApi } from '../services/newsletterApi';
 import './NewsletterBell.css';
 
 const EMAIL_KEY = 'pavan_newsletter_email_v1';
+const DISCORD_JOIN_URL = 'https://discord.gg/xDQPgXkj5X';
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
 
 function safeStr(value) {
@@ -50,23 +51,8 @@ export default function NewsletterBell({ stacked = false }) {
   const consentNewsletterRef = useRef(true);
   const consentMarketingRef = useRef(true);
   const googleInitializedRef = useRef(false);
-  const popupRef = useRef(null);
-  const popupTimerRef = useRef(null);
   const successTimerRef = useRef(null);
   const bellAudioRef = useRef(null);
-
-  const clearPopup = () => {
-    if (popupTimerRef.current) {
-      window.clearInterval(popupTimerRef.current);
-      popupTimerRef.current = null;
-    }
-    if (popupRef.current) {
-      try {
-        popupRef.current.close();
-      } catch {}
-    }
-    popupRef.current = null;
-  };
 
   const preferenceSummary = () => {
     const newsletter = consentNewsletterRef.current;
@@ -78,7 +64,6 @@ export default function NewsletterBell({ stacked = false }) {
   };
 
   const closePanel = () => {
-    clearPopup();
     if (successTimerRef.current) {
       window.clearTimeout(successTimerRef.current);
       successTimerRef.current = null;
@@ -174,7 +159,6 @@ export default function NewsletterBell({ stacked = false }) {
 
   useEffect(() => {
     return () => {
-      clearPopup();
       if (successTimerRef.current) {
         window.clearTimeout(successTimerRef.current);
         successTimerRef.current = null;
@@ -194,42 +178,6 @@ export default function NewsletterBell({ stacked = false }) {
       bellAudioRef.current = audio;
     }
   }, []);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const onMessage = (event) => {
-      if (!popupRef.current || event.source !== popupRef.current) return;
-      const data = event.data;
-      if (!data || typeof data !== 'object') return;
-
-      if (data.type === 'discord-connected' && data.ok) {
-        clearPopup();
-        setStatus('success');
-        setError('');
-        setIdentity({
-          provider: 'discord',
-          name: safeStr(data.name),
-          email: safeStr(data.email),
-          avatar: '',
-        });
-        setMessage(`Discord connected. ${preferenceSummary()}`);
-        if (successTimerRef.current) {
-          window.clearTimeout(successTimerRef.current);
-        }
-        successTimerRef.current = window.setTimeout(() => {
-          setOpen(false);
-        }, 1400);
-      } else if (data.type === 'discord-error') {
-        clearPopup();
-        setStatus('error');
-        setError(safeStr(data.message || 'Discord connect failed.'));
-      }
-    };
-
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [open]);
 
   useEffect(() => {
     document.body.classList.toggle('newsletter-bell-open', open);
@@ -291,7 +239,7 @@ export default function NewsletterBell({ stacked = false }) {
 
   async function handleManualSubmit(event) {
     event.preventDefault();
-    if (status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual') return;
+    if (status === 'loading-google' || status === 'loading-manual') return;
 
     const nextEmail = safeStr(emailRef.current);
     if (!isValidEmail(nextEmail)) {
@@ -338,59 +286,16 @@ export default function NewsletterBell({ stacked = false }) {
     }
   }
 
-  async function handleDiscordConnect() {
-    if (status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual') return;
-
-    setStatus('loading-discord');
-    setError('');
-    setMessage('');
-
-    const popup = window.open('', 'newsletter-discord', 'width=560,height=720,left=140,top=100');
-    if (!popup) {
-      setStatus('error');
-      setError('Popup was blocked. Please allow popups for this page and try again.');
-      return;
-    }
-
-    popupRef.current = popup;
-
+  function handleDiscordJoin() {
     try {
-      popup.document.write(
-        "<p style='font-family:Arial,sans-serif;padding:20px;color:#fff;background:#0b1220;min-height:100vh;margin:0'>Connecting to Discord...</p>"
-      );
-    } catch {}
-
-    popupTimerRef.current = window.setInterval(() => {
-      try {
-        if (!popupRef.current || popupRef.current.closed) {
-          clearPopup();
-          setStatus((current) => (current === 'loading-discord' ? 'idle' : current));
-        }
-      } catch {
-        clearPopup();
-        setStatus((current) => (current === 'loading-discord' ? 'idle' : current));
-      }
-    }, 600);
-
-    try {
-      const data = await newsletterApi.startDiscordConnect({
-        returnTo: window.location.href,
-        source: 'pavan-newsletter',
-        consent_newsletter: consentNewsletterRef.current,
-        consent_marketing: consentMarketingRef.current,
-      });
-
-      popup.location.href = data.authorizeUrl;
-      popup.focus();
-    } catch (err) {
-      clearPopup();
-      setStatus('error');
-      setError(safeStr(err?.message || 'Discord connect failed.'));
+      window.open(DISCORD_JOIN_URL, '_blank', 'noopener,noreferrer');
+    } catch {
+      window.location.href = DISCORD_JOIN_URL;
     }
   }
 
   function handleGoogleConnect() {
-    if (status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual') return;
+    if (status === 'loading-google' || status === 'loading-manual') return;
 
     if (!googleReady || !window.google?.accounts?.id) {
       setStatus('error');
@@ -506,7 +411,7 @@ export default function NewsletterBell({ stacked = false }) {
 
                     <button
                       type="submit"
-                      disabled={status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual'}
+                      disabled={status === 'loading-google' || status === 'loading-manual'}
                       className="newsletter-bell__email-submit"
                       aria-label="Save email"
                       title="Save email"
@@ -550,7 +455,7 @@ export default function NewsletterBell({ stacked = false }) {
                   <button
                     type="button"
                     onClick={handleGoogleConnect}
-                    disabled={!googleReady || status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual'}
+                    disabled={!googleReady || status === 'loading-google' || status === 'loading-manual'}
                     className="newsletter-bell__provider-card newsletter-bell__provider-card--google"
                   >
                     {status === 'loading-google' ? (
@@ -568,21 +473,11 @@ export default function NewsletterBell({ stacked = false }) {
 
                   <button
                     type="button"
-                    onClick={handleDiscordConnect}
-                    disabled={status === 'loading-google' || status === 'loading-discord' || status === 'loading-manual'}
+                    onClick={handleDiscordJoin}
                     className="newsletter-bell__provider-card newsletter-bell__provider-card--discord"
                   >
-                    {status === 'loading-discord' ? (
-                      <>
-                        <Loader2 size={16} className="newsletter-bell__spin" />
-                        Connecting Discord...
-                      </>
-                    ) : (
-                      <>
-                        <FaDiscord size={18} aria-hidden="true" />
-                        Connect Discord
-                      </>
-                    )}
+                    <FaDiscord size={18} aria-hidden="true" />
+                    Join Discord
                   </button>
                 </div>
 
@@ -604,12 +499,6 @@ export default function NewsletterBell({ stacked = false }) {
                   <div className="newsletter-bell__status newsletter-bell__status--error">{error}</div>
                 ) : null}
 
-                {status === 'loading-discord' ? (
-                  <div className="newsletter-bell__waiting">
-                    <Loader2 size={14} className="newsletter-bell__spin" />
-                    Waiting for Discord authorization...
-                  </div>
-                ) : null}
               </form>
             </motion.div>
           </>
