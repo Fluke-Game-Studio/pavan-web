@@ -9,9 +9,7 @@ import { newsletterApi } from '../services/newsletterApi';
 import './NewsletterBell.css';
 
 const EMAIL_KEY = 'pavan_newsletter_email_v1';
-const GOOGLE_CLIENT_ID =
-  (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim() ||
-  '795367262906-dk93nfkpo7v5fnnlt1g8nh0iralh8i8m.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
 
 function safeStr(value) {
   if (value === null || value === undefined) return '';
