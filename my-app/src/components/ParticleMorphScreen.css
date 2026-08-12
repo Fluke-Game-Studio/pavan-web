@@ -56,28 +56,6 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
-.pm-info__counter {
-  margin-top: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.pm-info__counter-value {
-  color: #ffd700;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
-}
-
 .pm-loading {
   position: absolute;
   inset: 0;
@@ -258,12 +236,6 @@
 
   .pm-info__subtitle {
     font-size: 11px;
-  }
-
-  .pm-info__counter {
-    font-size: 10px;
-    padding: 6px 10px;
-    gap: 8px;
   }
 
   .pm-controls {

@@ -76,7 +76,6 @@ const BlackHoleIntro = ({ onEnter }) => {
       ch = rect.height;
       centerx = cw / 2;
       centery = ch / 2;
-      startTimeRef.current = performance.now();
 
       dpi = Math.min(window.devicePixelRatio || 1, DPI_CAP);
       canvas.width = Math.ceil(cw * dpi);
@@ -189,20 +188,10 @@ const BlackHoleIntro = ({ onEnter }) => {
       setSize();
     };
 
-    const handleMouseMove = (event) => {
-      if (openRef.current) return;
-
-      const rect = container.getBoundingClientRect();
-      const centerX = rect.left + (rect.width / 2);
-      const centerY = rect.top + (rect.height / 2);
-      const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
-      const shortestSide = Math.min(rect.width, rect.height);
-      const enterRadius = shortestSide * HOTSPOT_ENTER_RATIO;
-      const exitRadius = shortestSide * HOTSPOT_EXIT_RATIO;
-
-      collapseRef.current = collapseRef.current
-        ? distance <= exitRadius
-        : distance <= enterRadius;
+    const handleMouseMove = () => {
+      if (!openRef.current) {
+        collapseRef.current = true;
+      }
     };
 
     const handleMouseLeave = () => {
@@ -234,20 +223,15 @@ const BlackHoleIntro = ({ onEnter }) => {
       className={`blackhole-scene${buttonOpen ? ' blackhole-scene--open' : ''}`}
     >
       <canvas ref={canvasRef} className="blackhole-scene__canvas" />
-    <button
-      type="button"
-      className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
-      aria-label="Enter the black hole scene"
-      onClick={handleClick}
-    >
-      <img
-        src="/starttextimage.png"
-        alt=""
-        className="blackhole-enter__image"
-        draggable="false"
-      />
-    </button>
-  </div>
+      <button
+        type="button"
+        className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
+        aria-label="Enter the black hole scene"
+        onClick={handleClick}
+      >
+        <span>ENTER</span>
+      </button>
+    </div>
   );
 };
 

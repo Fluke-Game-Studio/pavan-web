@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { BlastScene, GadaScene, BLAST_CLICK_THRESHOLD } from './InteractiveGadaV2';
+import { BlastScene, GadaScene } from './InteractiveGadaV2';
 import {
+  COLOR_SCHEMES,
   MOTION_PRESETS,
   buildColors,
   createStarTexture,
@@ -29,11 +30,6 @@ export const STORY_STAGES = [
     line: 'Before time was counted, there was only the spiral of stars.',
   },
   {
-    key: 'om2',
-    title: 'OM2',
-    line: 'A new form gathers in the wake of the cosmos.',
-  },
-  {
     key: 'gada',
     title: 'The Gada',
     line: 'From the swirling void, a weapon of divine strength took form.',
@@ -51,18 +47,6 @@ export const STORY_STAGES = [
   },
 ];
 
-const STORY_STAGE_VISUALS = {
-  galaxy: { colorScheme: 'neon' },
-  om2: { colorScheme: 'ember' },
-  gada: { colorScheme: 'ocean' },
-  hanuman: { colorScheme: 'ember' },
-  'gada-live': { colorScheme: 'ocean' },
-};
-
-const STORY_DEFAULT_MOTION_PRESET = 'calm';
-const STORY_COLOR_SWAP_RATIO = 0.5;
-const STORY_CONTINUE_FILL_MS = 10000;
-const BLAST_HINT_APPEAR_DELAY_MS = 3400;
 const CLICK_DRAG_TOLERANCE = 8; // px — beyond this it's an orbit drag, not a click
 const LIVE_GADA_STAGE = STORY_STAGES.length - 1;
 
@@ -98,74 +82,18 @@ function CameraRig({ active }) {
   return null;
 }
 
-function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0 }) {
-  const [progress, setProgress] = useState(0);
-  const frameRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const completedRef = useRef(false);
-
-  useEffect(() => {
-    completedRef.current = false;
-    setProgress(0);
-
-    const start = () => {
-      const startedAt = performance.now();
-      const tick = () => {
-        const nextProgress = Math.min(1, (performance.now() - startedAt) / durationMs);
-        setProgress(nextProgress);
-
-        if (nextProgress < 1) {
-          frameRef.current = window.requestAnimationFrame(tick);
-          return;
-        }
-
-        if (!completedRef.current) {
-          completedRef.current = true;
-          if (typeof onComplete === 'function') onComplete();
-        }
-      };
-
-      frameRef.current = window.requestAnimationFrame(tick);
-    };
-
-    timeoutRef.current = window.setTimeout(start, startDelayMs);
-
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
-    };
-  }, [durationMs, onComplete, startDelayMs]);
-
-  const progressPct = Math.round(progress * 100);
-  const fillStyle = {
-    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.98) ${progressPct}%, rgba(255,255,255,0.34) ${progressPct}%, rgba(255,255,255,0.34) 100%)`,
-  };
-
-  return (
-    <span className="ps-caption__hint ps-caption__hint--countdown">
-      <span className="ps-caption__hint-fillText" style={fillStyle}>
-        {label}
-      </span>
-      <span className="ps-caption__hint-bar" aria-hidden="true">
-        <span className="ps-caption__hint-barFill" style={{ width: `${progressPct}%` }} />
-      </span>
-    </span>
-  );
-}
-
 function StoryParticleField({ target, colorScheme, motionPreset }) {
   const pointsRef = useRef(null);
   const groupRef = useRef(null);
   const texture = useMemo(() => createStarTexture(), []);
-  const [displayColorScheme, setDisplayColorScheme] = useState(colorScheme);
   const initial = useMemo(
     () => generateGalaxy(STORY_CONFIG.particleCount, STORY_CONFIG.shapeSize),
     [],
   );
   const positionBuffer = useMemo(() => new Float32Array(initial), [initial]);
   const colorBuffer = useMemo(
-    () => buildColors(initial, displayColorScheme, STORY_CONFIG.shapeSize),
-    [initial, displayColorScheme],
+    () => buildColors(initial, colorScheme, STORY_CONFIG.shapeSize),
+    [initial], // eslint-disable-line react-hooks/exhaustive-deps
   );
   // baseRef holds the clean shape (no drift); drift is a continuous function of
   // time layered on top, so morph start/end never causes a positional jump
@@ -176,8 +104,6 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     from: new Float32Array(initial),
     to: initial,
   });
-  const pendingColorSchemeRef = useRef(colorScheme);
-  const colorSwapAppliedRef = useRef(true);
 
   // Morph to the new target whenever the stage changes
   useEffect(() => {
@@ -188,28 +114,14 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     morphRef.current.active = true;
   }, [target]);
 
-  // Hold the current palette until the morph reaches the midpoint, then swap.
   useEffect(() => {
-    pendingColorSchemeRef.current = colorScheme;
-    if (!morphRef.current.active || colorScheme === displayColorScheme) {
-      colorSwapAppliedRef.current = true;
-      if (displayColorScheme !== colorScheme) {
-        setDisplayColorScheme(colorScheme);
-      }
-      return;
-    }
-
-    colorSwapAppliedRef.current = false;
-  }, [colorScheme, displayColorScheme]);
-
-  useEffect(() => {
-    const nextColors = buildColors(baseRef.current, displayColorScheme, STORY_CONFIG.shapeSize);
+    const nextColors = buildColors(baseRef.current, colorScheme, STORY_CONFIG.shapeSize);
     if (pointsRef.current) {
       const colorAttr = pointsRef.current.geometry.attributes.color;
       colorAttr.array.set(nextColors);
       colorAttr.needsUpdate = true;
     }
-  }, [displayColorScheme]);
+  }, [colorScheme]);
 
   useFrame((state, delta) => {
     const points = pointsRef.current;
@@ -235,11 +147,6 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
         base[i + 2] = THREE.MathUtils.lerp(from[i + 2], to[i + 2], eased);
       }
 
-      if (!colorSwapAppliedRef.current && morphRef.current.progress >= STORY_COLOR_SWAP_RATIO) {
-        colorSwapAppliedRef.current = true;
-        setDisplayColorScheme(pendingColorSchemeRef.current);
-      }
-
       if (morphRef.current.progress >= 1) {
         morphRef.current.active = false;
       }
@@ -254,7 +161,7 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     positionAttr.needsUpdate = true;
 
     if (groupRef.current) {
-      groupRef.current.rotation.y -= delta * preset.spin;
+      groupRef.current.rotation.y += delta * preset.spin;
       groupRef.current.rotation.x = Math.sin(elapsed * 0.12) * 0.08;
     }
   });
@@ -281,17 +188,22 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
   );
 }
 
+// Minimum time on the blast/title screen before a click can exit — the user
+// was just clicking rapidly to trigger it, so absorb the leftover clicks
+const BLAST_EXIT_LOCK_MS = 3200;
 // Pre-warm the home screen after the blast burst settles, not during it
 const WARM_DELAY_MS = 1400;
 
-// Click-driven narrative morph: Galaxy → OM2 → Gada → Hanuman → live Gada.
+// Click-driven narrative morph: Galaxy → Gada → Hanuman → live Gada.
 // `modelPoints` is { gada, hanuman } Float32Arrays preloaded by the parent.
 function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBegin, heroTitleRect }) {
   const [stage, setStage] = useState(0);
+  const [colorScheme, setColorScheme] = useState('ember');
+  const [motionPreset, setMotionPreset] = useState('surge');
   const [blastMode, setBlastMode] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [blastToken, setBlastToken] = useState(0);
-  const [gadaClicks, setGadaClicks] = useState(0);
+  const blastStartRef = useRef(0);
   const exitStartedRef = useRef(false);
   const exitTimersRef = useRef([]);
   const pointerStartRef = useRef(null);
@@ -300,7 +212,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
 
   const targets = useMemo(() => [
     generateGalaxy(STORY_CONFIG.particleCount, STORY_CONFIG.shapeSize),
-    modelPoints?.om2 || null,
     modelPoints?.gada || null,
     modelPoints?.hanuman || null,
   ], [modelPoints]);
@@ -321,9 +232,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   useEffect(() => {
     if (typeof onStageChange === 'function') onStageChange(stage);
   }, [stage, onStageChange]);
-
-  const activeStage = STORY_STAGES[stage];
-  const colorScheme = STORY_STAGE_VISUALS[activeStage.key]?.colorScheme || STORY_STAGE_VISUALS.gada.colorScheme;
 
   // Step forward/backward, skipping stages whose points failed to load
   const step = useCallback((dir) => {
@@ -346,6 +254,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   }, [onExitBegin]);
 
   const handleBlastTrigger = useCallback(() => {
+    blastStartRef.current = performance.now();
     setBlastToken((value) => value + 1);
     setBlastMode(true);
     scheduleWarm();
@@ -363,8 +272,8 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     if (typeof onEnterSaga === 'function') onEnterSaga();
   }, [onEnterSaga]);
 
-  // Enter the Saga: identical to the 5-click path — blast → title screen,
-  // which stays (orbitable) until the timed hand-off begins
+  // Enter the Saga: identical to the 10-click path — blast → title screen,
+  // which stays (orbitable) until the user clicks to continue home
   const beginSagaOutro = useCallback(() => {
     if (exitStartedRef.current || blastMode) return;
     handleBlastTrigger();
@@ -382,18 +291,17 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     if (dist > CLICK_DRAG_TOLERANCE) return;
 
     if (blastMode) {
+      if (performance.now() - blastStartRef.current >= BLAST_EXIT_LOCK_MS) {
+        beginExitZoom();
+      }
       return;
     }
 
     advance();
   };
 
-  const motionPreset = STORY_DEFAULT_MOTION_PRESET;
+  const activeStage = STORY_STAGES[stage];
   const hideChrome = blastMode;
-  const handleContinueComplete = useCallback(() => {
-    if (blastMode || exiting || isLastStage || !nextReady) return;
-    advance();
-  }, [advance, blastMode, exiting, isLastStage, nextReady]);
 
   return (
     <div className="pm-scene">
@@ -403,26 +311,16 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
           <div className="pm-info__title">
             Chapter {stage + 1} / {STORY_STAGES.length} — {activeStage.title}
           </div>
-          {isLiveGada && (
-            <div className="pm-info__counter">
-              <span className="pm-info__counter-label">Gada Clicks</span>
-              <span className="pm-info__counter-value">
-                {String(gadaClicks).padStart(2, '0')} / {String(BLAST_CLICK_THRESHOLD).padStart(2, '0')}
-              </span>
-            </div>
-          )}
+          <div className="pm-info__subtitle">
+            Scheme: {COLOR_SCHEMES[colorScheme].label} | Motion: {MOTION_PRESETS[motionPreset].label}
+          </div>
         </div>
       </div>
       )}
 
       {blastMode && !exiting && (
         <div className="ps-blast-hint" key={blastToken}>
-          <ContinueCountdownHint
-            label="Click anywhere to enter the saga ✦"
-            durationMs={STORY_CONTINUE_FILL_MS}
-            startDelayMs={BLAST_HINT_APPEAR_DELAY_MS}
-            onComplete={beginExitZoom}
-          />
+          Click anywhere to enter the saga ✦
         </div>
       )}
 
@@ -446,15 +344,9 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
         {activeStage.hint ? (
           <span className="ps-caption__hint">{activeStage.hint}</span>
         ) : !isLastStage && (
-          nextReady ? (
-            <ContinueCountdownHint
-              label="Click to continue ✦"
-              durationMs={STORY_CONTINUE_FILL_MS}
-              onComplete={handleContinueComplete}
-            />
-          ) : (
-            <span className="ps-caption__hint ps-caption__hint--loading">Summoning…</span>
-          )
+          <span className={`ps-caption__hint${nextReady ? '' : ' ps-caption__hint--loading'}`}>
+            {nextReady ? 'Click to continue ✦' : 'Summoning…'}
+          </span>
         )}
       </div>
       )}
@@ -480,6 +372,45 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
         <FaChevronRight />
       </button>
       </>
+      )}
+
+      {!hideChrome && (
+      <div className="pm-controls ps-controls">
+        <div className="pm-controls__group">
+          <span className="pm-controls__label">Effects</span>
+          <div className="pm-pill-row">
+            {Object.entries(MOTION_PRESETS).map(([key, preset]) => (
+              <button
+                key={key}
+                type="button"
+                className={`pm-pill ${key === motionPreset ? 'active' : ''}`}
+                onClick={() => setMotionPreset(key)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="pm-controls__group">
+          <span className="pm-controls__label">Glow</span>
+          <div className="pm-color-picker">
+            {Object.entries(COLOR_SCHEMES).map(([key, scheme]) => (
+              <button
+                key={key}
+                type="button"
+                className={`pm-color-option ${colorScheme === key ? 'active' : ''}`}
+                aria-label={scheme.label}
+                title={scheme.label}
+                style={{
+                  background: `linear-gradient(135deg, hsl(${scheme.startHue}, 100%, 56%), hsl(${scheme.endHue}, 100%, 64%))`,
+                }}
+                onClick={() => setColorScheme(key)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
       )}
 
       <div
@@ -536,7 +467,6 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
                       cameraDistance={32}
                       modelScale={5.5}
                       onBlastTrigger={handleBlastTrigger}
-                      onClickCountChange={setGadaClicks}
                     />
                   </ScaleInGroup>
                 )}
