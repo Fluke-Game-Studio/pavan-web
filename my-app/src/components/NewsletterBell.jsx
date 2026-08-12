@@ -9,6 +9,7 @@ import './NewsletterBell.css';
 
 const EMAIL_KEY = 'pavan_newsletter_email_v1';
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+const GOOGLE_FALLBACK_CLIENT_ID = '795367262906-dk93nfkpo7v5fnnlt1g8nh0iralh8i8m.apps.googleusercontent.com';
 
 function safeStr(value) {
   if (value === null || value === undefined) return '';
@@ -249,7 +250,8 @@ export default function NewsletterBell({ stacked = false }) {
     const initGoogle = () => {
       if (cancelled) return;
 
-      if (!GOOGLE_CLIENT_ID) {
+      const clientId = GOOGLE_CLIENT_ID || GOOGLE_FALLBACK_CLIENT_ID;
+      if (!clientId) {
         setError('Google sign-in is not configured yet.');
         return;
       }
@@ -272,7 +274,7 @@ export default function NewsletterBell({ stacked = false }) {
 
         if (!googleInitializedRef.current) {
           window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
+            client_id: clientId,
             callback: handleGoogleCredentialResponse,
             context: 'signup',
             cancel_on_tap_outside: true,
@@ -288,7 +290,6 @@ export default function NewsletterBell({ stacked = false }) {
           text: 'signin_with',
           shape: 'rectangular',
           logo_alignment: 'left',
-          width: 280,
         });
       } catch {
         setError('Google sign-in could not initialize. You can still continue with Discord or email.');
@@ -527,7 +528,9 @@ export default function NewsletterBell({ stacked = false }) {
 
                 <div className="newsletter-bell__provider-grid">
                   <div className="newsletter-bell__provider-card newsletter-bell__provider-card--google">
-                    <div ref={googleRef} className="newsletter-bell__google-slot" />
+                    <div ref={googleRef} className="newsletter-bell__google-slot">
+                      <span>Sign up with Google</span>
+                    </div>
                   </div>
 
                   <button
