@@ -1,0 +1,145 @@
+/* ─── ROOT ─── */
+.nf-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.10) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(232, 56, 58, 0.08) 0%, transparent 40%),
+    linear-gradient(180deg, #060607 0%, #0f0f11 100%);
+  cursor: default;
+}
+
+/* Restore cursors — global CSS sets cursor:none everywhere */
+.nf-root *,
+.nf-root *:hover {
+  cursor: default !important;
+}
+
+.nf-root a,
+.nf-root a *,
+.nf-root button,
+.nf-root button * {
+  cursor: pointer !important;
+}
+
+/* ─── LOGO (mirrors .v2-logo) ─── */
+.nf-logo {
+  position: fixed;
+  top: 0.75rem;
+  left: 1.5rem;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.nf-logo__img {
+  height: 96px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 215, 0, 0.25));
+}
+
+/* ─── CONTENT ─── */
+.nf-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ─── 404 GLITCH NUMBER ─── */
+.nf-code {
+  font-family: var(--font-title, 'Cinzel', serif);
+  font-size: clamp(7rem, 18vw, 13rem);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: #ffd700;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  margin: 0;
+  user-select: none;
+}
+
+/* ─── DIVIDER ─── */
+.nf-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+  margin: 1.5rem auto;
+}
+
+/* ─── TITLE ─── */
+.nf-title {
+  font-family: var(--font-title, 'Cinzel', serif);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 0.75rem;
+}
+
+/* ─── MESSAGE ─── */
+.nf-message {
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 2.5rem;
+}
+
+/* ─── ACTIONS ─── */
+.nf-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ─── BUTTONS ─── */
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.nf-btn--primary {
+  background: #ffd700;
+  color: #06060a;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.3);
+}
+
+.nf-btn--primary:hover {
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.55);
+}
+
+.nf-btn--secondary {
+  background: transparent;
+  color: rgba(255, 215, 0, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+}
+
+.nf-btn--secondary:hover {
+  border-color: rgba(255, 215, 0, 0.7);
+  color: #ffd700;
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 600px) {
+  .nf-logo__img { height: 64px; }
+  .nf-actions { flex-direction: column; width: 100%; padding: 0 2rem; }
+  .nf-btn { width: 100%; }
+}
