@@ -1,0 +1,16 @@
+/* 
+  PavanPage.css has been refactored into modular components and section-based styles.
+  Styles can now be found in:
+  - src/pages/pavan/PavanTheme.css
+  - src/pages/pavan/PavanHero.css
+  - src/pages/pavan/PavanStatsSection.css
+  - src/pages/pavan/PavanFeaturesSection.css
+  - src/pages/pavan/PavanLoreSection.css
+  - src/pages/pavan/PavanCTA.css
+  - src/pages/pavan/PavanInfoSection.css
+  - src/components/pavan/PavanStat.css
+  - src/components/pavan/PavanFeature.css
+  - src/components/pavan/PavanLore.css
+  - src/components/InteractiveGada.css
+  - src/components/PavanTitleModel.css
+*/
