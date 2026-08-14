@@ -232,22 +232,33 @@ const BlackHoleIntro = ({ onEnter }) => {
     <div
       ref={containerRef}
       className={`blackhole-scene${buttonOpen ? ' blackhole-scene--open' : ''}`}
-    >
-      <canvas ref={canvasRef} className="blackhole-scene__canvas" />
-    <button
-      type="button"
-      className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
+      role="button"
+      tabIndex={0}
       aria-label="Enter the black hole scene"
       onClick={handleClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleClick();
+        }
+      }}
     >
-      <img
-        src="/starttextimage.png"
-        alt=""
-        className="blackhole-enter__image"
-        draggable="false"
-      />
-    </button>
-  </div>
+      <canvas ref={canvasRef} className="blackhole-scene__canvas" />
+      <button
+        type="button"
+        className={`blackhole-enter${buttonOpen ? ' blackhole-enter--open' : ''}`}
+        aria-hidden="true"
+        tabIndex={-1}
+        onClick={handleClick}
+      >
+        <img
+          src="/starttextimage.png"
+          alt=""
+          className="blackhole-enter__image"
+          draggable="false"
+        />
+      </button>
+    </div>
   );
 };
 
