@@ -1,0 +1,52 @@
+body.gada-standalone-page {
+  overflow: hidden;
+  cursor: auto !important;
+}
+
+body.gada-standalone-page::before {
+  opacity: 0;
+}
+
+body.gada-standalone-page *,
+body.gada-standalone-page *:hover,
+body.gada-standalone-page a,
+body.gada-standalone-page button,
+body.gada-standalone-page input,
+body.gada-standalone-page textarea,
+body.gada-standalone-page select,
+body.gada-standalone-page [role='button'] {
+  cursor: auto !important;
+}
+
+.gada-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background: transparent;
+}
+
+.gada-page__intro-layer,
+.gada-page__screen-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.gada-page__screen-layer--base {
+  z-index: 1;
+}
+
+.gada-page__intro-layer {
+  z-index: 2;
+}
+
+.gada-page .pm-scene {
+  height: 100vh;
+  min-height: 100svh;
+  width: 100%;
+}
+
+.gada-page .pm-scene canvas {
+  cursor: none;
+}

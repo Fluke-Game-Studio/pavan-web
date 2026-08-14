@@ -1,0 +1,82 @@
+.blackhole-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.blackhole-scene__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.blackhole-scene::before {
+  content: none;
+}
+
+.blackhole-scene::after {
+  content: none;
+}
+
+.blackhole-enter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 255px;
+  height: 255px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: opacity 500ms ease, transform 500ms ease;
+  cursor: pointer !important;
+  pointer-events: auto;
+}
+
+.blackhole-enter__image {
+  display: block;
+  width: min(180px, 72%);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 500ms ease, filter 500ms ease, opacity 500ms ease;
+}
+
+.blackhole-enter:hover .blackhole-enter__image {
+  transform: scale(1.03);
+  filter: brightness(1.15);
+}
+
+.blackhole-enter--open {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.blackhole-scene--open::after {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .blackhole-enter {
+    width: 200px;
+    height: 200px;
+  }
+
+  .blackhole-enter__image {
+    width: min(150px, 70%);
+  }
+}
