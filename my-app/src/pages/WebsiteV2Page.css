@@ -47,7 +47,7 @@
 }
 
 .v2-logo__img {
-  height: 96px;
+  height: 104px;
   width: auto;
   object-fit: contain;
   filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,215,0,0.25));
@@ -710,6 +710,6 @@
   }
 
   .v2-logo__img {
-    height: 28px;
+    height: 32px;
   }
 }
