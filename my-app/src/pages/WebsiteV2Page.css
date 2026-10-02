@@ -120,6 +120,7 @@
 .v2-bottom-bar__right {
   display: flex;
   justify-content: flex-end;
+  padding-right: 4.75rem;
 }
 
 .v2-bottom-bar__center {
@@ -181,27 +182,30 @@
 .v2-replay-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.78rem;
+  gap: 0.55rem;
+  min-height: 3.5rem;
+  padding: 0 1.25rem 0 1rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   white-space: nowrap;
-  border-radius: 2px;
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  color: var(--volt-primary);
-  background: rgba(10, 0, 5, 0.6);
-  backdrop-filter: blur(6px);
-  transition: background 0.25s ease, border-color 0.25s ease;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 204, 122, 0.28);
+  color: #fff5dc;
+  background: linear-gradient(145deg, rgba(29, 19, 9, 0.95), rgba(111, 64, 21, 0.9) 60%, rgba(255, 211, 107, 0.25));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  transition: background 0.25s ease, border-color 0.25s ease, filter 0.25s ease, transform 0.25s ease;
 }
 
 .v2-replay-btn:hover {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: var(--volt-primary);
+  filter: brightness(1.04);
+  background: linear-gradient(145deg, rgba(29, 19, 9, 1), rgba(111, 64, 21, 0.95) 60%, rgba(255, 211, 107, 0.35));
+  border-color: rgba(255, 214, 130, 0.45);
 }
 
 .v2-replay-btn svg {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 /* Dot nav — sits inline between arrows in bottom-bar__center */
@@ -706,6 +710,16 @@
 
   .v2-persist-btn {
     padding: 0.5rem 1rem;
+    font-size: 0.72rem;
+  }
+
+  .v2-bottom-bar__right {
+    padding-right: 3.75rem;
+  }
+
+  .v2-replay-btn {
+    min-height: 3.1rem;
+    padding: 0 1rem 0 0.9rem;
     font-size: 0.72rem;
   }
 
