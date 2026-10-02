@@ -95,5 +95,17 @@ function AppShell() {
       {showDiscordJoin && <FloatingDiscordJoin />}
       {showNewsletterBell && <NewsletterBell stacked={showDiscordJoin} />}
     </div>
-  )
+  );
 }
+
+function App() {
+  return (
+    <ThemeProvider>
+      <BrowserRouter>
+        <AppShell />
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
+
+export default App;
