@@ -184,50 +184,95 @@
     opacity: 0.85;
 }
 
-/* ─── Spec bars ──────────────────────────────────────────────────────────── */
+/* ─── Mala meters (prayer-bead trait rings) ──────────────────────────────── */
 
 .pss-specs {
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.4rem;
     margin-top: 2rem;
-    max-width: 400px;
+    max-width: 420px;
 }
 
-.pss-spec-item {
+.pss-mala {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-}
-
-.pss-spec-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    width: 100px;
+    text-align: center;
 }
 
-.pss-spec-label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--text-secondary);
-    font-weight: 700;
+.pss-mala__ring {
+    position: relative;
+    width: 88px;
+    height: 88px;
 }
 
-.pss-spec-value {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 800;
-}
-
-.pss-spec-track {
+.pss-mala__ring svg {
     width: 100%;
-    height: 2px;
-    background: var(--pavan-border);
+    height: 100%;
+    overflow: visible;
 }
 
-.pss-spec-fill {
-    height: 100%;
+.pss-mala__inner {
+    fill: none;
+    stroke: var(--mala-glow);
+    stroke-opacity: 0.12;
+    stroke-width: 1;
+}
+
+.pss-mala__bead {
+    fill: rgba(255, 255, 255, 0.13);
+}
+
+.pss-mala__bead--on {
+    fill: var(--mala-glow);
+    filter: drop-shadow(0 0 3px var(--mala-glow));
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pss-bead-on 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes pss-bead-on {
+    from { opacity: 0; transform: scale(0.2); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.pss-mala__glyph {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 0 18px;
+    font-family: 'Noto Serif Devanagari', 'Tiro Devanagari Hindi', 'Kohinoor Devanagari', 'Devanagari MT', 'Mangal', 'Nirmala UI', serif;
+    font-size: 1.02rem;
+    line-height: 1;
+    color: var(--mala-glow);
+    text-shadow: 0 0 14px var(--mala-glow);
+    white-space: nowrap;
+}
+
+.pss-mala__label {
+    margin-top: 0.7rem;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.pss-mala__value {
+    margin-top: 0.2rem;
+    font-family: 'Noto Serif Devanagari', 'Tiro Devanagari Hindi', 'Kohinoor Devanagari', 'Devanagari MT', 'Mangal', 'Nirmala UI', serif;
+    font-size: 1rem;
+    color: var(--mala-glow);
+    opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pss-mala__bead--on { animation: none; }
 }
 
 /* ─── Right: Open 3D Viewbox ────────────────────────────────────────────── */
@@ -318,9 +363,7 @@
     background: var(--pavan-border);
 }
 
-:root[data-theme='light'] .pss-spec-track {
-    background: var(--pavan-border);
-}
+
 
 :root[data-theme='light'] .pss-tab-number {
     opacity: 0.7;
@@ -414,4 +457,54 @@
   transition: opacity 0.35s ease;
   background: radial-gradient(circle at center, rgba(8, 4, 6, 0.55), transparent 70%);
   animation: none;
+}
+
+/* ─── Streaming description text ─────────────────────────────────────────── */
+.pss-stream-cursor {
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  position: relative;
+  vertical-align: text-bottom;
+}
+
+.pss-stream-cursor::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.08em;
+  width: 2px;
+  height: 1.05em;
+  background: var(--active-glow, currentColor);
+  opacity: 0.85;
+  animation: pss-cursor-blink 0.9s steps(2, start) infinite;
+}
+
+.pss-stream-cursor.is-done::after {
+  animation: pss-cursor-fade 0.8s ease 0.4s forwards;
+}
+
+@keyframes pss-cursor-blink {
+  to { visibility: hidden; }
+}
+
+@keyframes pss-cursor-fade {
+  to { opacity: 0; }
+}
+
+/* Visually hidden, still read by screen readers (they get the full text at once) */
+.pss-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pss-stream-cursor { display: none; }
 }
