@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, Suspense, useMemo, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
@@ -23,10 +23,11 @@ const SECTIONS = [
         modelUrl: '/gada.glb',
         scale: 2.5,
         position: [0, -0.6, 0], // Adjusted to be closer to pedestal
+        // glyph = Sanskrit/Hindi term shown in Devanagari; roman = its transliteration
         specs: [
-            { label: 'Power Level', value: 90 },
-            { label: 'Divine Weight', value: 100 },
-            { label: 'Range', value: 75 },
+            { label: 'Power', glyph: 'शक्ति', roman: 'Shakti', value: 90 },
+            { label: 'Divine Weight', glyph: 'भार', roman: 'Bhaar', value: 100 },
+            { label: 'Reach', glyph: 'विस्तार', roman: 'Vistaar', value: 75 },
         ],
     },
     {
@@ -43,9 +44,9 @@ const SECTIONS = [
         scale: 2.9, // seated pose: larger than the old standing model so it fills the view
         position: [0, -1.5, 0], // Adjusted to be closer to pedestal
         specs: [
-            { label: 'Strength', value: 95 },
-            { label: 'Agility', value: 88 },
-            { label: 'Devotion', value: 100 },
+            { label: 'Strength', glyph: 'बल', roman: 'Bal', value: 95 },
+            { label: 'Agility', glyph: 'चपलता', roman: 'Chapalta', value: 88 },
+            { label: 'Devotion', glyph: 'भक्ति', roman: 'Bhakti', value: 100 },
         ],
     },
     {
@@ -59,10 +60,54 @@ const SECTIONS = [
         tag: 'Prototype Build',
         modelUrl: null,
         scale: 1.8,
-        position: [0, -0.2, 0], 
-        specs: [],
+        position: [0, -0.2, 0],
+        specs: [
+            { label: 'Serenity', glyph: 'शांति', roman: 'Shaanti', value: 85 },
+            { label: 'Peril', glyph: 'संकट', roman: 'Sankat', value: 90 },
+            { label: 'Mystery', glyph: 'रहस्य', roman: 'Rahasya', value: 100 },
+        ],
     },
 ];
+
+// Types text out like a streamed reply. The not-yet-shown remainder is rendered
+// invisibly in the same flow, so the paragraph never reflows or changes height.
+function StreamingText({ text, charsPerSecond = 85, startDelayMs = 400 }) {
+    const reduceMotion = useReducedMotion();
+    const [count, setCount] = useState(reduceMotion ? text.length : 0);
+
+    useEffect(() => {
+        if (reduceMotion) {
+            setCount(text.length);
+            return undefined;
+        }
+        setCount(0);
+        let raf;
+        let startedAt = null;
+        const tick = (now) => {
+            if (startedAt === null) startedAt = now;
+            const n = Math.min(text.length, Math.floor(((now - startedAt) / 1000) * charsPerSecond));
+            setCount(n);
+            if (n < text.length) raf = requestAnimationFrame(tick);
+        };
+        const timer = setTimeout(() => {
+            raf = requestAnimationFrame(tick);
+        }, startDelayMs);
+        return () => {
+            clearTimeout(timer);
+            cancelAnimationFrame(raf);
+        };
+    }, [text, reduceMotion, charsPerSecond, startDelayMs]);
+
+    const done = count >= text.length;
+    return (
+        <>
+            <span className="pss-sr-only">{text}</span>
+            <span aria-hidden="true">{text.slice(0, count)}</span>
+            <span className={`pss-stream-cursor${done ? ' is-done' : ''}`} aria-hidden="true" />
+            <span aria-hidden="true" style={{ opacity: 0 }}>{text.slice(count)}</span>
+        </>
+    );
+}
 
 const VIEWER_HINTS = [
     { key: 'zoom', label: 'Scroll to zoom in and out', Icon: TbZoomInArea },
@@ -343,23 +388,47 @@ function ParticleBurst({ triggerKey }) {
 }
 
 
-// ─── Spec bar ─────────────────────────────────────────────────────────────────
-function SpecBar({ label, value, glow }) {
+// ─── Mala meter ───────────────────────────────────────────────────────────────
+// A ring of 36 prayer beads (a quarter of a 108-bead japa mala). Beads light up one
+// by one, as if being counted, up to the trait's value. The Sanskrit term sits in
+// the centre in Devanagari and the value is written in Devanagari numerals.
+const MALA_BEADS = 36;
+const DEVANAGARI_DIGITS = '०१२३४५६७८९';
+const toDevanagari = (n) => String(n).replace(/\d/g, (d) => DEVANAGARI_DIGITS[d]);
+
+function MalaMeter({ glyph, roman, label, value, glow, index }) {
+    const lit = Math.round((value / 100) * MALA_BEADS);
+    const beads = Array.from({ length: MALA_BEADS }, (_, i) => {
+        const angle = ((-90 + i * (360 / MALA_BEADS)) * Math.PI) / 180;
+        return { x: 44 + 36 * Math.cos(angle), y: 44 + 36 * Math.sin(angle), on: i < lit };
+    });
+
     return (
-        <div className="pss-spec-item">
-            <div className="pss-spec-header">
-                <span className="pss-spec-label">{label}</span>
-                <span className="pss-spec-value" style={{ color: glow }}>{value}%</span>
+        <div
+            className="pss-mala"
+            style={{ '--mala-glow': glow }}
+            title={`${roman} (${label}): ${value}%`}
+            role="img"
+            aria-label={`${label}: ${value} percent (${roman})`}
+        >
+            <div className="pss-mala__ring">
+                <svg viewBox="0 0 88 88" aria-hidden="true">
+                    <circle cx="44" cy="44" r="27" className="pss-mala__inner" />
+                    {beads.map((b, i) => (
+                        <circle
+                            key={i}
+                            cx={b.x}
+                            cy={b.y}
+                            r={b.on ? 2.7 : 1.9}
+                            className={b.on ? 'pss-mala__bead pss-mala__bead--on' : 'pss-mala__bead'}
+                            style={b.on ? { animationDelay: `${0.6 + index * 0.2 + i * 0.03}s` } : undefined}
+                        />
+                    ))}
+                </svg>
+                <span className="pss-mala__glyph" lang="hi" aria-hidden="true">{glyph}</span>
             </div>
-            <div className="pss-spec-track">
-                <motion.div
-                    className="pss-spec-fill"
-                    style={{ background: `linear-gradient(90deg, ${glow}88, ${glow})` }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${value}%` }}
-                    transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                />
-            </div>
+            <span className="pss-mala__label">{label}</span>
+            <span className="pss-mala__value" lang="hi" aria-hidden="true">{toDevanagari(value)}</span>
         </div>
     );
 }
@@ -462,11 +531,21 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange, acti
                                 </span>
                                 <h2 className="pss-title">{activeItem.title}</h2>
                                 <p className="pss-subtitle">{activeItem.subtitle}</p>
-                                <p className="pss-description">{activeItem.description}</p>
+                                <p className="pss-description">
+                                    <StreamingText text={activeItem.description} />
+                                </p>
 
                                 <div className="pss-specs">
-                                    {activeItem.specs.map((s) => (
-                                        <SpecBar key={s.label} label={s.label} value={s.value} glow={activeItem.glow} />
+                                    {activeItem.specs.map((s, i) => (
+                                        <MalaMeter
+                                            key={s.label}
+                                            index={i}
+                                            glyph={s.glyph}
+                                            roman={s.roman}
+                                            label={s.label}
+                                            value={s.value}
+                                            glow={activeItem.glow}
+                                        />
                                     ))}
                                 </div>
                             </motion.div>
