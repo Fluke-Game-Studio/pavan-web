@@ -5,9 +5,16 @@ import { useGLTF, PerspectiveCamera, Center } from '@react-three/drei';
 import * as THREE from 'three';
 import './PavanTitleModel.css';
 
-function TitleModel({ url, mousePositionRef }) {
+function TitleModel({ url, mousePositionRef, invalidateRef }) {
     const { scene } = useGLTF(url);
+    const { invalidate } = useThree();
     const modelRef = useRef();
+
+    // Expose invalidate so mouse moves outside the Canvas can wake the render loop
+    useEffect(() => {
+        invalidateRef.current = invalidate;
+        return () => { invalidateRef.current = null; };
+    }, [invalidate, invalidateRef]);
 
     // Optimize model materials and make V glow
     useEffect(() => {
@@ -39,8 +46,13 @@ function TitleModel({ url, mousePositionRef }) {
             const targetY = -mousePositionRef.current.y * 0.3;
             
             // Smoothly interpolate rotation based on mouse position
-            modelRef.current.rotation.y += (targetX - modelRef.current.rotation.y) * 0.08;
-            modelRef.current.rotation.x += (targetY - modelRef.current.rotation.x) * 0.08;
+            const dy = targetX - modelRef.current.rotation.y;
+            const dx = targetY - modelRef.current.rotation.x;
+            modelRef.current.rotation.y += dy * 0.08;
+            modelRef.current.rotation.x += dx * 0.08;
+
+            // On-demand rendering: keep drawing only until the tilt has settled
+            if (Math.abs(dy) > 0.0005 || Math.abs(dx) > 0.0005) invalidate();
         }
     });
 
@@ -58,6 +70,7 @@ function TitleModel({ url, mousePositionRef }) {
 
 const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
     const mousePosition = useRef({ x: 0, y: 0 });
+    const invalidateRef = useRef(null);
     const [isScrolled, setIsScrolled] = useState(false);
 
     // Scroll-linked motion for the backdrop
@@ -76,6 +89,7 @@ const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
             x: ((clientX - left) / width) * 2 - 1,
             y: -((clientY - top) / height) * 2 + 1
         };
+        if (invalidateRef.current) invalidateRef.current();
     };
 
     // Track scroll to center the model
@@ -118,7 +132,7 @@ const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
                     powerPreference: 'high-performance'
                 }}
                 style={{ background: 'transparent' }}
-                frameloop="always"
+                frameloop="demand"
             >
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
 
@@ -144,7 +158,7 @@ const PavanTitleModel = ({ modelPath = '/titlenew.glb' }) => {
 
                 {/* Model */}
                 <Suspense fallback={null}>
-                    <TitleModel url={modelPath} mousePositionRef={mousePosition} />
+                    <TitleModel url={modelPath} mousePositionRef={mousePosition} invalidateRef={invalidateRef} />
                 </Suspense>
             </Canvas>
         </div>

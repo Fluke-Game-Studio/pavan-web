@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaDiscord,
   FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaExpand, FaCompress, FaTimes,
@@ -74,6 +74,71 @@ const DISCOVER_CARD = {
   show: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
 };
 
+// Rotating call-to-action copy for the careers button
+// Keep each under ~26 characters so it fits the fixed-width pill
+const CTA_PHRASES = [
+  'Work With Us',
+  'Break Our Game. Join QA',
+  'Unreal Wizard? Join Us',
+  'Join the Primal Saga',
+  '3D Artist? Sculpt Gods',
+  'Be a Legend. Beta Test',
+  'Lead the Saga: PM Wanted',
+  'Playtest. Break. Repeat.',
+  'Coders: Code the Storm',
+  'Animator? Make Gods Move',
+  'Marketer? Sell the Legend',
+  'Writer? Pen the Legend',
+  'Composer? Score the Storm',
+  'VFX? Ignite the Sky',
+  'Builders: Forge Lanka',
+  'Build the Legend With Us',
+];
+const CTA_INTERVAL_MS = 5000; // each message holds for 5 seconds
+
+function CareersButton() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion || paused) return undefined;
+    const id = setInterval(() => setIndex((i) => (i + 1) % CTA_PHRASES.length), CTA_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [reduceMotion, paused]);
+
+  return (
+    <motion.a
+      href={CAREERS_URL}
+      target="_blank"
+      rel="noreferrer"
+      className="v2-persist-btn v2-persist-btn--gold v2-cta"
+      aria-label="Work with us: join our testing team or apply for an open role"
+      onHoverStart={() => setPaused(true)}
+      onHoverEnd={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      whileHover={{ scale: 1.06, y: -2 }}
+      whileTap={{ scale: 0.94 }}
+    >
+      <span className="v2-cta__label" aria-hidden="true">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={reduceMotion ? 'static' : index}
+            className="v2-cta__text"
+            initial={{ y: 14, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -14, opacity: 0 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {reduceMotion ? CTA_PHRASES[0] : CTA_PHRASES[index]}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+    </motion.a>
+  );
+}
+
 export default function WebsiteV2Page() {
   const [phase, setPhase]             = useState('blackhole');
   const [morphPhase, setMorphPhase]   = useState('collapse');
@@ -131,7 +196,7 @@ export default function WebsiteV2Page() {
       loadGlbPoints('/gada.glb', particleCount, shapeSize),
       loadGlbPoints('/om2.glb', particleCount, shapeSize),
       // detailBias pulls points toward dense geometry (face, hands, ornaments)
-      loadGlbPoints('/hanuman.glb', particleCount, shapeSize, { detailBias: 0.6 }),
+      loadGlbPoints('/hanuman.glb', particleCount, shapeSize, { detailBias: 0.6, pose: true }),
     ]).then(([gada, om2, hanuman]) => {
       if (cancelled) return;
       if (gada.status === 'rejected') console.error('Failed to sample gada.glb', gada.reason);
@@ -179,6 +244,13 @@ export default function WebsiteV2Page() {
     if (phase !== 'panels') return;
 
     const onWheel = (e) => {
+      // Interactive widgets (e.g. the 3D map) own the wheel for zoom: don't
+      // navigate panels, and don't preventDefault so their handlers run normally
+      if (e.target instanceof Element && e.target.closest('[data-wheel-lock]')) {
+        accDeltaRef.current = 0;
+        return;
+      }
+
       e.preventDefault();
 
       if (isScrollingRef.current) {
@@ -280,16 +352,7 @@ export default function WebsiteV2Page() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...CHROME_SPRING, delay: 0.7 }}
         >
-          <motion.a
-            href={CAREERS_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="v2-persist-btn v2-persist-btn--gold"
-            whileHover={{ scale: 1.06, y: -2 }}
-            whileTap={{ scale: 0.94 }}
-          >
-            Work With Us
-          </motion.a>
+          <CareersButton />
         </motion.div>
 
         {showNav && (
@@ -438,7 +501,11 @@ export default function WebsiteV2Page() {
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   >
                     {heavyReady && (
-                      <PavanScrollShowcase activeIndex={showcaseTab} onIndexChange={setShowcaseTab} />
+                      <PavanScrollShowcase
+                        activeIndex={showcaseTab}
+                        onIndexChange={setShowcaseTab}
+                        active={phase === 'panels' && activePanel === 1}
+                      />
                     )}
                   </motion.div>
                 </section>

@@ -1,8 +1,9 @@
-import React, { useRef, Suspense, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useRef, Suspense, useMemo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
+import { TbRotate360, TbZoomInArea } from 'react-icons/tb';
 import * as THREE from 'three';
 import SciChartMap from './scichart/SciChartMap';
 import './PavanScrollShowcase.css';
@@ -16,9 +17,9 @@ const SECTIONS = [
         title: 'Sacred Gada',
         subtitle: 'Weapon of the Divine',
         description:
-            "The mace isn't merely about precision — it's about sheer, overwhelming power. In the game, the Gada bounces across the battlefield relentlessly targeting enemies within the player's field of view. Its unpredictable motion mirrors Hanuman's own ferocity.",
+            "Forged from the first breath of the Wind God, the Gada does not merely strike. It descends. When the battle turns desperate, it tears across the field and hunts every foe who dares to stand within the warrior's sight. No path is ever the same twice, for its wrath moves as Hanuman does: wild, relentless, and without mercy.",
         glow: '#FFD700',
-        tag: 'WIP — Prototype Phase',
+        tag: 'WIP: Prototype Phase',
         modelUrl: '/gada.glb',
         scale: 2.5,
         position: [0, -0.6, 0], // Adjusted to be closer to pedestal
@@ -35,11 +36,11 @@ const SECTIONS = [
         title: 'Lord Hanuman',
         subtitle: 'The Primal Warrior',
         description:
-            'A dynamic and powerful hero blending immense strength, agility, and devotion. His abilities include devastating melee attacks, divine movement via Flight and Divine Leap, and support powers like Healing Touch and Mighty Roar.',
+            "Son of the Wind, servant of Rama, the warrior who once crossed an ocean in a single leap and set Lanka ablaze. His fists break armies. His Flight rides the storm of his father, his Divine Leap splits the sky, his Healing Touch raises the fallen, and his Mighty Roar shakes the heavens. His strength has no limit, yet it kneels to devotion alone.",
         glow: '#FF6B35',
-        tag: 'WIP — Character Design',
+        tag: 'WIP: Character Design',
         modelUrl: '/hanuman.glb',
-        scale: 1.4,
+        scale: 2.9, // seated pose: larger than the old standing model so it fills the view
         position: [0, -1.5, 0], // Adjusted to be closer to pedestal
         specs: [
             { label: 'Strength', value: 95 },
@@ -51,9 +52,9 @@ const SECTIONS = [
         id: 'world',
         tabLabel: '03 World',
         eyebrow: 'Exploration',
-        title: 'New York City',
+        title: 'An Unknown World',
         subtitle: '3D LiDAR Topology Map',
-        description: 'Explore the high-precision 3D topology of New York City. This interactive LiDAR map demonstrates the primal scale of the urban jungle that Hanuman will traverse.',
+        description: "No map remembers this land. Rivers of silver light wind through valleys older than memory, and the air hums with a quiet that feels almost like a welcome. It is gentle here, and breathtaking, but beauty is only the mask of something wild. Beneath the stillness, the ground shifts and the shadows watch. Only the Wind's son dares to walk it.",
         glow: '#A855F7',
         tag: 'Prototype Build',
         modelUrl: null,
@@ -63,20 +64,83 @@ const SECTIONS = [
     },
 ];
 
+const VIEWER_HINTS = [
+    { key: 'zoom', label: 'Scroll to zoom in and out', Icon: TbZoomInArea },
+    { key: 'rotate', label: 'Click and drag to rotate', Icon: TbRotate360 },
+];
+
+// Small, muted bronze badge: a hint, not a call to action
+const HINT_ICON_STYLE = {
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'rgba(255, 245, 220, 0.85)',
+    fontSize: 16,
+    border: '1px solid rgba(255, 204, 122, 0.16)',
+    background: 'linear-gradient(145deg, #1a1108, #4a2a0f 65%, #a37a33)',
+    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.4)',
+};
+
 // ─── Spinning 3D model inside the archive ─────────────────────────────────────
-function ModelViewer({ item, mousePos }) {
-    const { scene: rawScene } = useGLTF(item.modelUrl || '/gada.glb'); // Fallback or handle null below
-    const scene = useMemo(() => {
-        if (!item.modelUrl) return null;
+// Prepared (cloned / posed / measured) models, so returning to a tab is instant
+const PREPARED_MODELS = new Map();
+
+// `onShown` fires once the model has mounted and had a couple of frames to render,
+// letting the parent drop its loading spinner at the right moment.
+function ModelViewer({ item, mousePos, onShown }) {
+    const { scene: rawScene, animations } = useGLTF(item.modelUrl || '/gada.glb'); // Fallback or handle null below
+    // `center` = horizontal (x, z) centre of the posed model in unscaled units. The
+    // viewer orbits the camera around the origin, so an off-centre pivot makes the
+    // model swing around instead of turning in place.
+    const { scene, center } = useMemo(() => {
+        if (!item.modelUrl) return { scene: null, center: [0, 0] };
+        const cached = PREPARED_MODELS.get(item.id);
+        if (cached && cached.raw === rawScene) return cached.value;
         const cloned = SkeletonUtils.clone(rawScene);
         cloned.traverse((child) => {
             if (child.isMesh && child.material) {
                 child.material = child.material.clone();
             }
         });
-        return cloned;
-    }, [rawScene, item.modelUrl]);
+        let centerXZ = [0, 0];
+        // Hanuman ships with an authored pose clip; hold it on its last keyframe
+        // instead of showing the rig's default T-pose
+        if (item.id === 'hanuman') {
+            if (animations && animations.length) {
+                const mixer = new THREE.AnimationMixer(cloned);
+                mixer.clipAction(animations[0]).play();
+                mixer.setTime(animations[0].duration);
+            }
+            // Measure the posed (skinned) bounds, then offset by their centre
+            cloned.updateMatrixWorld(true);
+            cloned.traverse((child) => {
+                if (child.isSkinnedMesh) child.skeleton.update();
+            });
+            const box = new THREE.Box3().setFromObject(cloned, true);
+            if (!box.isEmpty()) {
+                const c = box.getCenter(new THREE.Vector3());
+                centerXZ = [c.x, c.z];
+            }
+        }
+        const value = { scene: cloned, center: centerXZ };
+        PREPARED_MODELS.set(item.id, { raw: rawScene, value });
+        return value;
+    }, [rawScene, animations, item.modelUrl, item.id]);
     const groupRef = useRef();
+
+    // Counted in useFrame (not a timer) so it only advances while the canvas is
+    // really rendering: the first frames are where the GPU texture upload happens
+    const shownFramesRef = useRef(0);
+    useEffect(() => {
+        shownFramesRef.current = 0;
+    }, [item.id]);
+    useFrame(() => {
+        if (!onShown || shownFramesRef.current >= 3) return;
+        shownFramesRef.current += 1;
+        if (shownFramesRef.current === 3) onShown();
+    });
 
     // Emissive overrides removed to respect original material
 
@@ -100,7 +164,10 @@ function ModelViewer({ item, mousePos }) {
 
     return (
         <group ref={groupRef} position={item.position}>
-            <primitive object={scene} scale={item.scale} />
+            {/* Offset puts the model's visual centre on the origin the camera orbits */}
+            <group position={[-center[0] * item.scale, 0, -center[1] * item.scale]}>
+                <primitive object={scene} scale={item.scale} />
+            </group>
             <pointLight position={[0, 2, 1]} intensity={3} color={item.glow} distance={6} decay={2} />
         </group>
     );
@@ -111,7 +178,6 @@ function HolographicPlatform({ color }) {
     const ring1Ref = useRef();
     const ring2Ref = useRef();
     const ring3Ref = useRef();
-    const shardsRef = useRef();
 
     useFrame((state) => {
         const t = state.clock.getElapsedTime();
@@ -120,16 +186,6 @@ function HolographicPlatform({ color }) {
         if (ring1Ref.current) ring1Ref.current.rotation.z = t * 0.4;
         if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.25;
         if (ring3Ref.current) ring3Ref.current.rotation.z = t * 0.15;
-
-        // Floating shards bobbing
-        if (shardsRef.current) {
-            shardsRef.current.children.forEach((shard, i) => {
-                const angle = (i / 4) * Math.PI * 2;
-                shard.position.y = Math.sin(t * 2 + i) * 0.15;
-                shard.rotation.x = t * 0.5 + i;
-                shard.rotation.y = t * 0.8;
-            });
-        }
     });
 
     return (
@@ -161,20 +217,6 @@ function HolographicPlatform({ color }) {
                     {/* Pulsing shader-like effect via prop if we had more time, simple opacity for now */}
                 </meshBasicMaterial>
             </mesh>
-
-            {/* Floating Data Shards (Cardinal points) */}
-            <group ref={shardsRef}>
-                {[0, 90, 180, 270].map((deg, i) => {
-                    const rad = (deg * Math.PI) / 180;
-                    const dist = 2.4;
-                    return (
-                        <mesh key={i} position={[Math.cos(rad) * dist, 0, Math.sin(rad) * dist]}>
-                            <boxGeometry args={[0.15, 0.15, 0.15]} />
-                            <meshBasicMaterial color={color} transparent opacity={0.8} />
-                        </mesh>
-                    );
-                })}
-            </group>
 
             {/* Vertical Light Columns (Subtle) */}
             <pointLight position={[0, 1, 0]} intensity={1.5} color={color} distance={4} decay={2} />
@@ -323,15 +365,49 @@ function SpecBar({ label, value, glow }) {
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {}) => {
+// `active` = this panel is the one on screen. When false the WebGL canvas stops
+// rendering so it doesn't compete with the hero / other panels for the GPU.
+const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange, active = true } = {}) => {
     const [internalIndex, setInternalIndex] = useState(0);
     const activeIndex = controlledIndex !== undefined ? controlledIndex : internalIndex;
+    // The map is very heavy (hundreds of thousands of points + a surface mesh),
+    // so it is only created the first time its tab is opened, then kept alive
+    const [mapMounted, setMapMounted] = useState(false);
+    const [mapReady, setMapReady] = useState(false);
+    useEffect(() => {
+        if (SECTIONS[activeIndex]?.id === 'world') setMapMounted(true);
+    }, [activeIndex]);
     const setActiveIndex = (i) => {
         setInternalIndex(i);
         if (onIndexChange) onIndexChange(i);
     };
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [hintHover, setHintHover] = useState(null); // which hint icon is hovered
     const activeItem = SECTIONS[activeIndex];
+
+    // Switching models blocks the page for a moment (clone + GPU texture upload), so a
+    // spinner can't appear mid-switch. Instead: show the spinner first, let it paint,
+    // and only then swap the displayed model (`shownIndex` lags `activeIndex`).
+    const isModelTab = (i) => SECTIONS[i]?.id !== 'world';
+    const [shownIndex, setShownIndex] = useState(() => (isModelTab(activeIndex) ? activeIndex : 0));
+    const [modelLoading, setModelLoading] = useState(true);
+    const loadStartRef = useRef(performance.now());
+    const shownItem = SECTIONS[shownIndex];
+
+    useEffect(() => {
+        if (!isModelTab(activeIndex) || activeIndex === shownIndex) return undefined;
+        loadStartRef.current = performance.now();
+        setModelLoading(true);
+        const t = setTimeout(() => setShownIndex(activeIndex), 180);
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeIndex]);
+
+    // Model is mounted and rendered: fade the spinner out (kept up at least 500ms so it never flashes)
+    const handleModelShown = useCallback(() => {
+        const wait = Math.max(0, 500 - (performance.now() - loadStartRef.current));
+        setTimeout(() => setModelLoading(false), wait);
+    }, []);
 
     return (
         <section className="pss-section">
@@ -401,6 +477,8 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {
                     {/* ── Right: Standard Model Box with Particles ── */}
                     <div
                         className="pss-content-viewbox"
+                        // The viewer owns the mouse wheel (zoom), so the page must not flip panels
+                        data-wheel-lock
                         onMouseMove={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             setMousePos({
@@ -409,13 +487,90 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {
                             });
                         }}
                     >
+                        {/* Interaction hint on all three tabs: always visible and muted;
+                            hovering an icon brightens it and shows its hint as text */}
+                        <div
+                            style={{
+                                position: 'absolute',
+                                left: '50%',
+                                bottom: 14,
+                                transform: 'translateX(-50%)',
+                                display: 'flex',
+                                gap: 10,
+                                zIndex: 30,
+                            }}
+                        >
+                            {VIEWER_HINTS.map(({ key, label, Icon }) => (
+                                <div
+                                    key={key}
+                                    style={{ position: 'relative' }}
+                                    onPointerEnter={() => setHintHover(key)}
+                                    onPointerLeave={() => setHintHover(null)}
+                                >
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: 'calc(100% + 8px)',
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            whiteSpace: 'nowrap',
+                                            padding: '5px 10px',
+                                            borderRadius: 999,
+                                            fontSize: 11,
+                                            letterSpacing: '0.06em',
+                                            color: '#fff5dc',
+                                            background: 'rgba(20, 12, 6, 0.85)',
+                                            border: '1px solid rgba(255, 204, 122, 0.22)',
+                                            pointerEvents: 'none',
+                                            opacity: hintHover === key ? 1 : 0,
+                                            transition: 'opacity 0.2s ease',
+                                        }}
+                                    >
+                                        {label}
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...HINT_ICON_STYLE,
+                                            opacity: hintHover === key ? 1 : 0.6,
+                                            cursor: 'help',
+                                            transition: 'opacity 0.2s ease',
+                                        }}
+                                        aria-label={label}
+                                    >
+                                        <Icon />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                         {/* Render both but toggle visibility to prevent WebGL context loss from unmounting */}
-                        <div style={{ position: 'absolute', inset: 0, opacity: activeItem.id === 'world' ? 1 : 0, pointerEvents: activeItem.id === 'world' ? 'auto' : 'none', zIndex: activeItem.id === 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
-                            <SciChartMap />
+                        <div data-wheel-lock style={{ position: 'absolute', inset: 0, opacity: activeItem.id === 'world' ? 1 : 0, pointerEvents: activeItem.id === 'world' ? 'auto' : 'none', zIndex: activeItem.id === 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
+                            {mapMounted && <SciChartMap onReady={() => setMapReady(true)} />}
+                            {/* Map data + WASM take a moment on first open */}
+                            {activeItem.id === 'world' && !mapReady && (
+                                <div className="pss-loader pss-loader--overlay" style={{ color: activeItem.glow }}>
+                                    <span className="pss-loader__ring" />
+                                    <span className="pss-loader__text">Charting the unknown…</span>
+                                </div>
+                            )}
                         </div>
                         <div style={{ position: 'absolute', inset: 0, opacity: activeItem.id !== 'world' ? 1 : 0, pointerEvents: activeItem.id !== 'world' ? 'auto' : 'none', zIndex: activeItem.id !== 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
+                            {/* Always mounted so it can fade; shown from the moment a tab is picked
+                                until the new model has rendered its first frames */}
+                            <div
+                                className="pss-loader pss-loader--overlay pss-loader--fade"
+                                style={{
+                                    color: activeItem.glow,
+                                    opacity: modelLoading && activeItem.id !== 'world' ? 1 : 0,
+                                }}
+                                aria-hidden={!modelLoading}
+                            >
+                                <span className="pss-loader__ring" />
+                                <span className="pss-loader__text">Summoning…</span>
+                            </div>
                             <Canvas
                                 camera={{ position: [0, 0, 7], fov: 40 }}
+                                dpr={[1, 1.5]}
+                                frameloop={active && activeItem.id !== 'world' ? 'always' : 'never'}
                                 gl={{ alpha: true, antialias: true }}
                                 style={{ width: '100%', height: '100%', background: 'transparent' }}
                             >
@@ -425,28 +580,32 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange } = {
                                 {/* Red Spark Explosion */}
                                 <ParticleBurst triggerKey={activeIndex} />
 
-                                <Suspense fallback={null}>
-                                    <OrbitControls 
-                                        enableZoom={false} 
-                                        enablePan={false} 
-                                        autoRotate 
-                                        autoRotateSpeed={2} 
-                                        minPolarAngle={Math.PI / 2.5} 
-                                        maxPolarAngle={Math.PI / 1.5} 
-                                    />
-                                    <HolographicPlatform color={activeItem.glow} />
-                                    <AnimatePresence mode="wait">
-                                        <motion.group
-                                            key={activeItem.id}
-                                            initial={{ scale: 0.6, opacity: 0, y: 1 }}
-                                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                                            exit={{ scale: 0.6, opacity: 0, y: 1 }}
-                                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                                        >
-                                            <ModelViewer item={activeItem} mousePos={mousePos} />
-                                        </motion.group>
-                                    </AnimatePresence>
-                                </Suspense>
+                                <OrbitControls
+                                    enableZoom
+                                    minDistance={4}
+                                    maxDistance={11}
+                                    enablePan={false}
+                                    autoRotate
+                                    autoRotateSpeed={2}
+                                    minPolarAngle={Math.PI / 2.5}
+                                    maxPolarAngle={Math.PI / 1.5}
+                                />
+                                {/* Platform stays on screen while a model loads; only the model
+                                    itself suspends and shows the spinner */}
+                                <HolographicPlatform color={activeItem.glow} />
+                                <AnimatePresence mode="wait">
+                                    <motion.group
+                                        key={shownItem.id}
+                                        initial={{ scale: 0.6, opacity: 0, y: 1 }}
+                                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                                        exit={{ scale: 0.6, opacity: 0, y: 1 }}
+                                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                                    >
+                                        <Suspense fallback={null}>
+                                            <ModelViewer item={shownItem} mousePos={mousePos} onShown={handleModelShown} />
+                                        </Suspense>
+                                    </motion.group>
+                                </AnimatePresence>
                             </Canvas>
                         </div>
                     </div>

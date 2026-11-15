@@ -52,6 +52,67 @@
   opacity: 1;
 }
 
+/* ─── Attention animations (match the Work With Us button's shine) ─── */
+.newsletter-bell__shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.newsletter-bell__shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 245, 220, 0.45), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: newsletter-bell-shine 5s ease-in-out infinite;
+}
+
+/* The bell itself rings (swings from the top) every few seconds */
+.newsletter-bell__ring-icon {
+  transform-origin: 50% 12%;
+  animation: newsletter-bell-ring 5s ease-in-out infinite;
+}
+
+.newsletter-bell__spark {
+  animation: newsletter-bell-twinkle 2.5s ease-in-out infinite;
+}
+
+.newsletter-bell__launch.is-open .newsletter-bell__ring-icon {
+  animation: none;
+}
+
+@keyframes newsletter-bell-shine {
+  0%, 55% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(450%) skewX(-20deg); }
+}
+
+@keyframes newsletter-bell-ring {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  64% { transform: rotate(16deg); }
+  68% { transform: rotate(-14deg); }
+  72% { transform: rotate(10deg); }
+  76% { transform: rotate(-8deg); }
+  80% { transform: rotate(4deg); }
+  84% { transform: rotate(0deg); }
+}
+
+@keyframes newsletter-bell-twinkle {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .newsletter-bell__shine { display: none; }
+  .newsletter-bell__ring-icon,
+  .newsletter-bell__spark { animation: none; }
+}
+
 .newsletter-bell__spark {
   position: absolute;
   right: 2px;

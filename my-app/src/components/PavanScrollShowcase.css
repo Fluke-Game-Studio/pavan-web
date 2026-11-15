@@ -353,3 +353,65 @@
 :root[data-theme='light'] .pss-tab-name {
     color: inherit;
 }
+/* ─── Loader shown while a model / the map is still loading ──────────────── */
+.pss-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--active-glow, #ffd36b);
+  pointer-events: none;
+  animation: pss-loader-in 0.35s ease both;
+}
+
+.pss-loader--overlay {
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  z-index: 40;
+}
+
+.pss-loader__ring {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: currentColor;
+  box-shadow: 0 0 18px -4px currentColor;
+  animation: pss-loader-spin 0.9s linear infinite;
+}
+
+.pss-loader__text {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.85;
+  animation: pss-loader-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pss-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pss-loader-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+@keyframes pss-loader-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pss-loader__ring { animation-duration: 2.4s; }
+  .pss-loader__text { animation: none; }
+}
+
+/* Overlay that fades in/out (model switch) instead of popping */
+.pss-loader--fade {
+  transition: opacity 0.35s ease;
+  background: radial-gradient(circle at center, rgba(8, 4, 6, 0.55), transparent 70%);
+  animation: none;
+}

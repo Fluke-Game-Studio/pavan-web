@@ -67,7 +67,7 @@
   border: 1px solid rgba(255, 215, 0, 0.12);
   border-radius: 99px;
   padding: 0.45rem 0.9rem;
-  backdrop-filter: blur(10px);
+
 }
 
 .v2-social-icon {
@@ -142,7 +142,7 @@
   justify-content: center;
   font-size: 0.85rem;
   transition: 0.25s ease;
-  backdrop-filter: blur(6px);
+
 }
 
 .v2-arrow-btn:disabled {
@@ -163,18 +163,78 @@
   font-weight: 600;
   letter-spacing: 0.07em;
   text-decoration: none;
-  border-radius: 2px;
+  border-radius: 999px;
   transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   white-space: nowrap;
 }
 
+/* Shared "saga" button look: gold outline, uppercase, soft glass + glow.
+   Matches .v2-enter-saga-btn below so every CTA reads as one system. */
 .v2-persist-btn--gold {
-  background: var(--volt-primary);
-  color: #000;
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  /* Same bronze-to-gold look as the floating newsletter bell */
+  color: #fff5dc;
+  border: 1px solid rgba(255, 204, 122, 0.28);
+  background: linear-gradient(145deg, #1d1309, #6f4015 60%, #ffd36b);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Rotating careers CTA: fixed width so the pill doesn't resize as the text changes */
+.v2-cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.v2-cta__label {
+  display: block;
+  position: relative;
+  width: 18.5rem;
+  max-width: 46vw;
+  height: 1.25em;
+  line-height: 1.25;
+  text-align: center;
+  overflow: hidden;
+}
+
+.v2-cta__text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Soft light sweep that passes across the button to draw the eye */
+.v2-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 245, 220, 0.4), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: v2-cta-shine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes v2-cta-shine {
+  0%, 55% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(450%) skewX(-20deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-cta::after { animation: none; display: none; }
 }
 
 .v2-persist-btn--gold:hover {
-  background: #fff000;
+  filter: brightness(1.08);
+  border-color: rgba(255, 204, 122, 0.55);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 211, 107, 0.25);
   transform: translateY(-2px);
 }
 
@@ -194,7 +254,7 @@
   color: #fff5dc;
   background: linear-gradient(145deg, rgba(29, 19, 9, 0.95), rgba(111, 64, 21, 0.9) 60%, rgba(255, 211, 107, 0.25));
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(8px);
+
   transition: background 0.25s ease, border-color 0.25s ease, filter 0.25s ease, transform 0.25s ease;
 }
 
@@ -249,21 +309,25 @@
 }
 
 .v2-enter-saga-btn {
-  border: 1px solid rgba(255, 215, 0, 0.5);
-  color: var(--volt-primary);
+  /* Same bronze-to-gold look as the floating newsletter bell */
+  border: 1px solid rgba(255, 204, 122, 0.28);
+  color: #fff5dc;
   padding: 0.8rem 2.5rem;
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-radius: 2px;
+  font-family: var(--font-body);
+  border-radius: 999px;
+  cursor: pointer;
   transition: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-  backdrop-filter: blur(6px);
-  background: rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, #1d1309, #6f4015 60%, #ffd36b);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
 }
 
 .v2-enter-saga-btn:hover {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: var(--volt-primary);
+  filter: brightness(1.08);
+  border-color: rgba(255, 204, 122, 0.55);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 211, 107, 0.25);
   transform: translateY(-2px);
 }
 

@@ -173,12 +173,31 @@ function sampleScenePoints(root, count, size, { detailBias = 0 } = {}) {
  * Supports static, Draco-compressed, and skinned (rigged) meshes.
  * options.detailBias (0..1) skews sampling toward densely-modeled regions.
  */
+// Poses the scene at the end of the file's first animation clip. Rigged models
+// otherwise sample in their bind pose (e.g. a T-pose) instead of the authored pose.
+function applyClipPose(gltf) {
+  const clip = gltf.animations && gltf.animations[0];
+  if (!clip) return;
+  const mixer = new THREE.AnimationMixer(gltf.scene);
+  mixer.clipAction(clip).play();
+  mixer.setTime(clip.duration);
+  gltf.scene.updateMatrixWorld(true);
+  gltf.scene.traverse((child) => {
+    if (child.isSkinnedMesh) child.skeleton.update();
+  });
+}
+
+/**
+ * options.pose: when true, sample the model in its animation-clip pose rather
+ * than the rig's default (bind) pose.
+ */
 export function loadGlbPoints(url, count, size, options = {}) {
   return new Promise((resolve, reject) => {
     getLoader().load(
       url,
       (gltf) => {
         try {
+          if (options.pose) applyClipPose(gltf);
           resolve(sampleScenePoints(gltf.scene, count, size, options));
         } catch (error) {
           reject(error);
