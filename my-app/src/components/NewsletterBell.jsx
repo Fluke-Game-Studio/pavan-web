@@ -575,14 +575,16 @@ export default function NewsletterBell({ stacked = false }) {
         animate={{ rotate: open ? 10 : 0, y: open ? -1 : 0 }}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
-        className="newsletter-bell__launch"
+        className={`newsletter-bell__launch${open ? ' is-open' : ''}`}
         aria-label={open ? 'Close newsletter panel' : 'Open newsletter panel'}
         aria-expanded={open}
         title={open ? 'Close newsletter panel' : 'Open newsletter panel'}
       >
+        {/* Attention effects: light sweep + bell ring (no extra rings or borders) */}
+        <span className="newsletter-bell__shine" aria-hidden="true" />
         <span className="newsletter-bell__launch-glow" />
         <Sparkles size={14} className="newsletter-bell__spark" />
-        <Bell size={20} />
+        <Bell size={20} className="newsletter-bell__ring-icon" />
       </motion.button>
     </div>
   );

@@ -91,6 +91,20 @@
   box-shadow: 0 0 18px rgba(46, 199, 255, 0.25);
 }
 
+/* Gold variant used on the title screen to match the site's primary accent */
+.ps-caption__hint--gold {
+  color: rgba(255, 215, 0, 0.38);
+}
+
+.ps-caption__hint--gold .ps-caption__hint-fillText {
+  text-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+}
+
+.ps-caption__hint--gold .ps-caption__hint-barFill {
+  background: linear-gradient(90deg, #c49a00, #ffd700, #fff000);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.45);
+}
+
 @keyframes ps-hint-pulse {
   0%, 100% {
     opacity: 0.45;

@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -21,32 +21,32 @@ export const STORY_CONFIG = {
   morphDuration: 2.4,
 };
 
-// Placeholder narrative beats — copy will be replaced when the lore is written
+// Story beats: creation → the sacred sound → the mace → the warrior → the player
 export const STORY_STAGES = [
   {
     key: 'galaxy',
     title: 'The Cosmos',
-    line: 'Before time was counted, there was only the spiral of stars.',
+    line: 'Before time was counted, there was only the spiral of stars, turning in silence.',
   },
   {
     key: 'om2',
-    title: 'OM2',
-    line: 'A new form gathers in the wake of the cosmos.',
+    title: 'The First Sound',
+    line: 'Then came a single vibration, OM, and the silence gave way to creation.',
   },
   {
     key: 'gada',
     title: 'The Gada',
-    line: 'From the swirling void, a weapon of divine strength took form.',
+    line: 'From that sound the Gada was forged, a mace heavy with the strength of the Wind God.',
   },
   {
     key: 'hanuman',
     title: 'Hanuman',
-    line: 'And the eternal warrior rose to wield it.',
+    line: 'Son of Pavan, bound by devotion and born to wield it, Hanuman rose.',
   },
   {
     key: 'gada-live',
     title: 'The Weapon Awakens',
-    line: 'The mace of the primal warrior — made real.',
+    line: 'The Gada is now in your hands. Strike, and let the world hear it.',
     hint: 'Hover to control • Click to throw',
   },
 ];
@@ -59,6 +59,7 @@ const STORY_STAGE_VISUALS = {
   'gada-live': { colorScheme: 'ocean' },
 };
 
+const GALAXY_TILT = Math.PI / 4; // 45° lean for the opening Cosmos view
 const STORY_DEFAULT_MOTION_PRESET = 'calm';
 const STORY_COLOR_SWAP_RATIO = 0.5;
 const STORY_CONTINUE_FILL_MS = 10000;
@@ -98,7 +99,7 @@ function CameraRig({ active }) {
   return null;
 }
 
-function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0 }) {
+function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0, gold = false }) {
   const [progress, setProgress] = useState(0);
   const frameRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -138,11 +139,13 @@ function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0
 
   const progressPct = Math.round(progress * 100);
   const fillStyle = {
-    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.98) ${progressPct}%, rgba(255,255,255,0.34) ${progressPct}%, rgba(255,255,255,0.34) 100%)`,
+    backgroundImage: gold
+      ? `linear-gradient(90deg, #ffd700 0%, #ffd700 ${progressPct}%, rgba(255,215,0,0.38) ${progressPct}%, rgba(255,215,0,0.38) 100%)`
+      : `linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.98) ${progressPct}%, rgba(255,255,255,0.34) ${progressPct}%, rgba(255,255,255,0.34) 100%)`,
   };
 
   return (
-    <span className="ps-caption__hint ps-caption__hint--countdown">
+    <span className={`ps-caption__hint ps-caption__hint--countdown${gold ? ' ps-caption__hint--gold' : ''}`}>
       <span className="ps-caption__hint-fillText" style={fillStyle}>
         {label}
       </span>
@@ -153,7 +156,7 @@ function ContinueCountdownHint({ label, durationMs, onComplete, startDelayMs = 0
   );
 }
 
-function StoryParticleField({ target, colorScheme, motionPreset }) {
+function StoryParticleField({ target, colorScheme, motionPreset, tilt = 0 }) {
   const pointsRef = useRef(null);
   const groupRef = useRef(null);
   const texture = useMemo(() => createStarTexture(), []);
@@ -167,6 +170,14 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
     () => buildColors(initial, displayColorScheme, STORY_CONFIG.shapeSize),
     [initial, displayColorScheme],
   );
+  // Start already tilted (no swing on load). Done once via the ref instead of a
+  // `rotation` prop: a changing prop would re-apply the whole Euler and snap the
+  // accumulated spin/tilt back to zero at the start of every morph.
+  useLayoutEffect(() => {
+    if (groupRef.current) groupRef.current.rotation.x = tilt;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // baseRef holds the clean shape (no drift); drift is a continuous function of
   // time layered on top, so morph start/end never causes a positional jump
   const baseRef = useRef(new Float32Array(initial));
@@ -255,7 +266,15 @@ function StoryParticleField({ target, colorScheme, motionPreset }) {
 
     if (groupRef.current) {
       groupRef.current.rotation.y -= delta * preset.spin;
-      groupRef.current.rotation.x = Math.sin(elapsed * 0.12) * 0.08;
+      // Ease toward the stage's tilt (45° for the galaxy, flat for models) so
+      // the galaxy leans back and then levels out smoothly on morph
+      const targetX = tilt + Math.sin(elapsed * 0.12) * 0.08;
+      groupRef.current.rotation.x = THREE.MathUtils.damp(
+        groupRef.current.rotation.x,
+        targetX,
+        2.5,
+        delta,
+      );
     }
   });
 
@@ -295,6 +314,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   const exitStartedRef = useRef(false);
   const exitTimersRef = useRef([]);
   const pointerStartRef = useRef(null);
+  const blastAtRef = useRef(Infinity);
 
   useEffect(() => () => exitTimersRef.current.forEach(clearTimeout), []);
 
@@ -346,6 +366,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
   }, [onExitBegin]);
 
   const handleBlastTrigger = useCallback(() => {
+    blastAtRef.current = performance.now();
     setBlastToken((value) => value + 1);
     setBlastMode(true);
     scheduleWarm();
@@ -382,6 +403,9 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
     if (dist > CLICK_DRAG_TOLERANCE) return;
 
     if (blastMode) {
+      // "Click anywhere to enter the saga" — only live once the hint has appeared
+      const hintVisible = performance.now() - blastAtRef.current >= BLAST_HINT_APPEAR_DELAY_MS;
+      if (hintVisible) beginExitZoom();
       return;
     }
 
@@ -418,6 +442,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
       {blastMode && !exiting && (
         <div className="ps-blast-hint" key={blastToken}>
           <ContinueCountdownHint
+            gold
             label="Click anywhere to enter the saga ✦"
             durationMs={STORY_CONTINUE_FILL_MS}
             startDelayMs={BLAST_HINT_APPEAR_DELAY_MS}
@@ -514,6 +539,7 @@ function ParticleStoryScreen({ modelPoints, onStageChange, onEnterSaga, onExitBe
                     target={targets[stage]}
                     colorScheme={colorScheme}
                     motionPreset={motionPreset}
+                    tilt={stage === 0 ? GALAXY_TILT : 0}
                   />
                 )}
                 <CameraRig active={isLiveGada} />

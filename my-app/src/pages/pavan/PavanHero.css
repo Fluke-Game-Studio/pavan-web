@@ -96,14 +96,18 @@
   transform: translate(-50%, -50%);
   width: 60%;
   height: 70%;
-  background: radial-gradient(ellipse at center,
+  /* closest-side: the gradient reaches fully transparent exactly at the box edges,
+     so there is no visible rectangle now that the blur filter is gone */
+  background: radial-gradient(ellipse closest-side at center,
       rgba(255, 215, 0, 0.25) 0%,
       rgba(255, 165, 0, 0.15) 30%,
       rgba(232, 56, 58, 0.1) 60%,
       transparent 100%);
-  filter: blur(40px);
+  /* Radial gradient is already soft; a 40px blur filter on an animated layer was
+     re-rasterised every frame. Animate only transform/opacity on its own layer. */
   z-index: -1;
   pointer-events: none;
+  will-change: transform, opacity;
   animation: pulseglow 3s ease-in-out infinite;
 }
 
@@ -144,8 +148,9 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 40px var(--pavan-gold));
+  /* No mix-blend-mode / drop-shadow here: on a ~1400px image stacked under a live
+     WebGL canvas they force a full re-composite every frame. The glow layer
+     below (.pavan-hero__backdrop-glow) supplies the golden halo instead. */
 }
 
 .pavan-hero__backdrop-glow {
@@ -155,8 +160,10 @@
       rgba(255, 215, 0, 0.6) 0%,
       rgba(155, 28, 28, 0.3) 35%,
       transparent 70%);
-  filter: blur(60px);
+  /* blur(60px) removed: the radial gradient is already soft, and blurring this
+     oversized (inset -40%) animated layer was a major per-frame cost */
   z-index: -1;
+  will-change: transform, opacity;
   animation: pulseglow 4s ease-in-out infinite;
 }
 
