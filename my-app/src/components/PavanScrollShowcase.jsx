@@ -373,7 +373,6 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange, acti
     // The map is very heavy (hundreds of thousands of points + a surface mesh),
     // so it is only created the first time its tab is opened, then kept alive
     const [mapMounted, setMapMounted] = useState(false);
-    const [mapReady, setMapReady] = useState(false);
     useEffect(() => {
         if (SECTIONS[activeIndex]?.id === 'world') setMapMounted(true);
     }, [activeIndex]);
@@ -544,14 +543,7 @@ const PavanScrollShowcase = ({ activeIndex: controlledIndex, onIndexChange, acti
                         </div>
                         {/* Render both but toggle visibility to prevent WebGL context loss from unmounting */}
                         <div data-wheel-lock style={{ position: 'absolute', inset: 0, opacity: activeItem.id === 'world' ? 1 : 0, pointerEvents: activeItem.id === 'world' ? 'auto' : 'none', zIndex: activeItem.id === 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
-                            {mapMounted && <SciChartMap onReady={() => setMapReady(true)} />}
-                            {/* Map data + WASM take a moment on first open */}
-                            {activeItem.id === 'world' && !mapReady && (
-                                <div className="pss-loader pss-loader--overlay" style={{ color: activeItem.glow }}>
-                                    <span className="pss-loader__ring" />
-                                    <span className="pss-loader__text">Charting the unknown…</span>
-                                </div>
-                            )}
+                            {mapMounted && <SciChartMap />}
                         </div>
                         <div style={{ position: 'absolute', inset: 0, opacity: activeItem.id !== 'world' ? 1 : 0, pointerEvents: activeItem.id !== 'world' ? 'auto' : 'none', zIndex: activeItem.id !== 'world' ? 10 : 1, transition: 'opacity 0.6s ease' }}>
                             {/* Always mounted so it can fade; shown from the moment a tab is picked
